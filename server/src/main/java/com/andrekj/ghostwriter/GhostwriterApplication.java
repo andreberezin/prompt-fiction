@@ -4,10 +4,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ServerApplication {
+public class GhostwriterApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ServerApplication.class, args);
+		SpringApplication.run(GhostwriterApplication.class, args);
+		System.out.println("Ghostwriter server started");
 	}
 
 }

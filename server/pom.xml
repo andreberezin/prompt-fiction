@@ -11,8 +11,8 @@
 	<groupId>com.andreKJ</groupId>
 	<artifactId>ghostwriter-server</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>server</name>
-	<description>server</description>
+	<name>Ghostwriter</name>
+	<description>server for ghostwriter</description>
 	<url/>
 	<licenses>
 		<license/>
