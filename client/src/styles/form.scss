@@ -1,0 +1,107 @@
+@use 'variables';
+
+.container {
+  height: calc(100% - 50px);
+
+  #blog-form,
+  #email-form {
+	//margin: 1rem 0 1rem 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	height: 60%;
+
+	.double {
+	  width: 60%;
+	  display: flex;
+	  align-items: center;
+	  justify-content: center;
+	  flex-direction: row;
+	}
+
+	label {
+	  margin-bottom: 16px;
+	  position: relative;
+	  display: flex;
+	  align-items: center;
+	  justify-content: center;
+
+	  &#seo-focus {
+		font-size: 0.8rem;
+		text-align: center;
+	  }
+
+	  &.long {
+		width: 90%;
+	  }
+
+	  &.short {
+		width: 40%;
+	  }
+
+	  input[type="number"] {
+		-moz-appearance:textfield;
+	  }
+
+	  input::-webkit-outer-spin-button,
+	  input::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	  }
+
+	  input[type="checkbox"] {
+		height: 1.3rem;
+		width: 1.3rem;
+		margin-left: 0.5rem;
+	  }
+
+	  input {
+		background-color: variables.$background-color;
+		border: none;
+		border-bottom: 1px solid variables.$background-color;
+		padding: 0.5rem;
+		height: 40px;
+		color: white;
+		width: 100%;
+		font-size: 0.9rem;
+		text-align: center;
+
+		&::placeholder {
+		  color: #b1b1b1;
+		}
+
+		&:focus {
+		  border-bottom: 1px solid variables.$accent-color;
+		  outline: none;
+
+		  &::placeholder {
+			color: transparent;
+		  }
+		}
+	  }
+
+	  &::after {
+		content: attr(data-placeholder);
+		color: transparent;
+		position: absolute;
+		bottom: -8px;
+		background-color: transparent;
+		padding: 0 0.5rem 0 0.5rem;
+		left: 50%;
+		transform: translateX(-50%);
+		font-size: 0.8rem;
+		//width: 0;
+		//transition: all 1s ease-in-out;
+	  }
+
+	  &.filled {
+		&::after {
+		  background-color: variables.$background-color;
+		  color: #b1b1b1;
+		  //width: fit-content;
+		}
+	  }
+	}
+  }
+}

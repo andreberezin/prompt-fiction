@@ -1,0 +1,27 @@
+@use 'variables';
+
+.output {
+  height: 40%;
+  width: 100%;
+  background-color: transparent;
+  backdrop-filter: blur(5px);
+  color: white;
+  border-radius: 0 20px 0 20px;
+  border: 2px solid white;
+
+  &:focus {
+    border-color: variables.$accent-color;
+  }
+
+  &.error {
+    border-color: red;
+  }
+
+  #output-text {
+    resize: none;
+    width: 100%;
+    height: 100%;
+    border-radius: 0 20px 0 20px;
+    padding: 0.5rem;
+  }
+}
