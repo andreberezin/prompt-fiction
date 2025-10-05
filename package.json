@@ -1,0 +1,17 @@
+{
+  "name": "prompt-fiction",
+  "version": "1.0.0",
+  "description": "Content generation tool that takes user inputs and generates ready-to-use content across multiple formats.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "",
+    "dev:client": "cd client && npm run dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitea.kood.tech/andreberezin/prompt-fiction.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
