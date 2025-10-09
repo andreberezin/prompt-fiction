@@ -16,7 +16,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@google/genai": "^1.23.0",
     "concurrently": "^9.2.1"
   }
 }
