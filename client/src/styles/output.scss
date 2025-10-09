@@ -7,7 +7,7 @@
   backdrop-filter: blur(5px);
   color: white;
   border-radius: 0 20px 0 20px;
-  border: 2px solid white;
+  //border: 2px solid white;
 
   &:focus {
     border-color: variables.$accent-color;
@@ -23,5 +23,12 @@
     height: 100%;
     border-radius: 0 20px 0 20px;
     padding: 0.5rem;
+    border: 2px solid white;
+
+    &:focus {
+      outline: none;
+      border-color: variables.$accent-color;
+      box-shadow: 0px 0px 3px 3px variables.$accent-color;
+    }
   }
 }
