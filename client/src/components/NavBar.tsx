@@ -23,7 +23,7 @@ const renderButtons = ({ contentType, setContentType }: NavBarProps) => {
 export default function NavBar(props: NavBarProps) {
     return (
         <div
-        className={'nav-bar'}
+        className='nav-bar'
         >
             {renderButtons(props)}
             <img src={'gw_logo_without_text.png'} alt={'logo'} className={'logo'}></img>
