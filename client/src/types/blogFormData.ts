@@ -1,4 +1,5 @@
 export default interface BlogFormData {
+    aimodel: string;
     contentType: string;
     topic: string;
     targetAudience: string;

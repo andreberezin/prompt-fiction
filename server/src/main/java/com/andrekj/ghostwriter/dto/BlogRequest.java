@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class BlogRequest {
+    private String aimodel;
     private String contentType;
     private String topic;
     private String targetAudience;

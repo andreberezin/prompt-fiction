@@ -1,11 +1,19 @@
 package com.andrekj.ghostwriter.service;
 
+import com.google.genai.Client;
+import com.google.genai.types.GenerateContentResponse;
 import com.andrekj.ghostwriter.dto.BlogRequest;
 import com.andrekj.ghostwriter.dto.BlogResponse;
 import org.springframework.stereotype.Service;
 
 @Service
 public class BlogService {
+
+    private final Client geminiClient;
+
+    public BlogService(Client geminiClient) {
+        this.geminiClient = geminiClient;
+    }
 
     public BlogResponse generateBlogPost(BlogRequest request) {
         // 1. Normalize input (word count range, tone, etc.)
@@ -14,10 +22,23 @@ public class BlogService {
         String prompt = createPrompt(request);
         System.out.println(prompt);
         // 3. Call AI API (e.g., via WebClient or OkHttp)
+        GenerateContentResponse response;
+        try {
+            response = geminiClient.models.generateContent(
+                    request.getAimodel(),
+                    prompt,
+                    null
+            );
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return new BlogResponse();
+        }
 
+        BlogResponse blogResponse = new BlogResponse();
+        blogResponse.setContent(response.text());
         // 4. Process AI response (parse JSON or text)
         // 5. Return BlogResponse object
-        return null;
+        return blogResponse;
     }
 
     private void normalizeInput(BlogRequest request) {

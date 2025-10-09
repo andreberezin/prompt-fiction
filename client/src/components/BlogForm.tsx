@@ -6,9 +6,12 @@ import * as React from "react";
 import axios from 'axios';
 import {useState} from "react";
 import type BlogFormData from "../types/blogFormData.ts";
+import type OutputType from "../types/output.ts";
+import AImodel from "./AImodel.tsx";
 
 export default function BlogForm() {
     const [blogFormData, setBlogFormData] = useState<BlogFormData>({
+        aimodel: 'gemini-2.5-flash',
         contentType: 'blog',
         topic: 'How to cook pasta',
         targetAudience: 'anyone',
@@ -17,7 +20,12 @@ export default function BlogForm() {
         wordCount: 1000,
         seoFocus: false,
     })
-    const [output, setOutput] = useState('');
+    const [output, setOutput] = useState<OutputType>({
+        title: '',
+        content: '',
+        wordCount: 0,
+        keywords: [],
+    });
 
     const togglePlaceholder = (value: string, labelId: string ) => {
         const labelElement = document.getElementById(labelId);
@@ -49,6 +57,7 @@ export default function BlogForm() {
     const handleSubmit = async (e:  React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const response = await axios.post('/api/blog', blogFormData);
+        console.log("Got response: ", response);
         setOutput(response.data);
     }
 
@@ -250,6 +259,9 @@ export default function BlogForm() {
                         {/*    onBlur={(e) => hideplaceholder(e.target.value, e.target.name)}*/}
                         {/*/>*/}
                     </label>
+
+                <AImodel blogFormData={blogFormData} setBlogFormData={setBlogFormData}/>
+
                 <div className='button-container'>
                     <SubmitButton/>
                     <ClearButton setBlogFormData={setBlogFormData}/>

@@ -1,0 +1,49 @@
+@use 'mixins';
+@use 'variables';
+
+.aimodel-container {
+  display: flex;
+  flex-direction: row;
+  @include mixins.flex-centered;
+  justify-content: space-around;
+  width: 100%;
+  font-size: 0.8rem;
+
+  label {
+	@include mixins.flex-centered;
+	position: relative;
+	width: fit-content;
+	cursor: pointer;
+	transition: color 0.1s ease-in-out;
+	padding: 0.5rem;
+
+	input[type="radio"] {
+	  display: none;
+	}
+
+	&::before {
+	  content: '';
+	  width: 12px;
+	  height: 12px;
+	  border-radius: 50%;
+	  background-color: variables.$accent-color;
+	  opacity: 0;
+	  //border: 1px solid white;
+	  margin-right: 0.5rem;
+	  transition: all 0.1s ease-in-out;
+	}
+
+	&:hover {
+	  &::before {
+		opacity: 0.5;
+	  }
+	}
+
+
+	&.active {
+	  &::before {
+		opacity: 1;
+	  }
+	}
+  }
+}
