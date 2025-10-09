@@ -24,11 +24,28 @@
     border-radius: 0 20px 0 20px;
     padding: 0.5rem;
     border: 2px solid white;
+    outline: none;
 
-    &:focus {
-      outline: none;
+    &:not(.loading):focus {
       border-color: variables.$accent-color;
       box-shadow: 0px 0px 3px 3px variables.$accent-color;
     }
+
+    &.loading {
+      border-color: variables.$accent-color;
+      animation: flashShadow 1s ease-in-out infinite;
+    }
   }
+}
+
+@keyframes flashShadow {
+  0% {
+    box-shadow: 0 0 1px 1px variables.$accent-color;
+  }
+  50% {
+    box-shadow: 0 0 4px 4px variables.$accent-color;
+  }
+  100% {
+    box-shadow: 0 0 1px 1px variables.$accent-color;
+     }
 }
