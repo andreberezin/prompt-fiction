@@ -1,24 +1,23 @@
 import '../styles/output.scss'
+import * as React from "react";
 
-export default function Output() {
+interface OutputProps {
+    output: string;
+    setOutput: React.Dispatch<React.SetStateAction<string>>;
+}
+
+export default function Output({output, setOutput}: OutputProps) {
 
     return (
         <div
-            className={'output'}
+            className='output'
         >
 
             <textarea
-                id={'output-text'}
+                id='output-text'
+                value={output}
+                onChange={(e) => {setOutput(e.target.value)}}
             >
-                copy text
-            {/*<br/>*/}
-            {/*export pdf*/}
-            {/*<br/>*/}
-            {/*MD*/}
-            {/*<br/>*/}
-            {/*HTML*/}
-            {/*<br/>*/}
-            {/*rich text*/}
             </textarea>
 
         </div>
