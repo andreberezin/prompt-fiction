@@ -1,19 +1,21 @@
 import '../styles/form.scss'
 import Output from "./Output.tsx";
+import {useState} from "react";
 
-export default function EmailForm({}) {
+export default function EmailForm() {
+    const [output, setOutput] = useState('');
 
     return (
         <div
-            id={'email'}
-            className={'container'}
+            id='email'
+            className='container'
         >
-            <form id={'email-form'}>
+            <form id='email-form'>
                 Input: purpose, recipient context, key points, tone
                 Output: subject line, email body
                 Parameters: tone, urgency level, CTA
             </form>
-            <Output/>
+            <Output output={output} setOutput={setOutput}/>
         </div>
     )
 }
