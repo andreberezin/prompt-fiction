@@ -1,5 +1,33 @@
+@use 'variables';
+
 @mixin flex-centered {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+@mixin track-style {
+  //background: transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  height: 3px;
+  margin: auto;
+  //border: 1px solid white;
+  background-color: variables.$placeholder-color;
+
+  &:hover {
+    background: variables.$accent-color;
+  }
+}
+
+@mixin thumb-style {
+  -webkit-appearance: none;
+  //border: 1px solid white;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  padding: 0.6rem;
+  cursor: pointer;
+  background: white;
+  margin-top: -9px;
 }
