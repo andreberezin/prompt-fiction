@@ -25,6 +25,10 @@
     padding: 0.5rem 1.5rem 0.5rem 1.5rem;
     position: relative;
     //border-bottom: 1px solid white;
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+/Edge */
+    user-select: none; /* Standard */
 
     &:hover {
       color: variables.$accent-color;
