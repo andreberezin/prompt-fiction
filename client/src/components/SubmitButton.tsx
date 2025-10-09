@@ -1,7 +1,11 @@
 import { MdKeyboardDoubleArrowRight } from "react-icons/md";
 import '../styles/buttons.scss'
 
-export default function SubmitButton() {
+interface SubmitButtonProps {
+    loadingState: boolean;
+}
+
+export default function SubmitButton({loadingState}: SubmitButtonProps) {
 
     return (
         <div
@@ -9,7 +13,8 @@ export default function SubmitButton() {
         >
             <button
                 type='submit'
-                className='submit'
+                className={`submit ${loadingState ? "disabled" : ""}`}
+                disabled={loadingState}
             >
                 <MdKeyboardDoubleArrowRight className='submit-icon icon'/>
             </button>
