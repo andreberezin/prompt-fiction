@@ -4,7 +4,8 @@ import * as React from "react";
 import type BlogFormData from "../types/blogFormData.ts";
 
 interface ClearButtonProps {
-    setBlogFormData: React.Dispatch<React.SetStateAction<BlogFormData>>;
+    setBlogFormData: React.Dispatch<React.SetStateAction<BlogFormData>>,
+    // setOutput: React.Dispatch<React.SetStateAction<Output>;
 }
 
 
@@ -19,6 +20,7 @@ export default function ClearButton({setBlogFormData}: ClearButtonProps) {
                 className='clear'
                 onClick={() => {
                     setBlogFormData({
+                        aimodel: "gemini-2.5-flash",
                         contentType: "blog",
                         topic: '',
                         targetAudience: '',
