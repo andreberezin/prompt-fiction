@@ -1,0 +1,40 @@
+@use 'variables';
+
+.button-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row-reverse;
+
+  .button-container {
+	width: 30%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: row;
+
+	button {
+	  all: unset;
+	  color: variables.$accent-color;
+	  transition: transform 0.2s;
+	  cursor: pointer;
+
+	  &.submit:hover {
+		transform: translateX(4px);
+	  }
+
+	  .submit-icon {
+		font-size: 3rem;
+	  }
+
+	  .clear-icon {
+		font-size: 2rem;
+	  }
+
+	  &.clear:hover {
+		transform: scale(1.1);
+	  }
+	}
+  }
+}
