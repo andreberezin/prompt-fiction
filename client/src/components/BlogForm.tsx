@@ -10,14 +10,18 @@ import type OutputType from "../types/output.ts";
 import AImodel from "./AImodel.tsx";
 
 export default function BlogForm() {
+    const [loadingState, setLoadingState] = useState<boolean>(false);
     const [blogFormData, setBlogFormData] = useState<BlogFormData>({
-        aimodel: 'gemini-2.5-flash',
+        aimodel: {
+            model: 'gemini-2.5-flash-lite',
+            tooltip: 'ultra fast'
+        },
         contentType: 'blog',
         topic: 'How to cook pasta',
         targetAudience: 'anyone',
         tone: 'engaging',
         expertiseLevel: 'beginner',
-        wordCount: 1000,
+        wordCount: 50,
         seoFocus: false,
     })
     const [output, setOutput] = useState<OutputType>({
@@ -56,8 +60,11 @@ export default function BlogForm() {
 
     const handleSubmit = async (e:  React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const response = await axios.post('/api/blog', blogFormData);
+        setLoadingState(true);
+        const payload = { ...blogFormData, aimodel: blogFormData.aimodel.model};
+        const response = await axios.post('/api/blog', payload);
         console.log("Got response: ", response);
+        setLoadingState(false);
         setOutput(response.data);
     }
 
@@ -76,7 +83,7 @@ export default function BlogForm() {
             >
                 <label
                     id='topic'
-                    className='long'
+                    className='long placeholder'
                     data-placeholder='topic'
                     onMouseEnter={(e) => showPlaceholder(e.currentTarget.id)}
                     onMouseLeave={(e) => hideplaceholder(blogFormData.topic, e.currentTarget.id)}
@@ -101,7 +108,7 @@ export default function BlogForm() {
                 >
                     <label
                         id='targetAudience'
-                        className='short'
+                        className='short placeholder'
                         data-placeholder='audience'
                         onMouseEnter={(e) => showPlaceholder(e.currentTarget.id)}
                         onMouseLeave={(e) => hideplaceholder(blogFormData.targetAudience, e.currentTarget.id)}
@@ -124,7 +131,7 @@ export default function BlogForm() {
                     {/*todo might switch to a <select> dropdown menu later*/}
                     <label
                         id='tone'
-                        className='short'
+                        className='short placeholder'
                         data-placeholder='tone'
                         onMouseEnter={(e) => showPlaceholder(e.currentTarget.id)}
                         onMouseLeave={(e) => hideplaceholder(blogFormData.tone, e.currentTarget.id)}
@@ -148,7 +155,7 @@ export default function BlogForm() {
                     {/*todo might switch to a <select> dropdown menu later*/}
                     <label
                         id='expertiseLevel'
-                        className='short'
+                        className='short placeholder'
                         data-placeholder='expertise'
                         onMouseEnter={(e) => showPlaceholder(e.currentTarget.id)}
                         onMouseLeave={(e) => hideplaceholder(blogFormData.expertiseLevel, e.currentTarget.id)}
@@ -216,7 +223,7 @@ export default function BlogForm() {
 
                 <label
                     id='wordCount'
-                    className='long'
+                    className='long placeholder'
                     data-placeholder='words'
                 >
                     {blogFormData.wordCount}
@@ -240,7 +247,7 @@ export default function BlogForm() {
                     <label
                         id='seoFocus'
                         className='short'
-                        data-placeholder='seo'
+                        // data-placeholder='seo'
                     >
                         Seo Focus
                         <input
@@ -250,24 +257,16 @@ export default function BlogForm() {
                                 setData(e);
                             }}
                         />
-                        {/*<input*/}
-                        {/*    type='text'*/}
-                        {/*    name={'seo-focus'}*/}
-                        {/*    placeholder={'seo focus'}*/}
-                        {/*    onChange={(e) => togglePlaceholder(e.target.value, e.target.name)}*/}
-                        {/*    onFocus={(e) => showPlaceholder(e.target.name)}*/}
-                        {/*    onBlur={(e) => hideplaceholder(e.target.value, e.target.name)}*/}
-                        {/*/>*/}
                     </label>
 
                 <AImodel blogFormData={blogFormData} setBlogFormData={setBlogFormData}/>
 
                 <div className='button-container'>
-                    <SubmitButton/>
+                    <SubmitButton loadingState={loadingState}/>
                     <ClearButton setBlogFormData={setBlogFormData}/>
                 </div>
             </form>
-            <Output output={output} setOutput={setOutput}/>
+            <Output output={output} setOutput={setOutput} loadingState={loadingState}/>
         </div>
     )
 }

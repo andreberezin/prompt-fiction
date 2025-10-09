@@ -1,7 +1,7 @@
 import '../styles/aimodels.scss'
 import * as React from "react";
 import type BlogFormData from "../types/blogFormData.ts";
-import {AIMODELS} from "../types/aimodels.ts";
+import {type AIMODELObject, AIMODELS} from "../types/aimodels.ts";
 
 interface AImodelProps {
     blogFormData: BlogFormData,
@@ -9,23 +9,32 @@ interface AImodelProps {
 }
 
 const renderAImodels = ({ blogFormData, setBlogFormData }: AImodelProps) => {
-    return AIMODELS.map((aimodel) => (
+
+    return AIMODELS.map((modelObj: AIMODELObject) => (
         <label
-            key={aimodel}
+            key={modelObj.model}
             className={`aimodel-button ${
-                blogFormData.aimodel === aimodel ? "active" : "inactive"
+                blogFormData.aimodel.model === modelObj.model ? "active" : "inactive"
             }`}
+            data-tooltip={modelObj.tooltip}
         >
             <input
                 type='radio'
                 name='aimodel'
-                checked={blogFormData.aimodel === aimodel}
-                value={aimodel}
+                checked={blogFormData.aimodel.model === modelObj.model}
+                value={modelObj.model}
                 onChange={() => {
-                    setBlogFormData({...blogFormData, aimodel: aimodel});
+                    setBlogFormData({
+                        ...blogFormData,
+                        aimodel: {
+                            ...blogFormData.aimodel,
+                            model: modelObj.model,
+                        },
+                    });
                 }}
+
             />
-            {aimodel}
+            {modelObj.model}
         </label>
     ));
 };
