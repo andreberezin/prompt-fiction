@@ -1,9 +1,10 @@
 import '../styles/output.scss'
 import * as React from "react";
+import type OutputType from "../types/output.ts"
 
 interface OutputProps {
-    output: string;
-    setOutput: React.Dispatch<React.SetStateAction<string>>;
+    output: OutputType;
+    setOutput: React.Dispatch<React.SetStateAction<OutputType>>;
 }
 
 export default function Output({output, setOutput}: OutputProps) {
@@ -15,8 +16,10 @@ export default function Output({output, setOutput}: OutputProps) {
 
             <textarea
                 id='output-text'
-                value={output}
-                onChange={(e) => {setOutput(e.target.value)}}
+                value={output.content}
+                onChange={(e) =>
+                    setOutput({...output, content: e.target.value })
+                }
             >
             </textarea>
 
