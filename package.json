@@ -4,8 +4,9 @@
   "description": "Content generation tool that takes user inputs and generates ready-to-use content across multiple formats.",
   "main": "index.js",
   "scripts": {
-    "dev": "",
-    "dev:client": "cd client && npm run dev"
+    "dev": "concurrently \"npm run client\" \"npm run server\"",
+    "client": "cd client && npm run dev",
+    "server": "cd server && mvn spring-boot:run"
   },
   "repository": {
     "type": "git",
@@ -13,5 +14,9 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@google/genai": "^1.23.0",
+    "concurrently": "^9.2.1"
+  }
 }
