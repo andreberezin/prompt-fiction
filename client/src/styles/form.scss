@@ -32,7 +32,7 @@
 
 	  input {
 		outline: none;
-		background-color: variables.$background-color;
+		background-color: transparent;
 		border: none;
 		border-bottom: 1px solid variables.$background-color;
 		padding: 0.5rem;
@@ -135,7 +135,7 @@
 		width: 50%;
 	  }
 
-	  &:not([type="checkbox"])::after {
+	  &.placeholder::after {
 		content: attr(data-placeholder);
 		color: transparent;
 		position: absolute;
