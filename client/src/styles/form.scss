@@ -1,4 +1,5 @@
 @use 'variables';
+@use 'mixins';
 
 .container {
   height: calc(100% - 50px);
@@ -13,11 +14,13 @@
 	height: 60%;
 
 	.double {
-	  width: 60%;
+	  width: 90%;
 	  display: flex;
 	  align-items: center;
 	  justify-content: center;
 	  flex-direction: row;
+	  gap: 10%;
+	  margin-bottom: 16px;
 	}
 
 	label {
@@ -27,36 +30,8 @@
 	  align-items: center;
 	  justify-content: center;
 
-	  &#seo-focus {
-		font-size: 0.8rem;
-		text-align: center;
-	  }
-
-	  &.long {
-		width: 90%;
-	  }
-
-	  &.short {
-		width: 40%;
-	  }
-
-	  input[type="number"] {
-		-moz-appearance:textfield;
-	  }
-
-	  input::-webkit-outer-spin-button,
-	  input::-webkit-inner-spin-button {
-		-webkit-appearance: none;
-		margin: 0;
-	  }
-
-	  input[type="checkbox"] {
-		height: 1.3rem;
-		width: 1.3rem;
-		margin-left: 0.5rem;
-	  }
-
 	  input {
+		outline: none;
 		background-color: variables.$background-color;
 		border: none;
 		border-bottom: 1px solid variables.$background-color;
@@ -64,24 +39,95 @@
 		height: 40px;
 		color: white;
 		width: 100%;
-		font-size: 0.9rem;
+		font-size: 1rem;
 		text-align: center;
+		transition: border-bottom-color 0.1s ease-in-out;
 
 		&::placeholder {
 		  color: #b1b1b1;
+		  transition: color 0.1s ease-in-out;
 		}
 
-		&:focus {
+		&:not([type="range"]):not([type="checkbox"]):focus,
+		&:not([type="range"]):not([type="checkbox"]):hover {
 		  border-bottom: 1px solid variables.$accent-color;
-		  outline: none;
 
 		  &::placeholder {
 			color: transparent;
+			font-size: 1rem;
 		  }
 		}
 	  }
 
-	  &::after {
+	  &#seoFocus {
+		font-size: 1rem;
+		text-align: center;
+		cursor: pointer;
+	  }
+
+	  &#wordCount {
+		flex-direction: column;
+		gap: 0;
+
+		input[type="range"] {
+		  -webkit-appearance: none;
+		  appearance: none;
+		  background: transparent;
+		  height: 50px;
+		  cursor: pointer;
+		  width: 50%;
+		  transition: all 0.1s ease-in-out;
+
+		  &:hover,
+		  &:focus {
+			outline: none;
+			width: 100%;
+
+			&::-webkit-slider-thumb {
+			  background-color: variables.$accent-color;
+			}
+
+			&::-webkit-slider-runnable-track {
+			  background-color: white;
+			}
+		  }
+
+		  &::-webkit-slider-thumb {
+			@include mixins.thumb-style;
+		  }
+
+		  &::-moz-range-thumb {
+			@include mixins.thumb-style;
+		  }
+
+		  &::-ms-thumb {
+			@include mixins.thumb-style;
+		  }
+
+		  &::-webkit-slider-runnable-track {
+			@include mixins.track-style;
+		  }
+
+		  &::-moz-range-track {
+			@include mixins.track-style;
+		  }
+
+		  &::-ms-track {
+			@include mixins.track-style;
+		  }
+		}
+
+	  }
+
+	  &.long {
+		width: 90%;
+	  }
+
+	  &.short {
+		width: 50%;
+	  }
+
+	  &:not([type="checkbox"])::after {
 		content: attr(data-placeholder);
 		color: transparent;
 		position: absolute;
@@ -95,12 +141,66 @@
 		//transition: all 1s ease-in-out;
 	  }
 
+	  &#wordCount::after {
+		bottom: 0;
+		top: 18px;
+		height: fit-content;
+		background-color: transparent;
+		color: variables.$placeholder-color;
+		padding: 0;
+	  }
+
 	  &.filled {
 		&::after {
 		  background-color: variables.$background-color;
-		  color: #b1b1b1;
+		  color: variables.$placeholder-color;
 		  //width: fit-content;
 		}
+	  }
+
+
+	  input[type="number"] {
+		-moz-appearance:textfield;
+	  }
+
+	  input::-webkit-outer-spin-button,
+	  input::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	  }
+
+	  input[type="checkbox"] {
+		appearance: none;
+		-webkit-appearance: none;
+		height: 1.3rem;
+		width: 1.3rem;
+		margin-left: 1rem;
+		background-color: transparent;
+		cursor: pointer;
+		//padding: 0.5rem;
+		border: 1px solid white;
+		border-radius: 0.2rem;
+		transition: border-color 0.1s ease-in-out;
+		background-size: 80%;
+		background-position: center center;
+		background-repeat: no-repeat;
+		//background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><line x1='4' y1='4' x2='20' y2='20' stroke='white' stroke-width='3'/><line x1='20' y1='4' x2='4' y2='20' stroke='white' stroke-width='3'/></svg>");
+
+		&:focus,
+		&:hover{
+		  outline: none;
+		  background-color: #3e3e3e;
+		  border-color: variables.$accent-color
+		}
+
+		&:checked {
+		  background-size: cover;
+		  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='white' d='M20 6L9 17l-5-5'/></svg>");
+		}
+
+		//&:checked:not(:disabled):checked {
+		//
+		//}
 	  }
 	}
   }
