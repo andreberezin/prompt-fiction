@@ -22,7 +22,7 @@ export default function BlogForm() {
         tone: 'engaging',
         expertiseLevel: 'beginner',
         wordCount: 50,
-        seoFocus: false,
+        seoFocus: true,
     })
     const [output, setOutput] = useState<OutputType>({
         title: '',
@@ -52,10 +52,11 @@ export default function BlogForm() {
     }
 
     const setData = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setBlogFormData((current ) => ({
+        const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+        setBlogFormData((current) => ({
             ...current,
-            [e.target.name]: e.target.value,
-        }))
+            [e.target.name]: value,
+        }));
     }
 
     const handleSubmit = async (e:  React.FormEvent<HTMLFormElement>) => {
@@ -81,44 +82,23 @@ export default function BlogForm() {
                     handleSubmit(e);
             }}
             >
-                <label
-                    id='topic'
-                    className='long placeholder'
-                    data-placeholder='topic'
-                    onMouseEnter={(e) => showPlaceholder(e.currentTarget.id)}
-                    onMouseLeave={(e) => hideplaceholder(blogFormData.topic, e.currentTarget.id)}
-                >
-                    <input
-                        autoFocus={true}
-                        type='text'
-                        name='topic'
-                        maxLength={100}
-                        placeholder='topic'
-                        value={blogFormData.topic}
-                        onChange={(e) => {
-                            togglePlaceholder(e.target.value, e.target.name);
-                            setData(e);
-                        }}
-                        onFocus={(e) => showPlaceholder(e.target.name)}
-                        onBlur={(e) => hideplaceholder(e.target.value, e.target.name)}
-                    />
-                </label>
-                <div
-                className='double'
-                >
+
+                <div className='fields-column fields-column-1'>
+
                     <label
-                        id='targetAudience'
-                        className='short placeholder'
-                        data-placeholder='audience'
+                        id='topic'
+                        className='long placeholder'
+                        data-placeholder='topic'
                         onMouseEnter={(e) => showPlaceholder(e.currentTarget.id)}
-                        onMouseLeave={(e) => hideplaceholder(blogFormData.targetAudience, e.currentTarget.id)}
+                        onMouseLeave={(e) => hideplaceholder(blogFormData.topic, e.currentTarget.id)}
                     >
                         <input
+                            autoFocus={true}
                             type='text'
-                            name='targetAudience'
-                            maxLength={50}
-                            placeholder='target audience'
-                            value={blogFormData.targetAudience}
+                            name='topic'
+                            maxLength={100}
+                            placeholder='topic'
+                            value={blogFormData.topic}
                             onChange={(e) => {
                                 togglePlaceholder(e.target.value, e.target.name);
                                 setData(e);
@@ -128,44 +108,119 @@ export default function BlogForm() {
                         />
                     </label>
 
-                    {/*todo might switch to a <select> dropdown menu later*/}
-                    <label
-                        id='tone'
-                        className='short placeholder'
-                        data-placeholder='tone'
-                        onMouseEnter={(e) => showPlaceholder(e.currentTarget.id)}
-                        onMouseLeave={(e) => hideplaceholder(blogFormData.tone, e.currentTarget.id)}
+                </div>
+                <div className='fields-column fields-column-2'>
+                    <div
+                        className='double'
                     >
-                        <input
-                            className='filled'
-                            type='text'
-                            name='tone'
-                            maxLength={20}
-                            placeholder='tone'
-                            value={blogFormData.tone}
-                            onChange={(e) => {
-                                togglePlaceholder(e.target.value, e.target.name);
-                                setData(e);
-                            }}
-                            onFocus={(e) => showPlaceholder(e.target.name)}
-                            onBlur={(e) => hideplaceholder(e.target.value, e.target.name)}
-                        />
-                    </label>
+                        <label
+                            id='targetAudience'
+                            className='short placeholder'
+                            data-placeholder='audience'
+                            onMouseEnter={(e) => showPlaceholder(e.currentTarget.id)}
+                            onMouseLeave={(e) => hideplaceholder(blogFormData.targetAudience, e.currentTarget.id)}
+                        >
+                            <input
+                                type='text'
+                                name='targetAudience'
+                                maxLength={50}
+                                placeholder='target audience'
+                                value={blogFormData.targetAudience}
+                                onChange={(e) => {
+                                    togglePlaceholder(e.target.value, e.target.name);
+                                    setData(e);
+                                }}
+                                onFocus={(e) => showPlaceholder(e.target.name)}
+                                onBlur={(e) => hideplaceholder(e.target.value, e.target.name)}
+                            />
+                        </label>
 
-                    {/*todo might switch to a <select> dropdown menu later*/}
+                        {/*todo might switch to a <select> dropdown menu later*/}
+                        <label
+                            id='tone'
+                            className='short placeholder'
+                            data-placeholder='tone'
+                            onMouseEnter={(e) => showPlaceholder(e.currentTarget.id)}
+                            onMouseLeave={(e) => hideplaceholder(blogFormData.tone, e.currentTarget.id)}
+                        >
+                            <input
+                                className='filled'
+                                type='text'
+                                name='tone'
+                                maxLength={20}
+                                placeholder='tone'
+                                value={blogFormData.tone}
+                                onChange={(e) => {
+                                    togglePlaceholder(e.target.value, e.target.name);
+                                    setData(e);
+                                }}
+                                onFocus={(e) => showPlaceholder(e.target.name)}
+                                onBlur={(e) => hideplaceholder(e.target.value, e.target.name)}
+                            />
+                        </label>
+                </div>
+
+                </div>
+
+                <div className='fields-column fields-column-3'>
+                    <div className='double'>
+
+                        {/*todo might switch to a <select> dropdown menu later*/}
+                        <label
+                            id='expertiseLevel'
+                            className='short placeholder'
+                            data-placeholder='expertise'
+                            onMouseEnter={(e) => showPlaceholder(e.currentTarget.id)}
+                            onMouseLeave={(e) => hideplaceholder(blogFormData.expertiseLevel, e.currentTarget.id)}
+                        >
+                            <input
+                                type='text'
+                                name='expertiseLevel'
+                                placeholder='expertise level'
+                                maxLength={50}
+                                value={blogFormData.expertiseLevel}
+                                onChange={(e) => {
+                                    togglePlaceholder(e.target.value, e.target.name);
+                                    setData(e);
+                                }}
+                                onFocus={(e) => showPlaceholder(e.target.name)}
+                                onBlur={(e) => hideplaceholder(e.target.value, e.target.name)}
+                            />
+                        </label>
+
+                        <label
+                            id='seoFocus'
+                            className='short'
+                            // data-placeholder='seo'
+                        >
+                            Seo Focus
+                            <input
+                                type='checkbox'
+                                name='seoFocus'
+                                checked={blogFormData.seoFocus}
+                                onChange={(e) => {
+                                    setData(e);
+                                }}
+                            />
+                        </label>
+                    </div>
+                </div>
+
+                <div className='slider-column'>
                     <label
-                        id='expertiseLevel'
-                        className='short placeholder'
-                        data-placeholder='expertise'
-                        onMouseEnter={(e) => showPlaceholder(e.currentTarget.id)}
-                        onMouseLeave={(e) => hideplaceholder(blogFormData.expertiseLevel, e.currentTarget.id)}
+                        id='wordCount'
+                        className='long placeholder'
+                        data-placeholder='words'
                     >
+                        {blogFormData.wordCount}
                         <input
-                            type='text'
-                            name='expertiseLevel'
-                            placeholder='expertise level'
-                            maxLength={50}
-                            value={blogFormData.expertiseLevel}
+                            type='range'
+                            name='wordCount'
+                            placeholder='word count'
+                            min={10}
+                            max={2000}
+                            step={10}
+                            value={blogFormData.wordCount}
                             onChange={(e) => {
                                 togglePlaceholder(e.target.value, e.target.name);
                                 setData(e);
@@ -175,89 +230,6 @@ export default function BlogForm() {
                         />
                     </label>
                 </div>
-                {/*<div*/}
-                {/*className='double'*/}
-                {/*>*/}
-
-                    {/*<label*/}
-                    {/*    id='wordCount'*/}
-                    {/*    className='short'*/}
-                    {/*    data-placeholder='words'*/}
-                    {/*>*/}
-                    {/*    <input*/}
-                    {/*        type='number'*/}
-                    {/*        name='wordCount'*/}
-                    {/*        placeholder='word count'*/}
-                    {/*        min={0}*/}
-                    {/*        max={1000}*/}
-                    {/*        onChange={(e) => {*/}
-                    {/*            togglePlaceholder(e.target.value, e.target.name);*/}
-                    {/*            setData(e);*/}
-                    {/*        }}*/}
-                    {/*        onFocus={(e) => showPlaceholder(e.target.name)}*/}
-                    {/*        onBlur={(e) => hideplaceholder(e.target.value, e.target.name)}*/}
-                    {/*    />*/}
-                    {/*</label>*/}
-
-                {/*</div>*/}
-
-                    {/*<label*/}
-                    {/*    id='wordCount'*/}
-                    {/*    className='short'*/}
-                    {/*    data-placeholder='words'*/}
-                    {/*>*/}
-                    {/*    <input*/}
-                    {/*        type='number'*/}
-                    {/*        name='wordCount'*/}
-                    {/*        placeholder='word count'*/}
-                    {/*        min={0}*/}
-                    {/*        max={1000}*/}
-                    {/*        onChange={(e) => {*/}
-                    {/*            togglePlaceholder(e.target.value, e.target.name);*/}
-                    {/*            setData(e);*/}
-                    {/*        }}*/}
-                    {/*        onFocus={(e) => showPlaceholder(e.target.name)}*/}
-                    {/*        onBlur={(e) => hideplaceholder(e.target.value, e.target.name)}*/}
-                    {/*    />*/}
-                    {/*</label>*/}
-
-                <label
-                    id='wordCount'
-                    className='long placeholder'
-                    data-placeholder='words'
-                >
-                    {blogFormData.wordCount}
-                    <input
-                        type='range'
-                        name='wordCount'
-                        placeholder='word count'
-                        min={10}
-                        max={2000}
-                        step={10}
-                        value={blogFormData.wordCount}
-                        onChange={(e) => {
-                            togglePlaceholder(e.target.value, e.target.name);
-                            setData(e);
-                        }}
-                        onFocus={(e) => showPlaceholder(e.target.name)}
-                        onBlur={(e) => hideplaceholder(e.target.value, e.target.name)}
-                    />
-                </label>
-
-                    <label
-                        id='seoFocus'
-                        className='short'
-                        // data-placeholder='seo'
-                    >
-                        Seo Focus
-                        <input
-                            type='checkbox'
-                            name='seoFocus'
-                            onChange={(e) => {
-                                setData(e);
-                            }}
-                        />
-                    </label>
 
                 <AImodel blogFormData={blogFormData} setBlogFormData={setBlogFormData}/>
 
