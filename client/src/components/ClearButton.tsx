@@ -20,14 +20,14 @@ export default function ClearButton({setBlogFormData}: ClearButtonProps) {
                 className='clear'
                 onClick={() => {
                     setBlogFormData({
-                        aimodel: "gemini-2.5-flash",
+                        aimodel: {model: "gemini-2.5-flash", tooltip: "Fast and intelligent"},
                         contentType: "blog",
                         topic: '',
                         targetAudience: '',
                         tone: '',
                         expertiseLevel: '',
                         wordCount: 1000,
-                        seoFocus: false,
+                        seoFocus: false
                     })
                 }}
             >
