@@ -6,9 +6,12 @@ interface OutputProps {
     output: OutputType;
     setOutput: React.Dispatch<React.SetStateAction<OutputType>>;
     loadingState: boolean;
+    error: string;
 }
 
-export default function Output({output, setOutput, loadingState}: OutputProps) {
+export default function Output({output, setOutput, loadingState, error}: OutputProps) {
+
+
 
     return (
         <div
@@ -17,8 +20,9 @@ export default function Output({output, setOutput, loadingState}: OutputProps) {
 
             <textarea
                 id='output-text'
-                className={`${loadingState ? "loading" : ""}`}
-                value={output.content}
+                className={`${error ? "error" : (loadingState ? "loading" : "")}`}
+                value={error !== "" ? error : output.content || ""}
+                readOnly={error !== ""}
                 onChange={(e) =>
                     setOutput({...output, content: e.target.value })
                 }

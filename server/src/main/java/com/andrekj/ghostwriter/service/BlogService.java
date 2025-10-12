@@ -25,24 +25,9 @@ public class BlogService extends BaseService {
 
         // 2. Build a prompt string based on request data
         String prompt = createBlogPrompt(request);
-        System.out.println("prompt:" + prompt);
 
         // 3. Call AI API
-//      GenerateContentResponse response;
-
         GenerateContentConfig config = buildConfig(request);
-
-//        try {
-//            response = geminiClient.models.generateContent(
-//                    request.getAimodel(),
-//                    prompt,
-//                    config
-//            );
-//        } catch (Exception e) {
-//            System.err.println(e.getMessage());
-//            return new BlogResponse();
-//        }
-
         GenerateContentResponse response = callAiAPI(request, prompt, config);
 
         // 4. Process AI response (parse JSON or text)
@@ -50,7 +35,6 @@ public class BlogService extends BaseService {
         processResponse(blogResponse, response);
 
         // 5. Return BlogResponse object
-        System.out.println("Response: \n" + response.text());
         return blogResponse;
     }
 
@@ -67,7 +51,7 @@ public class BlogService extends BaseService {
         String sectionCount = "3-4";
 
          return "You are an expert content writer specializing in " + request.getContentType() + "s.\n" +
-                 "Write a " + request.getTone() + ", " + request.getExpertiseLevel() + "-level" + request.getContentType() + "about '" + request.getTopic() + "' for " +
+                 "Write a " + request.getTone() + ", " + request.getExpertiseLevel() + "-level " + request.getContentType() + " about '" + request.getTopic() + "' for " +
                  request.getTargetAudience() + ".\n" +
                  "Requirements:\n" +
                  "- Target length: " + request.getWordCount() + " words\n" +

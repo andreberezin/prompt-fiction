@@ -13,10 +13,6 @@
     border-color: variables.$accent-color;
   }
 
-  &.error {
-    border-color: red;
-  }
-
   #output-text {
     resize: none;
     width: 100%;
@@ -26,19 +22,26 @@
     border: 2px solid white;
     outline: none;
 
-    &:not(.loading):focus {
+    &:not(.loading):not(.error):focus {
       border-color: variables.$accent-color;
       box-shadow: 0px 0px 3px 3px variables.$accent-color;
     }
 
     &.loading {
       border-color: variables.$accent-color;
-      animation: flashShadow 1s ease-in-out infinite;
+      animation: flashShadowLoading 1s ease-in-out infinite;
+    }
+
+    &.error {
+
+      text-align: center;
+      border-color: variables.$error-color;
+      animation: flashShadowError 1s ease-in-out infinite;
     }
   }
 }
 
-@keyframes flashShadow {
+@keyframes flashShadowLoading {
   0% {
     box-shadow: 0 0 1px 1px variables.$accent-color;
   }
@@ -48,4 +51,16 @@
   100% {
     box-shadow: 0 0 1px 1px variables.$accent-color;
      }
+}
+
+@keyframes flashShadowError {
+  0% {
+    box-shadow: 0 0 1px 1px variables.$error-color;
+  }
+  50% {
+    box-shadow: 0 0 4px 4px variables.$error-color;
+  }
+  100% {
+    box-shadow: 0 0 1px 1px variables.$error-color;
+  }
 }

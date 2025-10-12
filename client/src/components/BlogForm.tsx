@@ -4,13 +4,15 @@ import SubmitButton from "./SubmitButton.tsx";
 import ClearButton from "./ClearButton.tsx";
 import * as React from "react";
 import axios from 'axios';
-import {useState} from "react";
+import {useRef, useState} from "react";
 import type BlogFormData from "../types/blogFormData.ts";
 import type OutputType from "../types/output.ts";
 import AImodel from "./AImodel.tsx";
 
 export default function BlogForm() {
     const [loadingState, setLoadingState] = useState<boolean>(false);
+    const timeoutId = useRef<number>(null);
+    const [error, setError] = useState<string>("")
     const [blogFormData, setBlogFormData] = useState<BlogFormData>({
         aimodel: {
             model: 'gemini-2.5-flash-lite',
@@ -61,12 +63,31 @@ export default function BlogForm() {
 
     const handleSubmit = async (e:  React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        setError("");
+        if (timeoutId.current) clearTimeout(timeoutId.current);
         setLoadingState(true);
+
         const payload = { ...blogFormData, aimodel: blogFormData.aimodel.model};
-        const response = await axios.post('/api/blog', payload);
-        console.log("Got response: ", response);
+        try {
+            const response = await axios.post('/api/blog', payload);
+            setOutput(response.data || "");
+        } catch (err: unknown) {
+            if (axios.isAxiosError(err) && err.response) {
+                const { error, message, status } = err.response.data;
+                console.log("error:", err.response.data)
+                setError(`(${status}) ${message}`);
+                console.error(`Error ${status}: ${error}\n${message}`);
+            } else {
+                console.error(`Unexpected error: ${err}`);
+                setError(`${err}`)
+            }
+
+            timeoutId.current = setTimeout(() => {
+                setError("")
+            }, 10000)
+        }
         setLoadingState(false);
-        setOutput(response.data);
     }
 
     return (
@@ -238,7 +259,7 @@ export default function BlogForm() {
                     <ClearButton setBlogFormData={setBlogFormData}/>
                 </div>
             </form>
-            <Output output={output} setOutput={setOutput} loadingState={loadingState}/>
+            <Output output={output} setOutput={setOutput} loadingState={loadingState} error={error}/>
         </div>
     )
 }
