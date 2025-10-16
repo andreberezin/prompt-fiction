@@ -1,14 +1,44 @@
 package com.andrekj.ghostwriter.dto;
 
 import com.andrekj.ghostwriter.interfaces.BaseResponse;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
-public class BlogResponse implements BaseResponse {
+public class BlogResponse {
     private String title;
+    private List<Section> sections;
+    private Metadata metadata;
+    private ExportFormats exportFormats;
     private String content;
-    private int wordCount;
-    private List<String> keywords;
+
+    @Setter
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class Section {
+        private String type;
+        private String title;
+        private String content;
+    }
+
+    @Setter
+    @Getter
+    @AllArgsConstructor
+    public static class Metadata {
+        private int wordCount;
+        private Set<String> seoKeywords;
+        private String estimatedReadTime;
+    }
+
+    @Setter
+    @Getter
+    @AllArgsConstructor
+    public static class ExportFormats {
+        private String markdown;
+        private String plainText;
+        private boolean pdfReady;
+    }
 }
