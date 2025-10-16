@@ -23,14 +23,23 @@ export default function BlogForm() {
         targetAudience: 'anyone',
         tone: 'engaging',
         expertiseLevel: 'beginner',
-        wordCount: 50,
+        wordCount: 300,
         seoFocus: true,
     })
     const [output, setOutput] = useState<OutputType>({
         title: '',
+        sections: [],
+        metadata: {
+            wordCount: 0,
+            estimatedReadTime: '0 min',
+            seoKeywords: [],
+        },
+        exportFormats: {
+            markdown: '',
+            plainText: '',
+            pdfReady: false,
+        },
         content: '',
-        wordCount: 0,
-        keywords: [],
     });
 
     const togglePlaceholder = (value: string, labelId: string ) => {
@@ -72,6 +81,7 @@ export default function BlogForm() {
         try {
             const response = await axios.post('/api/blog', payload);
             setOutput(response.data || "");
+            console.log("Response:", response);
         } catch (err: unknown) {
             if (axios.isAxiosError(err) && err.response) {
                 const { error, message, status } = err.response.data;
@@ -238,7 +248,7 @@ export default function BlogForm() {
                             type='range'
                             name='wordCount'
                             placeholder='word count'
-                            min={10}
+                            min={300}
                             max={2000}
                             step={10}
                             value={blogFormData.wordCount}
