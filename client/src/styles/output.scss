@@ -1,42 +1,224 @@
 @use 'variables';
+@use 'mixins';
 
-.output {
-  height: 40%;
+#output-container {
+  @include mixins.flex-centered;
+  flex-direction: column;
+  height: 45%;
   width: 100%;
   background-color: transparent;
   backdrop-filter: blur(5px);
   color: white;
   border-radius: 0 20px 0 20px;
+  border: 2px solid white;
   //border: 2px solid white;
+
+  &:not(.loading):not(.error):focus, // &:not(.loading):not(.error):has(> textarea:focus)
+  &:not(.loading):not(.error):focus-within {
+    border-color: variables.$accent-color;
+    box-shadow: 0px 0px 3px 3px variables.$accent-color;
+  }
+
+  &.loading {
+    border-color: variables.$accent-color;
+    animation: flashShadowLoading 1s ease-in-out infinite;
+  }
+
+  &.error {
+    text-align: center;
+    border-color: variables.$error-color;
+    animation: flashShadowError 1s ease-in-out infinite;
+  }
 
   &:focus {
     border-color: variables.$accent-color;
   }
 
-  #output-text {
-    resize: none;
+  #format-container {
+    width: 100%;
+    height: 15%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-direction: row;
+
+    #buttons-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      flex-direction: row;
+      width: 50%;
+
+      button {
+        all: unset;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s ease-in-out;
+
+        &.active {
+          color: variables.$accent-color;
+        }
+
+        .icon {
+          font-size: 1.5rem;
+        }
+
+        &:not(:disabled):hover {
+          color: variables.$accent-color;
+          transform: scale(1.05);
+        }
+
+        &::after {
+          content: attr(data-tooltip);
+          position: absolute;
+          top: -35px;
+          right: 50%;
+          transform: translateX(50%);
+          width: fit-content;
+          white-space: nowrap;
+          opacity: 0;
+          background-color: transparent;
+          color: white;
+          border-radius: 10px;
+          transition: all 0.1s ease-in-out;
+          font-size: 0.8rem;
+        }
+
+        &:hover {
+          &::before {
+            opacity: 0.5;
+          }
+          &::after {
+            opacity: 1;
+          }
+        }
+      }
+    }
+    #metadata-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      flex-direction: row;
+      width: 30%;
+
+
+      .data {
+        @include mixins.flex-centered;
+        flex-direction: column;
+        height: 100%;
+        width: fit-content;
+        position: relative;
+        white-space: nowrap;
+
+        p {
+          height: fit-content;
+          @include mixins.flex-centered;
+          width: 100%;
+          -webkit-user-select: none; /* Safari */
+          -moz-user-select: none; /* Firefox */
+          -ms-user-select: none; /* IE10+/Edge */
+          user-select: none; /* Standard */
+        }
+
+        #value {
+          position: absolute;
+          top: -20px;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+
+        #text {
+          font-size: 0.8rem;
+          color: variables.$placeholder-color;
+          position: absolute;
+          bottom: -20px;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+      }
+    }
+  }
+
+  #textareas-container {
     width: 100%;
     height: 100%;
-    border-radius: 0 20px 0 20px;
-    padding: 0.5rem;
-    border: 2px solid white;
-    outline: none;
+    @include mixins.flex-centered;
+    flex-direction: row;
+    gap: 0.5rem;
 
-    &:not(.loading):not(.error):focus {
-      border-color: variables.$accent-color;
-      box-shadow: 0px 0px 3px 3px variables.$accent-color;
-    }
+    .textarea-container {
+      width: 100%;
+      height: 100%;
+      @include mixins.flex-centered;
+      flex-direction: row;
+      border-radius: 0 0 0 20px;
+      position: relative;
 
-    &.loading {
-      border-color: variables.$accent-color;
-      animation: flashShadowLoading 1s ease-in-out infinite;
-    }
+      &:only-child {
+        width: 100%;
+      }
 
-    &.error {
+      &:not(:only-child) {
+        width: 50%;
+      }
 
-      text-align: center;
-      border-color: variables.$error-color;
-      animation: flashShadowError 1s ease-in-out infinite;
+      &:nth-child(2) {
+        border-radius: 0;
+      }
+
+      button {
+        all: unset;
+        cursor: pointer;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        transition: all 0.2s ease-in-out;
+        opacity: 0.7;
+
+        .icon {
+          font-size: 1.5rem;
+        }
+
+        &:not(:disabled):hover {
+          color: variables.$accent-color;
+          transform: scale(1.05);
+          opacity: 1;
+        }
+
+        &::after {
+          content: attr(data-tooltip);
+          position: absolute;
+          bottom: -15px;
+          right: 50%;
+          transform: translateX(50%);
+          width: fit-content;
+          white-space: nowrap;
+          opacity: 0;
+          background-color: transparent;
+          color: variables.$accent-color;
+          border-radius: 10px;
+          transition: all 0.1s ease-in-out;
+          font-size: 0.8rem;
+        }
+
+        &:hover {
+          &::before {
+            opacity: 0.5;
+          }
+          &::after {
+            opacity: 1;
+          }
+        }
+      }
+
+      .output-text {
+        resize: none;
+        width: 100%;
+        height: 100%;
+        padding: 0.75rem;
+        outline: none;
+        border-radius: inherit;
+      }
     }
   }
 }
