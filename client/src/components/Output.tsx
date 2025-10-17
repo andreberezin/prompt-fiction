@@ -1,17 +1,21 @@
 import '../styles/output.scss'
+import '../styles/hover-icon-button.scss'
 import * as React from "react";
 import type OutputType from "../types/output.ts"
 import {AiOutlineCopy, AiOutlineFile, AiOutlineFileMarkdown, AiOutlineFilePdf} from "react-icons/ai";
 import {useState} from "react";
+import {RiFullscreenExitFill, RiFullscreenFill} from "react-icons/ri";
 
 interface OutputProps {
     output: OutputType;
     setOutput: React.Dispatch<React.SetStateAction<OutputType>>;
     loadingState: boolean;
     error: string;
+    showForm: boolean;
+    setShowForm: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function Output({output, setOutput, loadingState, error}: OutputProps) {
+export default function Output({output, setOutput, loadingState, error, showForm, setShowForm}: OutputProps) {
     const [copyText, setCopyText] = useState<string>("Copy");
 
     const [currentFormat, setCurrentFormat] = useState<{markdown: boolean, plainText: boolean}>({markdown: true, plainText: false});
@@ -63,7 +67,7 @@ export default function Output({output, setOutput, loadingState, error}: OutputP
     return (
         <div
             id={`output-container`}
-            className={`${error ? "error" : (loadingState ? "loading" : "")}`}
+            className={`${error ? "error" : loadingState ? "loading" : ""} ${!showForm ? "fullscreen" : ""}`}
             tabIndex={0}
         >
             <div id='format-container'>
@@ -72,7 +76,7 @@ export default function Output({output, setOutput, loadingState, error}: OutputP
                         id='markdown-button'
                         data-tooltip='Markdown'
                         disabled={loadingState}
-                        className={currentFormat.markdown ? "active" : ""}
+                        className={`hover-icon-button ${currentFormat.markdown ? "active" : ""}`}
                         onClick={() => {toggleFormat("markdown")}}
                     >
                         <AiOutlineFileMarkdown className='icon'/>
@@ -81,7 +85,7 @@ export default function Output({output, setOutput, loadingState, error}: OutputP
                         id='plain-text-button'
                         data-tooltip='Plain text'
                         disabled={loadingState}
-                        className={currentFormat.plainText ? "active" : ""}
+                        className={`hover-icon-button ${currentFormat.plainText ? "active" : ""}`}
                         onClick={() => {toggleFormat("plainText")}}
                     >
                         <AiOutlineFile className='icon'/>
@@ -90,6 +94,7 @@ export default function Output({output, setOutput, loadingState, error}: OutputP
                         id='pdf-download-button'
                         data-tooltip='Download pdf'
                         disabled={loadingState}
+                        className={`hover-icon-button`}
                         // onClick={downloadPdf}
                     >
                         <AiOutlineFilePdf className='icon'/>
@@ -107,6 +112,17 @@ export default function Output({output, setOutput, loadingState, error}: OutputP
                         <p id='text'>read time</p>
                     </div>
                 </div>
+
+                <button
+                    id='fullscreen-button'
+                    data-tooltip='Fullscreen'
+                    className='hover-icon-button'
+                    // disabled={loadingState}
+                    onClick={() => setShowForm(!showForm)}
+                >
+                    {showForm &&  <RiFullscreenFill className='icon'/>}
+                    {!showForm &&  <RiFullscreenExitFill className='icon'/>}
+                </button>
             </div>
 
             <div id='textareas-container'>
@@ -144,6 +160,7 @@ export default function Output({output, setOutput, loadingState, error}: OutputP
                 </textarea>
 						<button
 							id='copy-button'
+							className='hover-icon-button'
 							data-tooltip={copyText}
 							disabled={loadingState}
 							onClick={copyToClipboard}>
@@ -181,6 +198,7 @@ export default function Output({output, setOutput, loadingState, error}: OutputP
                 </textarea>
                         <button
                             id='copy-button'
+                            className='hover-icon-button'
                             data-tooltip={copyText}
                             disabled={loadingState}
                             onClick={copyToClipboard}>

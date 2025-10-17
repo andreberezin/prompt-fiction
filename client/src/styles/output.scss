@@ -12,11 +12,16 @@
   border-radius: 0 20px 0 20px;
   border: 2px solid white;
   //border: 2px solid white;
+  //transition: all 0.1s ease-in-out;
 
   &:not(.loading):not(.error):focus, // &:not(.loading):not(.error):has(> textarea:focus)
   &:not(.loading):not(.error):focus-within {
     border-color: variables.$accent-color;
     box-shadow: 0px 0px 3px 3px variables.$accent-color;
+  }
+
+  &.fullscreen {
+    height: 100%;
   }
 
   &.loading {
@@ -42,58 +47,17 @@
     justify-content: space-around;
     flex-direction: row;
 
+    #fullscreen-button {
+    }
+
     #buttons-container {
       display: flex;
       align-items: center;
       justify-content: space-around;
       flex-direction: row;
       width: 50%;
-
-      button {
-        all: unset;
-        cursor: pointer;
-        position: relative;
-        transition: all 0.2s ease-in-out;
-
-        &.active {
-          color: variables.$accent-color;
-        }
-
-        .icon {
-          font-size: 1.5rem;
-        }
-
-        &:not(:disabled):hover {
-          color: variables.$accent-color;
-          transform: scale(1.05);
-        }
-
-        &::after {
-          content: attr(data-tooltip);
-          position: absolute;
-          top: -35px;
-          right: 50%;
-          transform: translateX(50%);
-          width: fit-content;
-          white-space: nowrap;
-          opacity: 0;
-          background-color: transparent;
-          color: white;
-          border-radius: 10px;
-          transition: all 0.1s ease-in-out;
-          font-size: 0.8rem;
-        }
-
-        &:hover {
-          &::before {
-            opacity: 0.5;
-          }
-          &::after {
-            opacity: 1;
-          }
-        }
-      }
     }
+
     #metadata-container {
       display: flex;
       align-items: center;
@@ -166,49 +130,8 @@
         border-radius: 0;
       }
 
-      button {
-        all: unset;
-        cursor: pointer;
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        transition: all 0.2s ease-in-out;
-        opacity: 0.7;
+      #copy-button {
 
-        .icon {
-          font-size: 1.5rem;
-        }
-
-        &:not(:disabled):hover {
-          color: variables.$accent-color;
-          transform: scale(1.05);
-          opacity: 1;
-        }
-
-        &::after {
-          content: attr(data-tooltip);
-          position: absolute;
-          bottom: -15px;
-          right: 50%;
-          transform: translateX(50%);
-          width: fit-content;
-          white-space: nowrap;
-          opacity: 0;
-          background-color: transparent;
-          color: variables.$accent-color;
-          border-radius: 10px;
-          transition: all 0.1s ease-in-out;
-          font-size: 0.8rem;
-        }
-
-        &:hover {
-          &::before {
-            opacity: 0.5;
-          }
-          &::after {
-            opacity: 1;
-          }
-        }
       }
 
       .output-text {
