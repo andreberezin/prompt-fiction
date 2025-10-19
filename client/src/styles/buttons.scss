@@ -20,19 +20,21 @@
 	  transition: transform 0.2s;
 	  cursor: pointer;
 
-	  &:not(.disabled).submit:hover {
+	  &:not(.disabled)#submit-button:hover {
 		transform: translateX(4px);
 	  }
 
-	  .submit-icon {
+	  #submit-icon {
 		font-size: 3rem;
 	  }
 
-	  .clear-icon {
+	  #clear-icon,
+	  #cancel-icon{
 		font-size: 2rem;
 	  }
 
-	  &.clear:hover {
+	  &:not(.disabled)#clear-button:hover,
+	  &:not(.disabled)#cancel-button:hover{
 		transform: scale(1.1);
 	  }
 
