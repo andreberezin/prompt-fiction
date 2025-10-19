@@ -11,8 +11,13 @@ import AImodel from "./AImodel.tsx";
 
 export default function BlogForm() {
     const [loadingState, setLoadingState] = useState<boolean>(false);
+    const [isTextEdited, setIsTextEdited] = useState<boolean>(false);
+    const [generationTime, setGenerationTime] = useState<number>(0);
     const [showForm, setShowForm] = useState(true);
-    const timeoutId = useRef<number>(null);
+    const [showCEO, setShowCEO] = useState<boolean>(true);
+    const errorTimeoutId = useRef<number>(null);
+    const abortControllerRef = useRef<AbortController | null>(null);
+    const generationTimeInterval = useRef<number>(0);
     const [error, setError] = useState<string>("")
     const [blogFormData, setBlogFormData] = useState<BlogFormData>({
         aimodel: {
@@ -71,34 +76,114 @@ export default function BlogForm() {
         }));
     }
 
-    const handleSubmit = async (e:  React.FormEvent<HTMLFormElement>) => {
+    const handleGenerationTimer = () => {
+        setGenerationTime(0);
+        generationTimeInterval.current = setInterval(() => setGenerationTime(current => current + 10), 10);
+    }
+
+    const prepareForRequest = (e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
 
-        setError("");
-        if (timeoutId.current) clearTimeout(timeoutId.current);
+        handleGenerationTimer();
+
+        setIsTextEdited(false);
+
+        if (errorTimeoutId.current) clearTimeout(errorTimeoutId.current);
         setLoadingState(true);
+    }
+
+    const cleanupAfterRequest = () => {
+        clearInterval(generationTimeInterval.current);
+        abortControllerRef.current = null;
+        setLoadingState(false);
+    }
+
+    function newAbortSignal(timeoutMs: number) {
+        const abortController = new AbortController();
+        abortControllerRef.current = abortController;
+
+        setTimeout(() => abortController.abort("timeout"), timeoutMs);
+
+        return abortController.signal;
+    }
+
+    const handleError = (err: unknown) => {
+        if (axios.isCancel(err)) {
+            const reason = (err.config?.signal as AbortSignal & { reason?: unknown })?.reason;
+
+            if (reason === "manual") {
+                setError("");
+            } else if (reason === "timeout") {
+                setError("Request timed out. Please try again.");
+            } else {
+                setError("Request was canceled.");
+            }
+
+        } else if ((axios.isAxiosError(err) && err.response)) {
+            const { error, message, status } = err.response.data;
+            console.log("error:", error.response.data)
+            setError(`(${status}) ${message}`);
+            console.error(`Error: ${error}\n${message}`);
+        } else {
+            console.error(`Unexpected error: ${error}`);
+            setError(`${error}`)
+        }
+
+        errorTimeoutId.current = setTimeout(() => {
+            setError("")
+        }, 10000)
+    }
+
+    const handleSubmit = async (e:  React.FormEvent<HTMLFormElement>) => {
+        prepareForRequest(e);
 
         const payload = { ...blogFormData, aimodel: blogFormData.aimodel.model};
         try {
-            const response = await axios.post('/api/blog', payload);
+            const response = await axios.post('/api/blog/generate', payload, {
+                signal: newAbortSignal(60 * 1000)
+            });
             setOutput(response.data || "");
             console.log("Response:", response);
         } catch (err: unknown) {
-            if (axios.isAxiosError(err) && err.response) {
-                const { error, message, status } = err.response.data;
-                console.log("error:", err.response.data)
-                setError(`(${status}) ${message}`);
-                console.error(`Error ${status}: ${error}\n${message}`);
-            } else {
-                console.error(`Unexpected error: ${err}`);
-                setError(`${err}`)
-            }
-
-            timeoutId.current = setTimeout(() => {
-                setError("")
-            }, 10000)
+            handleError(err);
+        } finally {
+            cleanupAfterRequest();
         }
-        setLoadingState(false);
+    }
+
+    // todo function to update everything based on the edited markdown output
+    const updateOutput = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        prepareForRequest(e);
+        try {
+            const response = await axios.post('/api/blog/update', output, {
+                signal: newAbortSignal(60 * 1000)
+            });
+            setOutput(response.data || "");
+            console.log("Response:", response);
+            // 2. send output to backend
+            // 3. update plain text, word count and read time in backend
+            // 4. get response
+            // 5. update values
+            // 6. set loading state to false
+
+        } catch (err) {
+            handleError(err);
+        } finally {
+            cleanupAfterRequest();
+        }
+    }
+
+    const cancelRequest = () => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current?.abort("manual");
+            // abortControllerRef.current.abort();
+        }
+        setShowCEO(false);
+        if (errorTimeoutId.current) clearTimeout(errorTimeoutId.current);
+        if (generationTimeInterval.current) clearInterval(generationTimeInterval.current);
+        setGenerationTime(0)
+
+        cleanupAfterRequest();
     }
 
     return (
@@ -267,13 +352,13 @@ export default function BlogForm() {
 					<AImodel blogFormData={blogFormData} setBlogFormData={setBlogFormData}/>
 
 					<div className='button-container'>
-						<SubmitButton loadingState={loadingState}/>
-						<ClearButton setBlogFormData={setBlogFormData}/>
+						<SubmitButton loadingState={loadingState} cancelRequest={cancelRequest}/>
+						<ClearButton loadingState={loadingState} setBlogFormData={setBlogFormData}/>
 					</div>
 				</form>
             }
 
-            <Output output={output} setOutput={setOutput} loadingState={loadingState} error={error} showForm={showForm} setShowForm={setShowForm}/>
+            <Output output={output} setOutput={setOutput} loadingState={loadingState} error={error} showForm={showForm} setShowForm={setShowForm} generationTime={generationTime} setError={setError} isTextEdited={isTextEdited} setIsTextEdited={setIsTextEdited} updateOutput={updateOutput} showCEO={showCEO} setShowCEO={setShowCEO}/>
         </div>
     )
 }
