@@ -7,18 +7,18 @@ import com.andrekj.ghostwriter.dto.BlogRequest;
 import com.andrekj.ghostwriter.dto.BlogResponse;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
 public class BlogService extends BaseService {
-    public BlogService(Client geminiClient) {
-        super(geminiClient);
+    public BlogService(Client geminiClient, PDFGeneratorService pdfGeneratorService) {super(geminiClient);
+        this.pdfGeneratorService = pdfGeneratorService;
     }
+
+    private final PDFGeneratorService pdfGeneratorService;
+
 
 //    private final Client geminiClient;
 
@@ -43,6 +43,9 @@ public class BlogService extends BaseService {
 
         // 5. Return BlogResponse object
 //        blogResponse.setContent(response.text());
+
+        preparePdfFormat(blogResponse);
+
         return blogResponse;
     }
 
@@ -58,11 +61,12 @@ public class BlogService extends BaseService {
      private String createBlogPrompt(BlogRequest request) {
 //        String sectionCount = String.valueOf((int)Math.min(Math.floor((float) request.getWordCount() / 100), 6));
          String sectionCount = "2-4";
+         int wordCount = (int) (request.getWordCount() * 0.90); // because the valid range is -10% to +10% and gemini keeps overshooting it
 
         // todo edit prompt - doesn't always include a conclusion
          String prompt = "You are an expert content writer specializing in " + request.getContentType() + "s.\n" +
                  "Write a " + request.getTone() + ", " + request.getExpertiseLevel() + "-level " + request.getContentType() + " about '" + request.getTopic() + "' for " +
-                 request.getTargetAudience() + ".  Target length is " + (request.getWordCount() * 0.90) + " words, do not exceed this limit" + ".\n" +
+                 request.getTargetAudience() + ".  Target length is " + wordCount + " words, do not exceed this limit" + ".\n" +
 //                 "Requirements:\n" +
 //                 "- Target length: " + request.getWordCount() + " words\n" +
 //                 "- Tone: " + request.getTone() + "\n" +
@@ -90,7 +94,8 @@ public class BlogService extends BaseService {
 
         String currentSectionTitle = null;
         String currentSectionType = "introduction";
-        StringBuilder currentSectionContent = new StringBuilder();
+        StringBuilder currentSectionMarkdownContent = new StringBuilder();
+        StringBuilder currentSectionPlainTextContent = new StringBuilder();
         List<BlogResponse.Section> sections = new ArrayList<>();
 
         // prepare exportFormats and Metadata
@@ -120,11 +125,12 @@ public class BlogService extends BaseService {
                 plainTextBuilder.append("\n").append(plainline).append("\n");
 
                 // previous section
-                if (currentSectionType != null && !currentSectionContent.isEmpty()) {
+                if (currentSectionType != null && !currentSectionMarkdownContent.isEmpty()) {
                     BlogResponse.Section section = new BlogResponse.Section();
                     section.setType(currentSectionType);
                     section.setTitle(currentSectionTitle);
-                    section.setContent(currentSectionContent.toString().trim());
+                    section.setMarkdownContent(currentSectionMarkdownContent.toString().trim());
+                    section.setPlainTextContent(currentSectionPlainTextContent.toString().trim());
                     sections.add(section);
                 }
 
@@ -141,11 +147,13 @@ public class BlogService extends BaseService {
                 }
 
                 // reset section content
-                currentSectionContent = new StringBuilder();
+                currentSectionMarkdownContent = new StringBuilder();
+                currentSectionPlainTextContent = new StringBuilder();
             } else {
                 plainTextBuilder.append(plainline).append("\n");
 
-                currentSectionContent.append(line).append("\n");
+                currentSectionMarkdownContent.append(line).append("\n");
+                currentSectionPlainTextContent.append(plainline).append("\n");
             }
         }
 
@@ -154,7 +162,8 @@ public class BlogService extends BaseService {
              BlogResponse.Section section = new BlogResponse.Section();
              section.setType(currentSectionType);
              section.setTitle(currentSectionTitle);
-             section.setContent(currentSectionContent.toString().trim());
+             section.setMarkdownContent(currentSectionMarkdownContent.toString().trim());
+             section.setPlainTextContent(currentSectionPlainTextContent.toString().trim());
              sections.add(section);
          }
 
@@ -212,5 +221,16 @@ public class BlogService extends BaseService {
                  }
              }
          }
+     }
+
+     private void preparePdfFormat(BlogResponse blogResponse) {
+        byte[] pdfBytes = pdfGeneratorService.generateBlogPDF(blogResponse);
+        String base64pdf = Base64.getEncoder().encodeToString(pdfBytes);
+        blogResponse.getExportFormats().setPdfReady(true);
+     }
+
+     public BlogResponse updateBlogPost(BlogResponse editedResponse) {
+
+        return editedResponse;
      }
 }
