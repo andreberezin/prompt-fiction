@@ -21,7 +21,8 @@ public class BlogResponse {
     public static class Section {
         private String type;
         private String title;
-        private String content;
+        private String markdownContent;
+        private String plainTextContent;
     }
 
     @Setter
