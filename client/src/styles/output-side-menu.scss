@@ -1,0 +1,11 @@
+@use 'variables';
+@use 'mixins';
+
+#output-side-menu {
+  @include mixins.flex-centered;
+  flex-direction: column;
+
+  button {
+	all: unset;
+  }
+}
