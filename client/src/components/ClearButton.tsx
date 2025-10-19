@@ -5,11 +5,12 @@ import type BlogFormData from "../types/blogFormData.ts";
 
 interface ClearButtonProps {
     setBlogFormData: React.Dispatch<React.SetStateAction<BlogFormData>>,
+    loadingState: boolean;
     // setOutput: React.Dispatch<React.SetStateAction<Output>;
 }
 
 
-export default function ClearButton({setBlogFormData}: ClearButtonProps) {
+export default function ClearButton({setBlogFormData, loadingState}: ClearButtonProps) {
 
     return (
         <div
@@ -17,7 +18,9 @@ export default function ClearButton({setBlogFormData}: ClearButtonProps) {
         >
             <button
                 type='button'
-                className='clear'
+                id='clear-button'
+                className={`${loadingState ? "disabled" : ""}`}
+                disabled={loadingState}
                 onClick={() => {
                     setBlogFormData({
                         aimodel: {model: "gemini-2.5-flash", tooltip: "Fast and intelligent"},
@@ -31,7 +34,7 @@ export default function ClearButton({setBlogFormData}: ClearButtonProps) {
                     })
                 }}
             >
-                <RiDeleteBin2Line className='clear-icon icon'/>
+                <RiDeleteBin2Line className='icon' id={'clear-icon'}/>
             </button>
         </div>
     )
