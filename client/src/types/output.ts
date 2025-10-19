@@ -7,7 +7,8 @@ export type Metadata = {
 export type Section = {
     type: string;
     title: string;
-    content: string;
+    markdownContent: string;
+    plainTextContent: string;
 }
 
 export type ExportFormats = {
