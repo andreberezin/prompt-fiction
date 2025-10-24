@@ -1,12 +1,20 @@
-import {MdCancelPresentation, MdKeyboardDoubleArrowRight} from "react-icons/md";
+import {MdKeyboardDoubleArrowRight} from "react-icons/md";
 import '../styles/buttons.scss'
+import type BlogFormData from "../types/blogFormData.ts";
 
 interface SubmitButtonProps {
     loadingState: boolean;
     cancelRequest: () => void;
+    blogFormData: BlogFormData;
 }
 
-export default function SubmitButton({loadingState}: SubmitButtonProps) {
+export default function SubmitButton({loadingState, blogFormData}: SubmitButtonProps) {
+
+    const invalidContent:boolean =
+        !blogFormData.topic || blogFormData.topic === "" ||
+        !blogFormData.tone || blogFormData.tone === "" ||
+        !blogFormData.targetAudience || blogFormData.targetAudience === "" ||
+        !blogFormData.expertiseLevel || blogFormData.expertiseLevel === "";
 
     return (
         <div
@@ -16,14 +24,13 @@ export default function SubmitButton({loadingState}: SubmitButtonProps) {
                 // todo disable if some fields are empty
                 type='submit'
                 id={'submit-button'}
-                className={`${loadingState ? "disabled" : ""}`}
-                disabled={loadingState}
+                className={`${(loadingState || invalidContent) ? "disabled" : ""}`}
+                disabled={loadingState || invalidContent}
             >
                 <MdKeyboardDoubleArrowRight className='icon' id={'submit-icon'}/>
             </button>
+            {/*todo add a button to cancel the request*/}
             {/*{!loadingState ? (*/}
-            {/*    <button*/}
-            {/*        // todo disable if some fields are empty*/}
             {/*        type='submit'*/}
             {/*        id={'submit-button'}*/}
             {/*        className={`${loadingState ? "disabled" : ""}`}*/}
