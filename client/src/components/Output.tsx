@@ -49,7 +49,7 @@ export default function Output({output, setOutput, loadingState, error, showForm
         setCurrentFormat({ ...currentFormat, [key]: !currentFormat[key] });
     }
 
-    const downloadPdf= async () => {
+    const downloadPdf = async () => {
 
         try {
             const response = await axios.post('api/blog/pdf', output, {responseType: 'blob'});
@@ -82,15 +82,6 @@ export default function Output({output, setOutput, loadingState, error, showForm
         }
     }
 
-
-
-    // todo update word count live
-    // const updateWordCount = () => {
-    //     for () {
-    //
-    //     }
-    // }
-
     return (
         <div
             id={`output-container`}
@@ -122,7 +113,10 @@ export default function Output({output, setOutput, loadingState, error, showForm
                         data-tooltip='Download pdf'
                         disabled={loadingState || !output.exportFormats.pdfReady}
                         className={`hover-icon-button ${!output.exportFormats.pdfReady ? "disabled" : ""}`}
-                        onClick={downloadPdf}
+                        onClick={ async(e) => {
+                            await updateOutput(e);
+                            await downloadPdf();
+                        }}
                     >
                         <AiOutlineFilePdf className='icon'/>
                     </button>
@@ -138,7 +132,13 @@ export default function Output({output, setOutput, loadingState, error, showForm
                 {/*todo update word count when content is edited*/}
                 <div id='metadata-container'>
                     <div className='data'>
-                        <p className='value' id='generation-timer'>{generationTime > 0 ? generationTime / 1000 : "0.00"}</p>
+                        <p className='value'
+                           id='generation-timer'
+                           data-attemptcount={output.attempts}
+                        >
+                            {generationTime > 0 ? (generationTime / 1000).toFixed(2) : "0.00"}
+                        </p>
+                        {/*<p className='text' id='attempts-count'>{output.attempts || 0}</p>*/}
                         {/*<p className='text'>gen</p>*/}
                     </div>
                     <div className='data'>
@@ -157,7 +157,7 @@ export default function Output({output, setOutput, loadingState, error, showForm
                         data-tooltip='Update'
                         className={`hover-icon-button ${!isTextEdited? "disabled" : "flash"}`}
                         disabled={!isTextEdited}
-                        onClick={() => updateOutput()}
+                        onClick={(e) => updateOutput(e)}
                     >
                         <TbReload className='icon'/>
                     </button>
@@ -224,17 +224,17 @@ export default function Output({output, setOutput, loadingState, error, showForm
 								className={`output-text ${error ? "error" : (loadingState ? "loading" : "")}`}
 								value={error !== "" ? error : (output.exportFormats?.plainText ? output.exportFormats.plainText : "") || ""}
                                 readOnly={true}
-								onChange={(e) =>
-                                    // handleEditSection()
-                                    setOutput({
-                                        ...output,
-                                        exportFormats: {
-                                            ...output.exportFormats,
-                                            plainText: e.target.value,
-                                            // pdfReady: false,
-                                        }
-                                    })
-                                }
+								// onChange={(e) =>
+                                //     // handleEditSection()
+                                //     setOutput({
+                                //         ...output,
+                                //         exportFormats: {
+                                //             ...output.exportFormats,
+                                //             plainText: e.target.value,
+                                //             // pdfReady: false,
+                                //         }
+                                //     })
+                                // }
 							/>
 
 							<button
@@ -247,7 +247,6 @@ export default function Output({output, setOutput, loadingState, error, showForm
 							</button>
 						</div>
                     }
-                    {/* todo make SEO keywords toggleable */}
                     {showCEO && <SEOkeywords keywords={output.metadata?.seoKeywords} />}
                 </div>
                 {/*<OutputSideMenu/>*/}
