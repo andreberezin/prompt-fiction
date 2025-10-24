@@ -1,18 +1,21 @@
 package com.andrekj.ghostwriter.service;
+import com.andrekj.ghostwriter.exceptions.ContentGenerationException;
 import com.google.api.client.util.PemReader;
 import com.google.genai.Client;
-import com.google.genai.types.GenerateContentConfig;
-import com.google.genai.types.GenerateContentResponse;
+import com.google.genai.types.*;
 import com.andrekj.ghostwriter.dto.BlogRequest;
 import com.andrekj.ghostwriter.dto.BlogResponse;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class BlogService extends BaseService {
+
     public BlogService(Client geminiClient, PDFGeneratorService pdfGeneratorService) {super(geminiClient);
         this.pdfGeneratorService = pdfGeneratorService;
     }
@@ -20,26 +23,26 @@ public class BlogService extends BaseService {
     private final PDFGeneratorService pdfGeneratorService;
 
 
-//    private final Client geminiClient;
+    public BlogResponse generateBlogPost(BlogRequest request, int attempt) {
+        try {
+            // set max retries based on selected ai model
+            if (request.getAimodel().equalsIgnoreCase("gemini-2.5-pro")) {
+                MAX_RETRIES = 2;
+            }
 
-//    public BlogService(Client geminiClient) {
-//        this.geminiClient = geminiClient;
-//    }
+            // 1. Normalize input (word count range, tone, etc.)
+            normalizeBlogInput(request);
 
-    public BlogResponse generateBlogPost(BlogRequest request) {
-        // 1. Normalize input (word count range, tone, etc.)
-        normalizeBlogInput(request);
+            // 2. Build a prompt string based on request data
+            String prompt = createBlogPrompt(request);
 
-        // 2. Build a prompt string based on request data
-        String prompt = createBlogPrompt(request);
+            // 3. Call AI API
+            GenerateContentConfig config = buildConfig(request);
+            GenerateContentResponse response = callAiAPI(request, prompt, config);
 
-        // 3. Call AI API
-        GenerateContentConfig config = buildConfig(request);
-        GenerateContentResponse response = callAiAPI(request, prompt, config);
-
-        // 4. Process AI response (parse JSON or text)
-        BlogResponse blogResponse = new BlogResponse();
-        processResponse(blogResponse, response, request);
+            // 4. Process AI response (parse JSON or text)
+            BlogResponse blogResponse = new BlogResponse();
+            processResponse(blogResponse, response.text());
 
             // 5. Validate response
             if (!validateResponse(blogResponse, request)) {
@@ -55,9 +58,18 @@ public class BlogService extends BaseService {
                 }
             }
 
-        preparePdfFormat(blogResponse);
+            // 6. clean up response
+            cleanupResponse(blogResponse);
 
-        return blogResponse;
+            // 7. prepare pdf format
+            preparePdfFormat(blogResponse);
+
+            // return response object
+            return blogResponse;
+        } catch (Exception e) {
+            System.err.println("Error during blog generation: " + e.getMessage());
+            throw new RuntimeException("Failed to generate blog post", e);
+        }
     }
 
     private void normalizeBlogInput(BlogRequest request) {
@@ -85,21 +97,21 @@ public class BlogService extends BaseService {
                  (request.isSeoFocus() ? "- Include 5 SEO keywords and wrap them in **bold** markdown \n" : "") +
                   "Format your response in Markdown.";
 
-         System.out.println("\n" + "\u001B[32m" + "prompt: \n" + prompt + "\u001B[0m \n");
+         System.out.println("\n" + "\u001B[34m" + "Prompt: \n" + prompt + "\u001B[0m \n");
 
          return prompt;
      }
 
 
-     private void processResponse(BlogResponse blogResponse, GenerateContentResponse rawResponse, BlogRequest request) {
-         if (rawResponse.text() == null || rawResponse.text().isBlank()) return;
-         blogResponse.setContent(rawResponse.text());
+     private void processResponse(BlogResponse blogResponse, String markdownResponse ) {
+         if (markdownResponse == null || markdownResponse.isBlank()) return;
+         blogResponse.setContent(markdownResponse);
 //        cleanUpAiArtifacts(blogResponse);
-        structureParsing(blogResponse, rawResponse, request);
+        structureParsing(blogResponse, markdownResponse);
      }
 
-     private void structureParsing(BlogResponse blogResponse, GenerateContentResponse rawResponse, BlogRequest request) {
-        String rawText = rawResponse.text();
+     private void structureParsing(BlogResponse blogResponse, String rawText) {
+        //String rawText = rawResponse.text();
         assert rawText != null;
         String[] lines = rawText.split("\n");
 
@@ -117,7 +129,7 @@ public class BlogService extends BaseService {
             line = line.trim();
             if (line.isEmpty()) continue;
 
-            String plainline = setPlainText(line, plainTextBuilder); // get plain text format
+            String plainline = setPlainText(line); // get plain text format
 
             metadata.setWordCount(metadata.getWordCount() + countWords(plainline)); // get wordcount
 
@@ -189,20 +201,13 @@ public class BlogService extends BaseService {
          int minutes = (int) Math.ceil(metadata.getWordCount() / (double) wordsPerMinute);
          metadata.setEstimatedReadTime(minutes + " min");
 
-         boolean wordCountCorrect = validateWordCount(request.getWordCount(), metadata.getWordCount());
-
          // set all final fields
-         // todo validate structure (has title, 1 introduction, 2-4 H2, conclusion). If needed, restart
          blogResponse.setSections(sections);
-         // todo validate that word count is within limits
          blogResponse.setMetadata(metadata);
          blogResponse.setExportFormats(exportFormats);
-
-         System.out.println("\n" + "\u001B[32m" +  "Word count:" + "\u001B[0m" + metadata.getWordCount());
-         System.out.println(wordCountCorrect ? "\u001B[32m" + "Word count correct" + "\u001B[0m" : "\u001B[31m" + "word count incorrect" + "\u001B[0m");
      }
 
-     private String setPlainText(String line, StringBuilder plainTextBuilder) {
+     private String setPlainText(String line) {
 
          String plainLine = line
                  .replaceAll("#+", "") // headers
@@ -236,12 +241,99 @@ public class BlogService extends BaseService {
 
      private void preparePdfFormat(BlogResponse blogResponse) {
         byte[] pdfBytes = pdfGeneratorService.generateBlogPDF(blogResponse);
-        String base64pdf = Base64.getEncoder().encodeToString(pdfBytes);
         blogResponse.getExportFormats().setPdfReady(true);
      }
 
-     public BlogResponse updateBlogPost(BlogResponse editedResponse) {
+     private boolean validateResponse(BlogResponse blogResponse, BlogRequest blogRequest) {
+        if (blogResponse == null || blogResponse.getContent() == null) return false;
 
-        return editedResponse;
+        List<BlogResponse.Section> sections = blogResponse.getSections();
+        if (sections == null || sections.isEmpty()) {
+            System.out.println("\u001B[31m" + "Validation failed: no sections found" + "\u001B[0m");
+            return false;
+        }
+
+        // validate word count
+         boolean validWordCount = validateWordCount(blogRequest.getWordCount(), blogResponse.getMetadata().getWordCount());
+
+         // validate title
+         boolean hasTitle = blogResponse.getTitle() != null && !blogResponse.getTitle().isEmpty();
+
+         // validate structure
+         boolean firstIsIntro = sections.getFirst().getType().equalsIgnoreCase("introduction");
+         boolean lastIsConclusion = sections.getLast().getType().equalsIgnoreCase("conclusion");
+
+         // count sections
+         long introCount = sections.stream().filter(s -> "introduction".equalsIgnoreCase(s.getType())).count();
+         long bodyCount = sections.stream().filter(s -> "body".equalsIgnoreCase(s.getType())).count();
+         long conclusionCount = sections.stream().filter(s -> "conclusion".equalsIgnoreCase(s.getType())).count();
+
+         // validate content
+         boolean allHaveText = sections.stream().allMatch(s -> s.getMarkdownContent() != null && !s.getMarkdownContent().isEmpty() &&
+                 s.getPlainTextContent() != null && !s.getPlainTextContent().isEmpty());
+
+         boolean allBodyHaveTitle = sections.stream()
+                 .filter(s -> "body".equalsIgnoreCase(s.getType()))
+                 .allMatch(s -> s.getTitle() != null && !s.getTitle().isBlank());
+
+         boolean structureValid =
+                 firstIsIntro &&
+                 lastIsConclusion &&
+                 introCount == 1 &&
+                 conclusionCount == 1 &&
+                 bodyCount >= 2 &&
+                 bodyCount <= 4 &&
+                 allHaveText &&
+                 allBodyHaveTitle;
+
+         boolean overallValid = validWordCount && hasTitle && structureValid;
+
+         if (!overallValid) {
+             System.out.println("\n" + "\u001B[31m" +  "Validation failed:"  + "\u001B[0m");
+             if (!validWordCount) System.out.println(" - Invalid word count");
+             if (!hasTitle) System.out.println(" - Missing main title");
+             if (!firstIsIntro) System.out.println(" - First section is not introduction");
+             if (!lastIsConclusion) System.out.println(" - Last section is not conclusion");
+             if (introCount != 1) System.out.println(" - Invalid number of introductions (" + introCount + ")");
+             if (conclusionCount != 1) System.out.println(" - Invalid number of conclusions (" + conclusionCount + ")");
+             if (bodyCount < 1) System.out.println(" - No body sections found");
+//             if (bodyCount <= 1) System.out.println(" - No body sections found");
+//             if (bodyCount >= 5) System.out.println(" - No body sections found");
+             if (!allHaveText) System.out.println(" - Some sections have no content");
+             if (!allBodyHaveTitle) System.out.println(" - Some body sections have no titles");
+         }
+
+         System.out.println("\n" + "\u001B[32m" +  "Response is valid" + "\u001B[0m");
+         return overallValid;
+     }
+
+     private void cleanupResponse(BlogResponse blogResponse) {
+         List<BlogResponse.Section> sections = blogResponse.getSections();
+         for (BlogResponse.Section section : sections) {
+             section.setPlainTextContent(cleanupText(section.getPlainTextContent()));
+             section.setMarkdownContent(cleanupText(section.getMarkdownContent()));
+         }
+     }
+
+    private String cleanupText(String text) {
+        if (text == null) return "";
+        text = text.trim()
+                .replaceAll("\\r\\n|\\r", "\n")
+                .replaceAll("(?i)As an AI.*?\\.", "");
+        return Arrays.stream(text.split("\n"))
+                .map(String::stripTrailing)
+                .collect(Collectors.joining("\n"));
+    }
+
+     public BlogResponse updateBlogPost(BlogResponse editedResponse) {
+        BlogResponse updatedResponse = new BlogResponse();
+
+        processResponse(updatedResponse, editedResponse.getExportFormats().getMarkdown());
+
+        //cleanupResponse(updatedResponse);
+
+        preparePdfFormat(updatedResponse);
+
+        return updatedResponse;
      }
 }
