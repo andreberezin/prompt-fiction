@@ -45,7 +45,7 @@
 	  white-space: nowrap;
 	  opacity: 0;
 	  background-color: transparent;
-	  color: white;
+	  color: variables.$text-color-light;
 	  border-radius: 10px;
 	  transition: all 0.1s ease-in-out;
 	}

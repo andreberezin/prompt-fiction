@@ -9,8 +9,8 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: variables.$background-color;;
+  color: variables.$text-color-light;
+  background-color: variables.$bg-color-dark;;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;

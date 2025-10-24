@@ -1,4 +1,10 @@
-$accent-color: #F9A48A;
-$background-color: #242424;
-$placeholder-color: #b1b1b1;
-$error-color: #fb5d53;
+$accent-color: hsla(15, 90%, 75%, 100);
+$bg-color-dark: hsla(0, 0%, 15%, 100);
+$bg-color-mid: hsla(0, 0%, 20%, 100);
+$bg-color-light: hsla(0, 0%, 25%, 100);
+$placeholder-color: hsla(0, 0%, 70%, 100);
+$error-color: hsla(4, 95%, 65%, 100);
+$border-color: hsl(0, 0%, 65%, 100);
+$shadow-color: hsl(0, 0%, 40%, 100);
+$text-color-light: hsl(0, 0%, 95%, 100);
+$text-color-dark: hsl(0, 0%, 70%, 100);

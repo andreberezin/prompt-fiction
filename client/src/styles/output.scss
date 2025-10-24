@@ -8,12 +8,11 @@
   width: 100%;
   background-color: transparent;
   backdrop-filter: blur(5px);
-  color: white;
+  color: variables.$text-color-light;
   border-radius: 0 20px 0 20px;
-  border: 2px solid white;
+  border: 2px solid variables.$border-color;
+  box-shadow: 0 0 10px 0 variables.$shadow-color;
   position: relative;
-  //border: 2px solid white;
-  //transition: all 0.1s ease-in-out;
 
   &:not(.loading):not(.error):focus, // &:not(.loading):not(.error):has(> textarea:focus)
   &:not(.loading):not(.error):focus-within {
@@ -48,6 +47,8 @@
     align-items: center;
     justify-content: space-around;
     flex-direction: row;
+    background-color: variables.$bg-color-dark;
+    border-radius: 0 20px 0 0;
 
     div {
       display: flex;
@@ -144,6 +145,8 @@
     height: 100%;
     @include mixins.flex-centered;
     flex-direction: row;
+    background-color: variables.$bg-color-light;
+    border-radius: 0 0 0 20px;
 
     #textareas-container {
       flex: 1;
@@ -151,6 +154,7 @@
       @include mixins.flex-centered;
       flex-direction: row;
       gap: 0.5rem;
+      background-color: transparent;
 
       .textarea-container {
         width: 100%;
@@ -159,19 +163,7 @@
         flex-direction: row;
         border-radius: 0 0 0 20px;
         position: relative;
-
-        //&:only-child {
-        //  width: 100%;
-        //}
-        //
-        //&:not(:only-child) {
-        //  width: 50%;
-        //}
-        //
-        //&:nth-child(2),
-        //&:nth-child(3){
-        //  border-radius: 0;
-        //}
+        background-color: transparent;
 
         &:not(:nth-child(1)) {
           border-radius: 0;

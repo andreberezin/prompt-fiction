@@ -191,18 +191,20 @@ export default function BlogForm() {
         <div
             id='blog'
             className='container'
+            tabIndex={0}
         >
 
             {showForm &&
 				<form
 					id='blog-form'
+					tabIndex={0}
 					autoComplete='off'
 					onSubmit={(e) => {
                         handleSubmit(e);
                     }}
 				>
 
-					<div className='fields-column fields-column-1'>
+					<div className='fields-column fields-column-1' tabIndex={0}>
 
 						<label
 							id='topic'
@@ -228,7 +230,7 @@ export default function BlogForm() {
 						</label>
 
 					</div>
-					<div className='fields-column fields-column-2'>
+					<div className='fields-column fields-column-2' tabIndex={0}>
 						<div
 							className='double'
 						>
@@ -281,7 +283,7 @@ export default function BlogForm() {
 
 					</div>
 
-					<div className='fields-column fields-column-3'>
+					<div className='fields-column fields-column-3' tabIndex={0}>
 						<div className='double'>
 
                             {/*todo might switch to a <select> dropdown menu later*/}
@@ -325,7 +327,7 @@ export default function BlogForm() {
 						</div>
 					</div>
 
-					<div className='slider-column'>
+					<div className='slider-column' tabIndex={0}>
 						<label
 							id='wordCount'
 							className='long placeholder'
