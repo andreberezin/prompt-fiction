@@ -1,6 +1,5 @@
 package com.andrekj.ghostwriter.dto;
 
-import com.andrekj.ghostwriter.interfaces.BaseResponse;
 import lombok.*;
 
 import java.util.List;
@@ -13,6 +12,7 @@ public class BlogResponse {
     private Metadata metadata;
     private ExportFormats exportFormats;
     private String content;
+    private int attempts = 1;
 
     @Setter
     @Getter
