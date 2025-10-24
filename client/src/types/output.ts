@@ -23,6 +23,7 @@ export default interface OutputType {
     metadata: Metadata;
     exportFormats: ExportFormats;
     content: string;
+    attempts: number;
     // wordCount?: number;
     // keywords?: string[];
 }
