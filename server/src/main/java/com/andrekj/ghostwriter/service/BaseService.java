@@ -18,6 +18,7 @@ import static java.lang.Math.min;
 
 @Slf4j
 public abstract class BaseService {
+    public static int MAX_RETRIES = 3;
 
     List<String> aiModels = List.of(
             "gemini-2.5-flash-lite",
@@ -112,8 +113,8 @@ public abstract class BaseService {
                 .includeThoughts(false)
                 .build();
 
-        System.out.println("\n" + "\u001B[32m" + "MaxOutputTokens:" + "\u001B[0m" + maxOutputTokens);
-        System.out.println("\n" + "\u001B[32m" +  "Thinking budget:" + "\u001B[0m" + thinkingBudget + "\n");
+        System.out.println("\u001B[34m" + "MaxOutputTokens:" + "\u001B[0m" + maxOutputTokens);
+        System.out.println("\u001B[34m" +  "Thinking budget:" + "\u001B[0m" + thinkingBudget + "\n");
 
         return GenerateContentConfig.builder()
                 .temperature(temperature)
@@ -124,7 +125,7 @@ public abstract class BaseService {
     }
 
 
-    // todo empty response with gemini-2.5-pro and gemini-2.5-flash
+    // todo automatically switch model if one of them fails
     protected GenerateContentResponse callAiAPI(
             BaseRequest request,
             String prompt,
@@ -156,8 +157,8 @@ public abstract class BaseService {
                 throw new AIServiceException(msg, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
-        System.out.println("\n" + "\u001B[32m" + "Response:" + "\u001B[0m \n" + response.text());
-        System.out.println("\n" + "\u001B[32m" +  "Response tokens:" + "\u001B[0m \n" + response.usageMetadata() + "\n");
+        System.out.println("\n" + "\u001B[34m" + "Response:" + "\u001B[0m" + response.text());
+        System.out.println("\n" + "\u001B[34m" +  "Response tokens:" + "\u001B[0m \n" + response.usageMetadata() + "\n");
 
         // the gemini api sometimes just returns an empty response without an exception when the rate limit is exceeded or something else goes wrong
         if (response == null || response.text() == null || response.text().isBlank()) {
@@ -167,11 +168,6 @@ public abstract class BaseService {
             );
         }
         return response;
-    }
-
-    // todo maybe not needed? Haven't seen gemini produce these artifacts yet
-    protected void cleanUpAiArtifacts(BaseResponse response) {
-
     }
 
     protected int countWords(String line) {
@@ -196,13 +192,8 @@ public abstract class BaseService {
     }
 
     protected boolean validateWordCount(int desiredWordCount, int actualWordCount) {
-        System.out.println("Desired word count: " + desiredWordCount);
-        System.out.println("Actual word count: " + actualWordCount);
         int lowerLimit = (int) Math.ceil(desiredWordCount * 0.9);
         int upperLimit = (int) Math.floor(desiredWordCount * 1.1);
-        System.out.println("Lower: " + lowerLimit);
-        System.out.println("Upper: " + upperLimit);
         return actualWordCount >= lowerLimit && actualWordCount <= upperLimit;
     }
-
 }

@@ -41,8 +41,19 @@ public class BlogService extends BaseService {
         BlogResponse blogResponse = new BlogResponse();
         processResponse(blogResponse, response, request);
 
-        // 5. Return BlogResponse object
-//        blogResponse.setContent(response.text());
+            // 5. Validate response
+            if (!validateResponse(blogResponse, request)) {
+                if (attempt <= MAX_RETRIES) {
+                    // todo regenerate only the invalid parts
+                    attempt++;
+                    System.out.println("Retrying blog generation (attempt " + (attempt) + ")");
+                    blogResponse.setAttempts(attempt);
+                    return generateBlogPost(request, attempt);
+                } else {
+                    System.out.println("Too many retries");
+                    throw new ContentGenerationException("Blog generation failed after " + MAX_RETRIES + " attempts.");
+                }
+            }
 
         preparePdfFormat(blogResponse);
 

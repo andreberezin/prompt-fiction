@@ -46,6 +46,7 @@ export default function BlogForm() {
             pdfReady: false,
         },
         content: '',
+        attempts: 0,
     });
 
     const togglePlaceholder = (value: string, labelId: string ) => {
@@ -352,7 +353,7 @@ export default function BlogForm() {
 					<AImodel blogFormData={blogFormData} setBlogFormData={setBlogFormData}/>
 
 					<div className='button-container'>
-						<SubmitButton loadingState={loadingState} cancelRequest={cancelRequest}/>
+						<SubmitButton loadingState={loadingState} cancelRequest={cancelRequest} blogFormData={blogFormData}/>
 						<ClearButton loadingState={loadingState} setBlogFormData={setBlogFormData}/>
 					</div>
 				</form>
