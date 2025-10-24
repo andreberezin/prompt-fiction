@@ -40,7 +40,7 @@
 
 	  &.disabled {
 		color: variables.$placeholder-color;
-		cursor: wait;
+		cursor: not-allowed;
 	  }
 	}
   }
