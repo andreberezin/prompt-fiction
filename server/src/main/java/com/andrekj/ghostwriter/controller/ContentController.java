@@ -34,18 +34,32 @@ public class ContentController {
 //        if (true) { // testing error handling
 //            throw new AIServiceException("Simulated AI API error");
 //        }
-        return blogService.generateBlogPost(request);
+        return blogService.generateBlogPost(request, 1);
     }
 
     @PostMapping("/blog/update")
     public BlogResponse generateBlogPost(@RequestBody BlogResponse editedResponse) {
-
         return blogService.updateBlogPost(editedResponse);
     }
 
+//    @PostMapping("/blog/pdf")
+//    public ResponseEntity<byte[]> generatePdf(@RequestBody BlogResponse editedResponse) {
+//        pdfGeneratorService.updateSections(editedResponse);
+//
+//        byte[] pdfBytes = pdfGeneratorService.generateBlogPDF(editedResponse);
+//
+//        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
+//        String currentDateTime = dateFormatter.format(new Date());
+//
+//        return ResponseEntity.ok()
+//                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=Ghostwriter_blogPost_" + currentDateTime + ".pdf")
+//                .contentType(MediaType.APPLICATION_PDF)
+//                .body(pdfBytes);
+//    }
+
     @PostMapping("/blog/pdf")
     public ResponseEntity<byte[]> generatePdf(@RequestBody BlogResponse editedResponse) {
-        pdfGeneratorService.updateSections(editedResponse);
+        //BlogResponse updatedResponse = blogService.updateBlogPost(editedResponse);
 
         byte[] pdfBytes = pdfGeneratorService.generateBlogPDF(editedResponse);
 
