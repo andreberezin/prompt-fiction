@@ -82,13 +82,13 @@ public abstract class BaseService {
             default -> 0.7F;
         };
 
-        int requestedWords = request.getWordCount();
-        String aimodel = request.getAimodel();
 
         // Convert words → tokens
-        int desiredOutputTokens = (int) Math.ceil(requestedWords / 0.75);
+        int requestedWords = request.getWordCount();
+        int targetTokens = (int) Math.ceil(requestedWords * 1.3);
 
         // Max & Min thinking budgets
+        String aimodel = request.getAimodel();
         int maxThinking = MODEL_DEFAULT_THINKING.getOrDefault(aimodel, -1);
         int minThinking = MODEL_MIN_THINKING.getOrDefault(aimodel, 512);
 
@@ -97,16 +97,23 @@ public abstract class BaseService {
             thinkingBudget = -1; // dynamic thinking
         } else {
             // Cap thinking to 1/3 of desired output, but respect min/max
-            thinkingBudget = Math.max(minThinking, Math.min(maxThinking, desiredOutputTokens / 3));
+            //thinkingBudget = Math.max(minThinking, Math.min(maxThinking, targetTokens / 3));
+            //thinkingBudget = (int) (targetTokens * 2 * 1.5);
+            thinkingBudget = Math.max(maxThinking, targetTokens * 5);
         }
 
         // Total token budget = desired output + thinking budget
         int maxOutputTokens;
         if (thinkingBudget == -1) {
-            maxOutputTokens = desiredOutputTokens + 512; // safe buffer for dynamic thinking
+            maxOutputTokens = targetTokens + 512; // safe buffer for dynamic thinking
         } else {
-            maxOutputTokens = desiredOutputTokens + thinkingBudget;
+            //maxOutputTokens = (int) (targetTokens * 1.5 + thinkingBudget);
+            //maxOutputTokens = (int) (targetTokens * 5);
+            maxOutputTokens = (int) (targetTokens * 1.5 + thinkingBudget);
         }
+
+//        int maxOutputTokens = (int) (targetTokens * 1.5);
+//        int thinkingBudget = (int) (maxOutputTokens * 1.5);
 
         ThinkingConfig thinkingConfig = ThinkingConfig.builder()
                 .thinkingBudget(thinkingBudget)
