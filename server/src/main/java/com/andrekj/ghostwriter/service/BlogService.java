@@ -5,6 +5,7 @@ import com.google.genai.Client;
 import com.google.genai.types.*;
 import com.andrekj.ghostwriter.dto.BlogRequest;
 import com.andrekj.ghostwriter.dto.BlogResponse;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -15,47 +16,75 @@ import java.util.stream.Collectors;
 
 @Service
 public class BlogService extends BaseService {
-
-    public BlogService(Client geminiClient, PDFGeneratorService pdfGeneratorService) {super(geminiClient);
-        this.pdfGeneratorService = pdfGeneratorService;
-    }
+    private GenerateContentResponse response;
+    private BlogRequest blogRequest;
+    private BlogResponse blogResponse;
+    private String modifications;
+    private GenerateContentConfig config;
 
     private final PDFGeneratorService pdfGeneratorService;
+    private final SimpMessagingTemplate messagingTemplate;
 
+
+    public BlogService(Client geminiClient, PDFGeneratorService pdfGeneratorService, SimpMessagingTemplate messagingTemplate) {super(geminiClient);
+        this.pdfGeneratorService = pdfGeneratorService;
+        this.messagingTemplate = messagingTemplate;
+    }
 
     public BlogResponse generateBlogPost(BlogRequest request, int attempt) {
+        this.blogRequest = request;
+
+        //messagingTemplate.convertAndSend("/topic/blog-retry", "Starting generation...");
+        if (attempt == 1) messagingTemplate.convertAndSend("/topic/blog-status", "Generating blog..");
+
         try {
             // set max retries based on selected ai model
             if (request.getAimodel().equalsIgnoreCase("gemini-2.5-pro")) {
                 MAX_RETRIES = 2;
             }
-
             // 1. Normalize input (word count range, tone, etc.)
             normalizeBlogInput(request);
 
-            // 2. Build a prompt string based on request data
-            String prompt = createBlogPrompt(request);
+            String prompt = null;
+            BlogResponse blogResponse = null;
+            List<String> validationErrors = new ArrayList<>();
+            int currentAttempt = attempt;
 
-            // 3. Call AI API
-            GenerateContentConfig config = buildConfig(request);
-            GenerateContentResponse response = callAiAPI(request, prompt, config);
-
-            // 4. Process AI response (parse JSON or text)
-            BlogResponse blogResponse = new BlogResponse();
-            processResponse(blogResponse, response.text());
-
-            // 5. Validate response
-            if (!validateResponse(blogResponse, request)) {
-                if (attempt <= MAX_RETRIES) {
-                    // todo regenerate only the invalid parts
-                    attempt++;
-                    System.out.println("Retrying blog generation (attempt " + (attempt) + ")");
-                    blogResponse.setAttempts(attempt);
-                    return generateBlogPost(request, attempt);
+            for (; currentAttempt <= MAX_RETRIES; currentAttempt++) {
+                messagingTemplate.convertAndSend("/topic/blog-retry", "Starting generation...");
+                // 2. build prompt
+                if (currentAttempt == 1) {
+                    // 2.1 regular prompt
+                    prompt = generateBlogPrompt(request);
                 } else {
-                    System.out.println("Too many retries");
-                    throw new ContentGenerationException("Blog generation failed after " + MAX_RETRIES + " attempts.");
+                    // 2.2 Regenerate prompt based on last response and errors
+                    prompt = regenerateBlogPrompt(request, blogResponse, validationErrors);
+                    System.out.println("Retrying blog generation (attempt " + currentAttempt + ")\n");
+                    messagingTemplate.convertAndSend("/topic/blog-status", "Generated content was not up to code. Retrying...");
                 }
+
+                // 3. Build config and call the AI api
+                GenerateContentConfig config = buildConfig(request);
+                GenerateContentResponse response = callAiAPI(request, prompt, config);
+
+                // 4. Process the response
+                blogResponse = new BlogResponse();
+                processResponse(blogResponse, response.text());
+                blogResponse.setAttempts(currentAttempt);
+
+                // 5. Validate response
+                validationErrors = validateResponse(blogResponse, request);
+                if (validationErrors.isEmpty()) {
+                    // Valid response, break and continue to cleanup
+                    break;
+                }
+            }
+
+            if (validationErrors != null && !validationErrors.isEmpty()) {
+                System.out.println("Too many retries");
+                String payload = "Blog generation failed after " + MAX_RETRIES + " attempts.";
+                messagingTemplate.convertAndSend("/topic/blog-status", payload);
+                throw new ContentGenerationException("Blog generation failed after " + MAX_RETRIES + " attempts.");
             }
 
             // 6. clean up response
@@ -71,6 +100,79 @@ public class BlogService extends BaseService {
             throw new RuntimeException("Failed to generate blog post", e);
         }
     }
+//
+//    public BlogResponse generateBlogPost(BlogRequest request, int attempt) {
+//        this.blogRequest = request;
+//
+//        messagingTemplate.convertAndSend("/topic/blog-retry", "Starting generation...");
+//        if (attempt == 1) messagingTemplate.convertAndSend("/topic/blog-status", "Generating blog..");
+//
+//        try {
+//            // set max retries based on selected ai model
+//            if (request.getAimodel().equalsIgnoreCase("gemini-2.5-pro")) {
+//                MAX_RETRIES = 2;
+//            }
+//            // 1. Normalize input (word count range, tone, etc.)
+//            normalizeBlogInput(request);
+//
+//            // 2. Build a prompt string based on request data
+//            String prompt = generateBlogPrompt(request);
+////            if (attempt == 1) {
+////                prompt = generateBlogPrompt(request);
+////            } else {
+////                prompt = regenerateBlogPrompt(this.blogResponse)
+////            }
+//
+//
+//            // 3. Call AI API
+//            GenerateContentConfig config = buildConfig(request);
+//            GenerateContentResponse response = callAiAPI(request, prompt, config);
+//
+//            // 4. Process AI response (parse JSON or text)
+//            BlogResponse blogResponse = new BlogResponse();
+//            processResponse(blogResponse, response.text());
+//
+//            // 5. Validate response
+//            List<String> validationErrors = validateResponse(blogResponse, request);
+//
+//            // 5.1 retry if validation failed
+//            if (!validationErrors.isEmpty()) {
+//                if (attempt < MAX_RETRIES) {
+//                    attempt++;
+//                    System.out.println("Retrying blog generation (attempt " + (attempt) + ")");
+//                    messagingTemplate.convertAndSend("/topic/blog-status", "Generated content was not up to code. Retrying...");
+//                    blogResponse.setAttempts(attempt);
+//
+//                    String newPrompt = regenerateBlogPrompt(request, blogResponse, validationErrors);
+//
+//                    config = buildConfig(request);
+//                    response = callAiAPI(request, newPrompt, config);
+//
+//                    BlogResponse newBlogResponse = new BlogResponse();
+//                    processResponse(newBlogResponse, response.text());
+//
+//                    return generateBlogPost(request, attempt);
+//                } else {
+//                    System.out.println("Too many retries");
+//                    String payload = "Blog generation failed after " + MAX_RETRIES + " attempts.";
+//                    messagingTemplate.convertAndSend("/topic/blog-status", payload);
+//                    throw new ContentGenerationException("Blog generation failed after " + MAX_RETRIES + " attempts.");
+//                }
+//            }
+//
+//            // 6. clean up response
+//            cleanupResponse(blogResponse);
+//
+//            // 7. prepare pdf format
+//            preparePdfFormat(blogResponse);
+//
+//            // return response object
+//            return blogResponse;
+//        } catch (Exception e) {
+//            System.err.println("Error during blog generation: " + e.getMessage());
+//            throw new RuntimeException("Failed to generate blog post", e);
+//        }
+//    }
 
     private void normalizeBlogInput(BlogRequest request) {
         request.setTopic(request.getTopic().trim().toLowerCase());
@@ -81,20 +183,21 @@ public class BlogService extends BaseService {
     }
 
 
-     private String createBlogPrompt(BlogRequest request) {
+     private String generateBlogPrompt(BlogRequest request) {
 //        String sectionCount = String.valueOf((int)Math.min(Math.floor((float) request.getWordCount() / 100), 6));
          String sectionCount = "2-4";
-         int wordCount = (int) (request.getWordCount() * 0.90); // because the valid range is -10% to +10% and gemini keeps overshooting it
+         int minWordCount = (int) (request.getWordCount() * 0.90); // because the valid range is -10% to +10% and gemini keeps overshooting it
+         int maxWordCount = (int) (request.getWordCount() * 1.10);
 
         // todo edit prompt - doesn't always include a conclusion
          String prompt = "You are an expert content writer specializing in " + request.getContentType() + "s.\n" +
                  "Write a " + request.getTone() + ", " + request.getExpertiseLevel() + "-level " + request.getContentType() + " about '" + request.getTopic() + "' for " +
-                 request.getTargetAudience() + ".  Target length is " + wordCount + " words, do not exceed this limit" + ".\n" +
+                 request.getTargetAudience() + ".  Target length is between " + minWordCount + " and " + maxWordCount + " words, do not exceed this limit" + ".\n" +
 //                 "Requirements:\n" +
 //                 "- Target length: " + request.getWordCount() + " words\n" +
 //                 "- Tone: " + request.getTone() + "\n" +
-                 "- Structure: Title, Introduction (titled ##Introduction), " + sectionCount + " main sections (titled ##), a short conclusion (titled ##Conclusion)\n" +
-                 (request.isSeoFocus() ? "- Include 5 SEO keywords and wrap them in **bold** markdown \n" : "") +
+                 "- Structure: #Title, ##Introduction, " + sectionCount + " main sections (titled ##), a short ##Conclusion\n" +
+                 (request.isSeoFocus() ? "- Include 5 SEO keywords and wrap them in _italics_ markdown \n" : "") +
                   "Format your response in Markdown.";
 
          System.out.println("\n" + "\u001B[34m" + "Prompt: \n" + prompt + "\u001B[0m \n");
@@ -102,6 +205,44 @@ public class BlogService extends BaseService {
          return prompt;
      }
 
+    private String regenerateBlogPrompt(BlogRequest request, BlogResponse previousResponse, List<String> failedReasons) {
+        String sectionCount = "2-4";
+        String reasons = failedReasons.isEmpty() ? "The previous response was invalid" : String.join(", ", failedReasons);
+
+        int minWordCount = (int) (request.getWordCount() * 0.90); // because the valid range is -10% to +10% and gemini keeps overshooting it
+        int maxWordCount = (int) (request.getWordCount() * 1.10);
+
+        int prevWordCount = previousResponse.getMetadata().getWordCount();
+        String adjustAction = prevWordCount > maxWordCount ? "remove" : "add";
+        int wordsToAdjust = Math.abs(prevWordCount - request.getWordCount());
+
+        String prompt = """
+                Here is the blog content previously generated:
+                %s
+                It did not meet the validation requirements because: %s
+                
+                Regenerate the blog so that:
+                - is follows the structure: #Title, ##Introduction, %s main sections (titled ##), a short ##Conclusion
+                - The total word count must be between %d and %d
+                  The previous version had %d words, so please %s approximately %d words to fall within the target range.
+                - The tone, expertise level and target audience remain the same
+                - Preserve valuable existing text when possible
+                - Return Markdown only, no explanations
+                """.formatted(
+                        previousResponse.getContent(),
+                        reasons,
+                        sectionCount,
+                        minWordCount,
+                        maxWordCount,
+                        prevWordCount,
+                        adjustAction,
+                        wordsToAdjust
+                );
+
+        System.out.println("\n" + "\u001B[34m" + "New prompt: \n" + prompt + "\u001B[0m \n");
+
+        return prompt;
+    }
 
      private void processResponse(BlogResponse blogResponse, String markdownResponse ) {
          if (markdownResponse == null || markdownResponse.isBlank()) return;
@@ -161,12 +302,18 @@ public class BlogService extends BaseService {
                 currentSectionTitle = line.substring(2).trim();
 
                 // Map header title to section type
-                if (currentSectionTitle.equalsIgnoreCase("Introduction")) {
-                    currentSectionType = "introduction";
-                } else if (currentSectionTitle.equalsIgnoreCase("Conclusion")) {
-                    currentSectionType = "conclusion";
-                } else {
-                    currentSectionType = "body";
+                if (currentSectionTitle != null) {
+                    String lower = currentSectionTitle.toLowerCase();
+                    if (lower.contains("introduction") || lower.contains("intro")) {
+                        currentSectionType = "introduction";
+                    } else if (lower.contains("conclusion") ||
+                            lower.contains("summary") ||
+                            lower.contains("wrap up") ||
+                            lower.contains("final thoughts")) {
+                        currentSectionType = "conclusion";
+                    } else {
+                        currentSectionType = "body";
+                    }
                 }
 
                 // reset section content
@@ -222,9 +369,9 @@ public class BlogService extends BaseService {
 
      private void findSeoKeywords(String line, BlogResponse.Metadata metadata) {
          String[] patterns = {
-                 "\\*\\*(.*?)\\*\\*",   // bold **keyword**
+//                 "\\*\\*(.*?)\\*\\*",   // bold **keyword**
 //                 "\"([^\"]+)\"",        // quoted "keyword"
-//                 "_([^_]+)_"            // italic _keyword_
+                 "_([^_]+)_"            // italic _keyword_
          };
 
          for (String pattern : patterns) {
@@ -244,13 +391,15 @@ public class BlogService extends BaseService {
         blogResponse.getExportFormats().setPdfReady(true);
      }
 
-     private boolean validateResponse(BlogResponse blogResponse, BlogRequest blogRequest) {
-        if (blogResponse == null || blogResponse.getContent() == null) return false;
+     private List<String> validateResponse(BlogResponse blogResponse, BlogRequest blogRequest) {
+         List<String> errors = new ArrayList<>();
+
+        if (blogResponse == null || blogResponse.getContent() == null) return errors;
 
         List<BlogResponse.Section> sections = blogResponse.getSections();
         if (sections == null || sections.isEmpty()) {
             System.out.println("\u001B[31m" + "Validation failed: no sections found" + "\u001B[0m");
-            return false;
+            return errors;
         }
 
         // validate word count
@@ -290,22 +439,54 @@ public class BlogService extends BaseService {
 
          if (!overallValid) {
              System.out.println("\n" + "\u001B[31m" +  "Validation failed:"  + "\u001B[0m");
-             if (!validWordCount) System.out.println(" - Invalid word count");
-             if (!hasTitle) System.out.println(" - Missing main title");
-             if (!firstIsIntro) System.out.println(" - First section is not introduction");
-             if (!lastIsConclusion) System.out.println(" - Last section is not conclusion");
-             if (introCount != 1) System.out.println(" - Invalid number of introductions (" + introCount + ")");
-             if (conclusionCount != 1) System.out.println(" - Invalid number of conclusions (" + conclusionCount + ")");
-             if (bodyCount < 1) System.out.println(" - No body sections found");
+
+             if (!validWordCount) {
+                 System.out.println(" - Invalid word count: " + blogResponse.getMetadata().getWordCount());
+                 errors.add("Invalid word count");
+             };
+
+             if (!hasTitle) {
+                 System.out.println(" - Missing main title");
+                 errors.add("Missing title");
+             };
+
+             if (!firstIsIntro) {
+                 System.out.println(" - First section is not introduction");
+                 errors.add("First section is not ##Introduction");
+             };
+             if (!lastIsConclusion) {
+                 System.out.println(" - Last section is not conclusion");
+                 errors.add("Last section is not ##Conclusion");
+             };
+             if (introCount != 1) {
+                 System.out.println(" - Invalid number of introductions (" + introCount + ")");
+                 errors.add("Invalid number of ##Introductions, need one");
+             };
+             if (conclusionCount != 1) {
+                 System.out.println(" - Invalid number of conclusions (" + conclusionCount + ")");
+                 errors.add("Invalid number of ##Conclusions, need one");
+             };
+             if (bodyCount < 1) {
+                 System.out.println(" - No body sections found");
+                 errors.add("No body sections found");
+             };
 //             if (bodyCount <= 1) System.out.println(" - No body sections found");
 //             if (bodyCount >= 5) System.out.println(" - No body sections found");
-             if (!allHaveText) System.out.println(" - Some sections have no content");
-             if (!allBodyHaveTitle) System.out.println(" - Some body sections have no titles");
+             if (!allHaveText) {
+                 System.out.println(" - Some sections have no content");
+                 errors.add("Some sections have no content");
+             };
+             if (!allBodyHaveTitle) {
+                 System.out.println(" - Some body sections have no titles");
+                 errors.add("Some body sections have no titles");
+             };
+         } else {
+             System.out.println("\n" + "\u001B[32m" +  "Response is valid" + "\u001B[0m");
          }
 
-         System.out.println("\n" + "\u001B[32m" +  "Response is valid" + "\u001B[0m");
-         return overallValid;
+         return errors;
      }
+
 
      private void cleanupResponse(BlogResponse blogResponse) {
          List<BlogResponse.Section> sections = blogResponse.getSections();
