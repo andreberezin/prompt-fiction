@@ -4,7 +4,7 @@
   "description": "Content generation tool that takes user inputs and generates ready-to-use content across multiple formats.",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"npm run client\" \"npm run server\"",
+    "dev": "concurrently \"npm run server\" \"sleep 3 && npm run client\"",
     "client": "cd client && npm run dev",
     "server": "cd server && mvn spring-boot:run"
   },

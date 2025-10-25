@@ -24,11 +24,12 @@ interface OutputProps {
     updateOutput: Function;
     showCEO: boolean;
     setShowCEO: React.Dispatch<React.SetStateAction<boolean>>;
+    retryCounter: number;
+    status: string;
 }
 
-export default function Output({output, setOutput, loadingState, error, showForm, setShowForm, generationTime, setError, isTextEdited, setIsTextEdited, updateOutput, showCEO, setShowCEO}: OutputProps) {
+export default function Output({output, setOutput, loadingState, error, showForm, setShowForm, generationTime, setError, isTextEdited, setIsTextEdited, updateOutput, showCEO, setShowCEO, retryCounter, status}: OutputProps) {
     const [copyText, setCopyText] = useState<string>("Copy");
-
     const [currentFormat, setCurrentFormat] = useState<{markdown: boolean, plainText: boolean}>({markdown: true, plainText: false});
 
     const currentOutputContent =
@@ -134,7 +135,7 @@ export default function Output({output, setOutput, loadingState, error, showForm
                     <div className='data'>
                         <p className='value'
                            id='generation-timer'
-                           data-attemptcount={output.attempts}
+                           data-attemptcount={retryCounter}
                         >
                             {generationTime > 0 ? (generationTime / 1000).toFixed(2) : "0.00"}
                         </p>
@@ -196,8 +197,8 @@ export default function Output({output, setOutput, loadingState, error, showForm
                         <textarea
 							id='markdown-text'
 							className={`output-text ${error ? "error" : (loadingState ? "loading" : "")}`}
-							value={error ? error : (output.exportFormats.markdown ? output.exportFormats.markdown : "")}
-							readOnly={error !== ""}
+							value={error ? error : (status ? status: (output.exportFormats.markdown ? output.exportFormats.markdown : ""))}
+							readOnly={error === "" || status === ""}
 							onChange={(e) => {
                                 setOutput({ ...output, exportFormats: { ...output.exportFormats, markdown: e.target.value } });
                                 setIsTextEdited(true);
@@ -217,24 +218,13 @@ export default function Output({output, setOutput, loadingState, error, showForm
 						</div>
 
                     }
-                    {currentFormat.plainText && !error &&
+                    {currentFormat.plainText && !error && !loadingState &&
 						<div className='textarea-container'>
                             <textarea
 								id='plainText-text'
 								className={`output-text ${error ? "error" : (loadingState ? "loading" : "")}`}
-								value={error !== "" ? error : (output.exportFormats?.plainText ? output.exportFormats.plainText : "") || ""}
+								value={output.exportFormats?.plainText ? output.exportFormats.plainText : ""}
                                 readOnly={true}
-								// onChange={(e) =>
-                                //     // handleEditSection()
-                                //     setOutput({
-                                //         ...output,
-                                //         exportFormats: {
-                                //             ...output.exportFormats,
-                                //             plainText: e.target.value,
-                                //             // pdfReady: false,
-                                //         }
-                                //     })
-                                // }
 							/>
 
 							<button
