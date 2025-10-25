@@ -18,6 +18,17 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, ex.getStatus());
     }
 
+    @ExceptionHandler(ContentGenerationException.class)
+    public ResponseEntity<ErrorResponse> handleContentGenerationException(AIServiceException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "Content generation error",
+                ex.getMessage(),
+                HttpStatus.UNPROCESSABLE_ENTITY.value()
+//                ex.getStatus().value()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
         ErrorResponse errorResponse = new ErrorResponse(
