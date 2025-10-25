@@ -14,8 +14,7 @@ public class BlogResponse {
     private String content;
     private int attempts = 1;
 
-    @Setter
-    @Getter
+    @Data
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Section {
@@ -25,8 +24,7 @@ public class BlogResponse {
         private String plainTextContent;
     }
 
-    @Setter
-    @Getter
+    @Data
     @AllArgsConstructor
     public static class Metadata {
         private int wordCount;
@@ -34,8 +32,7 @@ public class BlogResponse {
         private String estimatedReadTime;
     }
 
-    @Setter
-    @Getter
+    @Data
     @AllArgsConstructor
     public static class ExportFormats {
         private String markdown;
