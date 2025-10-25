@@ -4,20 +4,29 @@ import SubmitButton from "./SubmitButton.tsx";
 import ClearButton from "./ClearButton.tsx";
 import * as React from "react";
 import axios from 'axios';
-import {useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import type BlogFormData from "../types/blogFormData.ts";
 import type OutputType from "../types/output.ts";
 import AImodel from "./AImodel.tsx";
 
-export default function BlogForm() {
+interface BlogFormProps {
+    retryCounter: number;
+    setRetryCounter: React.Dispatch<React.SetStateAction<number>>;
+    status: string;
+    setStatus: React.Dispatch<React.SetStateAction<string>>;
+}
+
+
+export default function BlogForm({retryCounter, setRetryCounter, status, setStatus}: BlogFormProps) {
+    const errorTimeoutId = useRef<number>(null);
+    const abortControllerRef = useRef<AbortController | null>(null);
+    const generationTimeInterval = useRef<number>(0);
+
     const [loadingState, setLoadingState] = useState<boolean>(false);
     const [isTextEdited, setIsTextEdited] = useState<boolean>(false);
     const [generationTime, setGenerationTime] = useState<number>(0);
     const [showForm, setShowForm] = useState(true);
     const [showCEO, setShowCEO] = useState<boolean>(true);
-    const errorTimeoutId = useRef<number>(null);
-    const abortControllerRef = useRef<AbortController | null>(null);
-    const generationTimeInterval = useRef<number>(0);
     const [error, setError] = useState<string>("")
     const [blogFormData, setBlogFormData] = useState<BlogFormData>({
         aimodel: {
@@ -48,6 +57,11 @@ export default function BlogForm() {
         content: '',
         attempts: 0,
     });
+
+    useEffect(() => {
+        setRetryCounter(0);
+        setStatus("")
+    }, [])
 
     const togglePlaceholder = (value: string, labelId: string ) => {
         const labelElement = document.getElementById(labelId);
@@ -120,14 +134,21 @@ export default function BlogForm() {
                 setError("Request was canceled.");
             }
 
-        } else if ((axios.isAxiosError(err) && err.response)) {
-            const { error, message, status } = err.response.data;
-            console.log("error:", error.response.data)
-            setError(`(${status}) ${message}`);
-            console.error(`Error: ${error}\n${message}`);
+        } else if (axios.isAxiosError(err)) {
+            // err.response might be undefined
+            if (err.response && err.response.data) {
+                const { error, message, status } = err.response.data;
+                console.error(`Error: ${error}\n${message}`);
+                setError(`(${status}) ${message}`);
+            } else {
+                // fallback if no response data
+                console.error("Axios error without response data:", err.message);
+                setError(err.message);
+            }
+
         } else {
-            console.error(`Unexpected error: ${error}`);
-            setError(`${error}`)
+            console.error("Unexpected error:", err);
+            setError(String(err));
         }
 
         errorTimeoutId.current = setTimeout(() => {
@@ -137,6 +158,24 @@ export default function BlogForm() {
 
     const handleSubmit = async (e:  React.FormEvent<HTMLFormElement>) => {
         prepareForRequest(e);
+        setOutput({
+            title: '',
+            sections: [],
+            metadata: {
+                wordCount: 0,
+                estimatedReadTime: '0 min',
+                seoKeywords: [],
+            },
+            exportFormats: {
+                markdown: '',
+                plainText: '',
+                pdfReady: false,
+            },
+            content: '',
+            attempts: 0,
+        })
+        setRetryCounter(0);
+        setStatus("")
 
         const payload = { ...blogFormData, aimodel: blogFormData.aimodel.model};
         try {
@@ -145,6 +184,7 @@ export default function BlogForm() {
             });
             setOutput(response.data || "");
             console.log("Response:", response);
+            setStatus("")
         } catch (err: unknown) {
             handleError(err);
         } finally {
@@ -161,12 +201,7 @@ export default function BlogForm() {
             });
             setOutput(response.data || "");
             console.log("Response:", response);
-            // 2. send output to backend
-            // 3. update plain text, word count and read time in backend
-            // 4. get response
-            // 5. update values
-            // 6. set loading state to false
-
+            setStatus("")
         } catch (err) {
             handleError(err);
         } finally {
@@ -361,7 +396,7 @@ export default function BlogForm() {
 				</form>
             }
 
-            <Output output={output} setOutput={setOutput} loadingState={loadingState} error={error} showForm={showForm} setShowForm={setShowForm} generationTime={generationTime} setError={setError} isTextEdited={isTextEdited} setIsTextEdited={setIsTextEdited} updateOutput={updateOutput} showCEO={showCEO} setShowCEO={setShowCEO}/>
+            <Output output={output} setOutput={setOutput} loadingState={loadingState} error={error} showForm={showForm} setShowForm={setShowForm} generationTime={generationTime} setError={setError} isTextEdited={isTextEdited} setIsTextEdited={setIsTextEdited} updateOutput={updateOutput} showCEO={showCEO} setShowCEO={setShowCEO} retryCounter={retryCounter} status={status}/>
         </div>
     )
 }
