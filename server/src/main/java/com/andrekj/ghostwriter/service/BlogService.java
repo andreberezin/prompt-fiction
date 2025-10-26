@@ -276,15 +276,16 @@ public class BlogService extends BaseService {
 
             findSeoKeywords(line, metadata); // find seo keywords
 
+            String cleanLine = line.replaceAll("^\\*\\*", "").replaceAll("\\*\\*$", "").trim();
             // parse for structure
-            if (line.startsWith("# ")) { // title
+            if (cleanLine.startsWith("# ")) { // title
                 blogResponse.setTitle(line.substring(1).trim());
 
                 plainTextBuilder.append("\n").append(plainline).append("\n\n");
 //                if (!plainTextBuilder.isEmpty()) {
 //                    plainTextBuilder.append("\n").append(plainline).append("\n\\n");
 //                }
-            } else if (line.startsWith("## ")) { // section
+            } else if (cleanLine.startsWith("## ")) { // section
 
                 plainTextBuilder.append("\n").append(plainline).append("\n");
 
@@ -299,7 +300,7 @@ public class BlogService extends BaseService {
                 }
 
                 // Start new section
-                currentSectionTitle = line.substring(2).trim();
+                currentSectionTitle = cleanLine.substring(2).trim();
 
                 // Map header title to section type
                 if (currentSectionTitle != null) {
@@ -507,7 +508,21 @@ public class BlogService extends BaseService {
     }
 
      public BlogResponse updateBlogPost(BlogResponse editedResponse) {
-        BlogResponse updatedResponse = new BlogResponse();
+         System.out.println("Updating blog post");
+
+         String markdown = editedResponse.getExportFormats().getMarkdown();
+         if (markdown == null || markdown.trim().isEmpty()) {
+             return new BlogResponse(
+                     "", // title
+                     Collections.emptyList(), // sections
+                     new BlogResponse.Metadata(0, new HashSet<>(), "0 min"), // metadata with empty set
+                     new BlogResponse.ExportFormats("", "", false), // exportFormats
+                     "", // content
+                     0 // attempts
+             );
+         }
+
+         BlogResponse updatedResponse = new BlogResponse();
 
         processResponse(updatedResponse, editedResponse.getExportFormats().getMarkdown());
 
