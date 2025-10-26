@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class BlogResponse {
     private String title;
     private List<Section> sections;
@@ -26,6 +28,7 @@ public class BlogResponse {
 
     @Data
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class Metadata {
         private int wordCount;
         private Set<String> seoKeywords;
@@ -34,6 +37,7 @@ public class BlogResponse {
 
     @Data
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class ExportFormats {
         private String markdown;
         private String plainText;
