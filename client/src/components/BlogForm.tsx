@@ -176,7 +176,7 @@ export default function BlogForm({blogResponse, setBlogResponse, retryCounter, s
         try {
             const response = await axios.post('/api/blog/generate', payload, {
                 headers: {'Content-Type': 'application/json'},
-                signal: newAbortSignal(60 * 1000)
+                signal: newAbortSignal(120 * 1000)
             });
             setBlogResponse(response.data || "");
             console.log("Response:", response);
@@ -194,7 +194,7 @@ export default function BlogForm({blogResponse, setBlogResponse, retryCounter, s
         try {
             const response = await axios.post('/api/blog/update-manual', blogResponseRef.current, {
                 headers: {'Content-Type': 'application/json'},
-                signal: newAbortSignal(60 * 1000)
+                signal: newAbortSignal(120 * 1000)
             });
             setBlogResponse(response.data || "");
             console.log("Response:", response);
