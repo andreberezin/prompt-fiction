@@ -1,4 +1,4 @@
-export default interface BlogFormData {
+export default interface BlogRequestType {
     aimodel: {
         model: string;
         tooltip: string;

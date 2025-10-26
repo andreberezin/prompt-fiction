@@ -17,7 +17,7 @@ export type ExportFormats = {
     pdfReady: boolean;
 }
 
-export default interface OutputType {
+export default interface BlogResponseType {
     title?: string;
     sections: Array<Section>;
     metadata: Metadata;

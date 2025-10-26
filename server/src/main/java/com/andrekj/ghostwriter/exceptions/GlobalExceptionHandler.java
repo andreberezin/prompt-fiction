@@ -1,6 +1,7 @@
 package com.andrekj.ghostwriter.exceptions;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,18 +16,23 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 ex.getStatus().value()
         );
-        return new ResponseEntity<>(errorResponse, ex.getStatus());
+        return ResponseEntity
+                .status(ex.getStatus())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(errorResponse);
     }
 
     @ExceptionHandler(ContentGenerationException.class)
-    public ResponseEntity<ErrorResponse> handleContentGenerationException(AIServiceException ex) {
+    public ResponseEntity<ErrorResponse> handleContentGenerationException(ContentGenerationException ex) {
         ErrorResponse errorResponse = new ErrorResponse(
                 "Content generation error",
                 ex.getMessage(),
                 HttpStatus.UNPROCESSABLE_ENTITY.value()
-//                ex.getStatus().value()
         );
-        return new ResponseEntity<>(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY);
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)
@@ -36,6 +42,9 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value()
         );
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(errorResponse);
     }
 }

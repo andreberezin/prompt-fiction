@@ -5,30 +5,37 @@ import ClearButton from "./ClearButton.tsx";
 import * as React from "react";
 import axios from 'axios';
 import {useEffect, useRef, useState} from "react";
-import type BlogFormData from "../types/blogFormData.ts";
-import type OutputType from "../types/output.ts";
+import type BlogRequestType from "../types/BlogRequest.ts";
+import type BlogResponseType from "../types/BlogResponse.ts";
 import AImodel from "./AImodel.tsx";
+import type {Client} from "@stomp/stompjs";
 
 interface BlogFormProps {
+    blogResponse: BlogResponseType;
+    setBlogResponse: React.Dispatch<React.SetStateAction<BlogResponseType>>;
     retryCounter: number;
     setRetryCounter: React.Dispatch<React.SetStateAction<number>>;
     status: string;
     setStatus: React.Dispatch<React.SetStateAction<string>>;
+    stompClient: React.RefObject<Client | null | undefined>;
+    setIsEditingMarkdown: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 
-export default function BlogForm({retryCounter, setRetryCounter, status, setStatus}: BlogFormProps) {
+export default function BlogForm({blogResponse, setBlogResponse, retryCounter, setRetryCounter, status, setStatus, stompClient, setIsEditingMarkdown}: BlogFormProps) {
     const errorTimeoutId = useRef<number>(null);
     const abortControllerRef = useRef<AbortController | null>(null);
     const generationTimeInterval = useRef<number>(0);
+    const blogResponseRef = useRef(blogResponse);
 
     const [loadingState, setLoadingState] = useState<boolean>(false);
     const [isTextEdited, setIsTextEdited] = useState<boolean>(false);
     const [generationTime, setGenerationTime] = useState<number>(0);
     const [showForm, setShowForm] = useState(true);
     const [showCEO, setShowCEO] = useState<boolean>(true);
-    const [error, setError] = useState<string>("")
-    const [blogFormData, setBlogFormData] = useState<BlogFormData>({
+    const [error, setError] = useState<string>("");
+    //const [markdown, setMarkdown] = useState(blogResponse.exportFormats.markdown);
+    const [blogRequest, setBlogRequest] = useState<BlogRequestType>({
         aimodel: {
             model: 'gemini-2.5-flash-lite',
             tooltip: 'ultra fast'
@@ -41,27 +48,15 @@ export default function BlogForm({retryCounter, setRetryCounter, status, setStat
         wordCount: 300,
         seoFocus: true,
     })
-    const [output, setOutput] = useState<OutputType>({
-        title: '',
-        sections: [],
-        metadata: {
-            wordCount: 0,
-            estimatedReadTime: '0 min',
-            seoKeywords: [],
-        },
-        exportFormats: {
-            markdown: '',
-            plainText: '',
-            pdfReady: false,
-        },
-        content: '',
-        attempts: 0,
-    });
 
     useEffect(() => {
         setRetryCounter(0);
         setStatus("")
     }, [])
+
+    useEffect(() => {
+        blogResponseRef.current = blogResponse;
+    }, [blogResponse]);
 
     const togglePlaceholder = (value: string, labelId: string ) => {
         const labelElement = document.getElementById(labelId);
@@ -85,7 +80,7 @@ export default function BlogForm({retryCounter, setRetryCounter, status, setStat
 
     const setData = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-        setBlogFormData((current) => ({
+        setBlogRequest((current) => ({
             ...current,
             [e.target.name]: value,
         }));
@@ -158,7 +153,7 @@ export default function BlogForm({retryCounter, setRetryCounter, status, setStat
 
     const handleSubmit = async (e:  React.FormEvent<HTMLFormElement>) => {
         prepareForRequest(e);
-        setOutput({
+        setBlogResponse({
             title: '',
             sections: [],
             metadata: {
@@ -177,12 +172,13 @@ export default function BlogForm({retryCounter, setRetryCounter, status, setStat
         setRetryCounter(0);
         setStatus("")
 
-        const payload = { ...blogFormData, aimodel: blogFormData.aimodel.model};
+        const payload = { ...blogRequest, aimodel: blogRequest.aimodel.model};
         try {
             const response = await axios.post('/api/blog/generate', payload, {
+                headers: {'Content-Type': 'application/json'},
                 signal: newAbortSignal(60 * 1000)
             });
-            setOutput(response.data || "");
+            setBlogResponse(response.data || "");
             console.log("Response:", response);
             setStatus("")
         } catch (err: unknown) {
@@ -196,10 +192,11 @@ export default function BlogForm({retryCounter, setRetryCounter, status, setStat
     const updateOutput = async (e: React.MouseEvent<HTMLButtonElement>) => {
         prepareForRequest(e);
         try {
-            const response = await axios.post('/api/blog/update', output, {
+            const response = await axios.post('/api/blog/update-manual', blogResponseRef.current, {
+                headers: {'Content-Type': 'application/json'},
                 signal: newAbortSignal(60 * 1000)
             });
-            setOutput(response.data || "");
+            setBlogResponse(response.data || "");
             console.log("Response:", response);
             setStatus("")
         } catch (err) {
@@ -246,7 +243,7 @@ export default function BlogForm({retryCounter, setRetryCounter, status, setStat
 							className='long placeholder'
 							data-placeholder='topic'
 							onMouseEnter={(e) => showPlaceholder(e.currentTarget.id)}
-							onMouseLeave={(e) => hideplaceholder(blogFormData.topic, e.currentTarget.id)}
+							onMouseLeave={(e) => hideplaceholder(blogRequest.topic, e.currentTarget.id)}
 						>
 							<input
 								autoFocus={true}
@@ -254,7 +251,7 @@ export default function BlogForm({retryCounter, setRetryCounter, status, setStat
 								name='topic'
 								maxLength={100}
 								placeholder='topic'
-								value={blogFormData.topic}
+								value={blogRequest.topic}
 								onChange={(e) => {
                                     togglePlaceholder(e.target.value, e.target.name);
                                     setData(e);
@@ -274,14 +271,14 @@ export default function BlogForm({retryCounter, setRetryCounter, status, setStat
 								className='short placeholder'
 								data-placeholder='audience'
 								onMouseEnter={(e) => showPlaceholder(e.currentTarget.id)}
-								onMouseLeave={(e) => hideplaceholder(blogFormData.targetAudience, e.currentTarget.id)}
+								onMouseLeave={(e) => hideplaceholder(blogRequest.targetAudience, e.currentTarget.id)}
 							>
 								<input
 									type='text'
 									name='targetAudience'
 									maxLength={50}
 									placeholder='target audience'
-									value={blogFormData.targetAudience}
+									value={blogRequest.targetAudience}
 									onChange={(e) => {
                                         togglePlaceholder(e.target.value, e.target.name);
                                         setData(e);
@@ -297,7 +294,7 @@ export default function BlogForm({retryCounter, setRetryCounter, status, setStat
 								className='short placeholder'
 								data-placeholder='tone'
 								onMouseEnter={(e) => showPlaceholder(e.currentTarget.id)}
-								onMouseLeave={(e) => hideplaceholder(blogFormData.tone, e.currentTarget.id)}
+								onMouseLeave={(e) => hideplaceholder(blogRequest.tone, e.currentTarget.id)}
 							>
 								<input
 									className='filled'
@@ -305,7 +302,7 @@ export default function BlogForm({retryCounter, setRetryCounter, status, setStat
 									name='tone'
 									maxLength={20}
 									placeholder='tone'
-									value={blogFormData.tone}
+									value={blogRequest.tone}
 									onChange={(e) => {
                                         togglePlaceholder(e.target.value, e.target.name);
                                         setData(e);
@@ -327,14 +324,14 @@ export default function BlogForm({retryCounter, setRetryCounter, status, setStat
 								className='short placeholder'
 								data-placeholder='expertise'
 								onMouseEnter={(e) => showPlaceholder(e.currentTarget.id)}
-								onMouseLeave={(e) => hideplaceholder(blogFormData.expertiseLevel, e.currentTarget.id)}
+								onMouseLeave={(e) => hideplaceholder(blogRequest.expertiseLevel, e.currentTarget.id)}
 							>
 								<input
 									type='text'
 									name='expertiseLevel'
 									placeholder='expertise level'
 									maxLength={50}
-									value={blogFormData.expertiseLevel}
+									value={blogRequest.expertiseLevel}
 									onChange={(e) => {
                                         togglePlaceholder(e.target.value, e.target.name);
                                         setData(e);
@@ -353,7 +350,7 @@ export default function BlogForm({retryCounter, setRetryCounter, status, setStat
 								<input
 									type='checkbox'
 									name='seoFocus'
-									checked={blogFormData.seoFocus}
+									checked={blogRequest.seoFocus}
 									onChange={(e) => {
                                         setData(e);
                                     }}
@@ -368,7 +365,7 @@ export default function BlogForm({retryCounter, setRetryCounter, status, setStat
 							className='long placeholder'
 							data-placeholder='words'
 						>
-                            {blogFormData.wordCount}
+                            {blogRequest.wordCount}
 							<input
 								type='range'
 								name='wordCount'
@@ -376,7 +373,7 @@ export default function BlogForm({retryCounter, setRetryCounter, status, setStat
 								min={300}
 								max={2000}
 								step={10}
-								value={blogFormData.wordCount}
+								value={blogRequest.wordCount}
 								onChange={(e) => {
                                     togglePlaceholder(e.target.value, e.target.name);
                                     setData(e);
@@ -387,16 +384,16 @@ export default function BlogForm({retryCounter, setRetryCounter, status, setStat
 						</label>
 					</div>
 
-					<AImodel blogFormData={blogFormData} setBlogFormData={setBlogFormData}/>
+					<AImodel blogRequest={blogRequest} setBlogRequest={setBlogRequest}/>
 
 					<div className='button-container'>
-						<SubmitButton loadingState={loadingState} cancelRequest={cancelRequest} blogFormData={blogFormData}/>
-						<ClearButton loadingState={loadingState} setBlogFormData={setBlogFormData}/>
+						<SubmitButton loadingState={loadingState} cancelRequest={cancelRequest} blogRequest={blogRequest}/>
+						<ClearButton loadingState={loadingState} setBlogRequest={setBlogRequest}/>
 					</div>
 				</form>
             }
 
-            <Output output={output} setOutput={setOutput} loadingState={loadingState} error={error} showForm={showForm} setShowForm={setShowForm} generationTime={generationTime} setError={setError} isTextEdited={isTextEdited} setIsTextEdited={setIsTextEdited} updateOutput={updateOutput} showCEO={showCEO} setShowCEO={setShowCEO} retryCounter={retryCounter} status={status}/>
+            <Output blogResponse={blogResponse} setBlogResponse={setBlogResponse} loadingState={loadingState} error={error} showForm={showForm} setShowForm={setShowForm} generationTime={generationTime} setError={setError} isTextEdited={isTextEdited} setIsTextEdited={setIsTextEdited} updateOutput={updateOutput} showCEO={showCEO} setShowCEO={setShowCEO} retryCounter={retryCounter} status={status} stompClient={stompClient} setIsEditingMarkdown={setIsEditingMarkdown} blogResponseRef={blogResponseRef}/>
         </div>
     )
 }

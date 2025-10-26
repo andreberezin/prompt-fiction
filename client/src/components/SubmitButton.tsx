@@ -1,20 +1,20 @@
 import {MdKeyboardDoubleArrowRight} from "react-icons/md";
 import '../styles/buttons.scss'
-import type BlogFormData from "../types/blogFormData.ts";
+import type BlogRequest from "../types/BlogRequest.ts";
 
 interface SubmitButtonProps {
     loadingState: boolean;
     cancelRequest: () => void;
-    blogFormData: BlogFormData;
+    blogRequest: BlogRequest;
 }
 
-export default function SubmitButton({loadingState, blogFormData}: SubmitButtonProps) {
+export default function SubmitButton({loadingState, blogRequest}: SubmitButtonProps) {
 
     const invalidContent:boolean =
-        !blogFormData.topic || blogFormData.topic === "" ||
-        !blogFormData.tone || blogFormData.tone === "" ||
-        !blogFormData.targetAudience || blogFormData.targetAudience === "" ||
-        !blogFormData.expertiseLevel || blogFormData.expertiseLevel === "";
+        !blogRequest.topic || blogRequest.topic === "" ||
+        !blogRequest.tone || blogRequest.tone === "" ||
+        !blogRequest.targetAudience || blogRequest.targetAudience === "" ||
+        !blogRequest.expertiseLevel || blogRequest.expertiseLevel === "";
 
     return (
         <div

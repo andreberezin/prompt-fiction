@@ -7,6 +7,8 @@ import com.andrekj.ghostwriter.service.PDFGeneratorService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.DateFormat;
@@ -30,8 +32,14 @@ public class ContentController {
         return blogService.generateBlogPost(request, 1);
     }
 
-    @PostMapping("/blog/update")
-    public BlogResponse generateBlogPost(@RequestBody BlogResponse editedResponse) {
+    @MessageMapping("/blog/update-auto")
+    @SendTo("/topic/blog-updated")
+    public BlogResponse handleAutoUpdate(@RequestBody BlogResponse editedResponse) {
+        return blogService.updateBlogPost(editedResponse);
+    }
+
+    @PostMapping("/blog/update-manual")
+    public BlogResponse handleManualUpdate(@RequestBody BlogResponse editedResponse) {
         return blogService.updateBlogPost(editedResponse);
     }
 

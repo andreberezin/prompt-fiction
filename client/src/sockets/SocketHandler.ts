@@ -1,6 +1,7 @@
 import SockJS from 'sockjs-client'
 import {Client, type IMessage} from "@stomp/stompjs";
 import * as React from "react";
+import type BlogResponseType from "../types/BlogResponse.ts";
 
 // interface socketProps {
 //     setRetryCounter: React.Dispatch<React.SetStateAction<number>>;
@@ -19,8 +20,10 @@ export default class SocketHandler {
     }
 
     createSocketConnection(
-        onRetryUpdate?: React.Dispatch<React.SetStateAction<number>>,
-        onStatusUpdate?: React.Dispatch<React.SetStateAction<string>>
+        setRetryCounter?: React.Dispatch<React.SetStateAction<number>>,
+        setStatus?: React.Dispatch<React.SetStateAction<string>>,
+        setBlogResponse?: React.Dispatch<React.SetStateAction<BlogResponseType>>,
+        isEditingMarkdown?: boolean
     ) {
         if (this.#client) {
             console.log("Socket connection already connected");
@@ -42,21 +45,43 @@ export default class SocketHandler {
                     //     setStatus("")
                     // }, 3000)
                     //const data = JSON.parse(message.body);
-                    if (onStatusUpdate) onStatusUpdate(message.body ?? "");
+                    if (setStatus) setStatus(message.body ?? "");
                     console.log("Status update:", message.body);
                 })
 
                 stompClient.subscribe('/topic/blog-retry', (message: IMessage) => {
                     //setRetryCounter((prev: number) => prev + 1);
                     //const data = JSON.parse(message.body);
-                    if (onRetryUpdate) {onRetryUpdate((prev: number) => prev + 1)}
+                    if (setRetryCounter) {setRetryCounter((prev: number) => prev + 1)}
                     console.log(message.body);
+                })
+
+                stompClient.subscribe('/topic/blog-updated', (message: IMessage) => {
+                    const data = JSON.parse(message.body);
+                    if (setBlogResponse) {
+                        setBlogResponse(prev => ({
+                            ...prev, // keep everything from local state
+                            ...data,
+                            exportFormats: {
+                                ...prev.exportFormats,
+                                plainText: data.exportFormats.plainText,
+                                pdfReady: data.exportFormats.pdfReady,
+                                // markdown untouched
+                            }
+                        }));
+                    }
                 })
 
                 // stompClient.subscribe('/email', (data) => {
                 //     // callback
                 //     console.log(data);
                 // })
+            },
+            onStompError: (frame) => {
+                console.error("Broker reported error: ", frame);
+            },
+            onDisconnect: () => {
+                console.log("Socket disconnected");
             }
         })
 

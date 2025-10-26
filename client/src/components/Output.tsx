@@ -1,17 +1,19 @@
 import '../styles/output.scss'
 import '../styles/hover-icon-button.scss'
 import * as React from "react";
-import type OutputType from "../types/output.ts"
 import {AiOutlineCopy, AiOutlineFile, AiOutlineFileMarkdown, AiOutlineFilePdf} from "react-icons/ai";
 import {useState} from "react";
 import {RiFullscreenExitFill, RiFullscreenFill} from "react-icons/ri";
 import axios from "axios";
 import {SEOkeywords} from "./SEOkeywords.tsx";
 import {TbReload, TbSeo} from "react-icons/tb";
+import type {Client as StompClient} from "@stomp/stompjs";
+import useDebounce from "../utils/debounce.ts";
+import type BlogResponseType from "../types/BlogResponse.ts";
 
 interface OutputProps {
-    output: OutputType;
-    setOutput: React.Dispatch<React.SetStateAction<OutputType>>;
+    blogResponse: BlogResponseType;
+    setBlogResponse: React.Dispatch<React.SetStateAction<BlogResponseType>>;
     loadingState: boolean;
     error: string;
     showForm: boolean;
@@ -26,14 +28,17 @@ interface OutputProps {
     setShowCEO: React.Dispatch<React.SetStateAction<boolean>>;
     retryCounter: number;
     status: string;
+    stompClient: React.RefObject<StompClient | null | undefined>;
+    setIsEditingMarkdown: React.Dispatch<React.SetStateAction<boolean>>;
+    blogResponseRef: React.RefObject<BlogResponseType>;
 }
 
-export default function Output({output, setOutput, loadingState, error, showForm, setShowForm, generationTime, setError, isTextEdited, setIsTextEdited, updateOutput, showCEO, setShowCEO, retryCounter, status}: OutputProps) {
+export default function Output({blogResponse, setBlogResponse, loadingState, error, showForm, setShowForm, generationTime, setError, isTextEdited, setIsTextEdited, updateOutput, showCEO, setShowCEO, retryCounter, status, stompClient, setIsEditingMarkdown, blogResponseRef}: OutputProps) {
     const [copyText, setCopyText] = useState<string>("Copy");
     const [currentFormat, setCurrentFormat] = useState<{markdown: boolean, plainText: boolean}>({markdown: true, plainText: false});
 
     const currentOutputContent =
-        currentFormat.markdown ? output.exportFormats?.markdown || "" : output.exportFormats?.plainText || "";
+        currentFormat.markdown ? blogResponse.exportFormats?.markdown || "" : blogResponse.exportFormats?.plainText || "";
 
     function copyToClipboard() {
         navigator.clipboard.writeText(currentOutputContent);
@@ -53,7 +58,14 @@ export default function Output({output, setOutput, loadingState, error, showForm
     const downloadPdf = async () => {
 
         try {
-            const response = await axios.post('api/blog/pdf', output, {responseType: 'blob'});
+            const response = await axios.post(
+                '/api/blog/pdf',
+                blogResponseRef.current,
+                {
+                    headers: { 'Content-Type': 'application/json' },
+                    responseType: 'blob',
+                }
+            );
 
             const contentDisposition = response.headers['content-disposition'];
             let fileName = 'Ghostwriter_blogPost.pdf';
@@ -82,6 +94,16 @@ export default function Output({output, setOutput, loadingState, error, showForm
             setError(`${err}`)
         }
     }
+
+
+    const handleUpdateOutput = useDebounce(() => {
+        if (stompClient.current?.connected) {
+            stompClient.current.publish({
+                destination: "/app/blog/update-auto",
+                body: JSON.stringify(blogResponseRef.current),
+            });
+        }
+    }, 10);
 
     return (
         <div
@@ -112,8 +134,8 @@ export default function Output({output, setOutput, loadingState, error, showForm
                     <button
                         id='pdf-download-button'
                         data-tooltip='Download pdf'
-                        disabled={loadingState || !output.exportFormats.pdfReady}
-                        className={`hover-icon-button ${!output.exportFormats.pdfReady ? "disabled" : ""}`}
+                        disabled={loadingState || !blogResponse.exportFormats.pdfReady}
+                        className={`hover-icon-button ${!blogResponse.exportFormats.pdfReady ? "disabled" : ""}`}
                         onClick={ async(e) => {
                             await updateOutput(e);
                             await downloadPdf();
@@ -143,11 +165,11 @@ export default function Output({output, setOutput, loadingState, error, showForm
                         {/*<p className='text'>gen</p>*/}
                     </div>
                     <div className='data'>
-                        <p className='value'>{output.metadata?.wordCount || 0}</p>
+                        <p className='value'>{blogResponse.metadata?.wordCount || 0}</p>
                         <p className='text'>words</p>
                     </div>
                     <div className='data'>
-                        <p className='value'>{output.metadata?.estimatedReadTime || "0 min"}</p>
+                        <p className='value'>{blogResponse.metadata?.estimatedReadTime || "0 min"}</p>
                         <p className='text'>read</p>
                     </div>
                 </div>
@@ -165,8 +187,8 @@ export default function Output({output, setOutput, loadingState, error, showForm
                     <button
                         id='seo-button'
                         data-tooltip='SEO keywords'
-                        className={`hover-icon-button ${output.metadata.seoKeywords.length === 0 ? "disabled" : ""} ${showCEO ? "active" : ""}`}
-                        disabled={output.metadata.seoKeywords.length === 0}
+                        className={`hover-icon-button ${blogResponse.metadata.seoKeywords.length === 0 ? "disabled" : ""} ${showCEO ? "active" : ""}`}
+                        disabled={blogResponse.metadata.seoKeywords.length === 0}
                         onClick={() => setShowCEO(!showCEO)}
                     >
                         <TbSeo className='icon'/>
@@ -197,13 +219,24 @@ export default function Output({output, setOutput, loadingState, error, showForm
                         <textarea
 							id='markdown-text'
 							className={`output-text ${error ? "error" : (loadingState ? "loading" : "")}`}
-							value={error ? error : (status ? status: (output.exportFormats.markdown ? output.exportFormats.markdown : ""))}
-							readOnly={error === "" || status === ""}
+							value={error ? error : (status ? status: (blogResponse.exportFormats.markdown ? blogResponse.exportFormats.markdown : ""))}
+							readOnly={error !== "" || status !== ""}
+							// onChange={(e) => {
+                            //     setBlogResponse({ ...blogResponse, exportFormats: { ...blogResponse.exportFormats, markdown: e.target.value } });
+                            //     setIsTextEdited(true);
+                            //     handleUpdateOutput();
+                            // }
+                            // }
+							onFocus={() => setIsEditingMarkdown(true)}
+							onBlur={() => setIsEditingMarkdown(false)}
 							onChange={(e) => {
-                                setOutput({ ...output, exportFormats: { ...output.exportFormats, markdown: e.target.value } });
+                                setBlogResponse(prev => ({
+                                    ...prev,
+                                    exportFormats: { ...prev.exportFormats, markdown: e.target.value }
+                                }));
                                 setIsTextEdited(true);
+                                handleUpdateOutput();
                             }
-
                             }
 						/>
 
@@ -223,7 +256,7 @@ export default function Output({output, setOutput, loadingState, error, showForm
                             <textarea
 								id='plainText-text'
 								className={`output-text ${error ? "error" : (loadingState ? "loading" : "")}`}
-								value={output.exportFormats?.plainText ? output.exportFormats.plainText : ""}
+								value={blogResponse.exportFormats?.plainText ? blogResponse.exportFormats.plainText : ""}
                                 readOnly={true}
 							/>
 
@@ -237,7 +270,7 @@ export default function Output({output, setOutput, loadingState, error, showForm
 							</button>
 						</div>
                     }
-                    {showCEO && <SEOkeywords keywords={output.metadata?.seoKeywords} />}
+                    {showCEO && <SEOkeywords keywords={blogResponse.metadata?.seoKeywords} />}
                 </div>
                 {/*<OutputSideMenu/>*/}
             </div>

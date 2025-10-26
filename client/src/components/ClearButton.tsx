@@ -1,16 +1,16 @@
 import { RiDeleteBin2Line } from "react-icons/ri";
 import '../styles/buttons.scss'
 import * as React from "react";
-import type BlogFormData from "../types/blogFormData.ts";
+import type BlogFormData from "../types/BlogRequest.ts";
 
 interface ClearButtonProps {
-    setBlogFormData: React.Dispatch<React.SetStateAction<BlogFormData>>,
+    setBlogRequest: React.Dispatch<React.SetStateAction<BlogFormData>>,
     loadingState: boolean;
     // setOutput: React.Dispatch<React.SetStateAction<Output>;
 }
 
 
-export default function ClearButton({setBlogFormData, loadingState}: ClearButtonProps) {
+export default function ClearButton({setBlogRequest, loadingState}: ClearButtonProps) {
 
     return (
         <div
@@ -22,7 +22,7 @@ export default function ClearButton({setBlogFormData, loadingState}: ClearButton
                 className={`${loadingState ? "disabled" : ""}`}
                 disabled={loadingState}
                 onClick={() => {
-                    setBlogFormData({
+                    setBlogRequest({
                         aimodel: {model: "gemini-2.5-flash", tooltip: "Fast and intelligent"},
                         contentType: "blog",
                         topic: '',
