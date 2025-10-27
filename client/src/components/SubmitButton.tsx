@@ -5,16 +5,17 @@ import type BlogRequest from "../types/BlogRequest.ts";
 interface SubmitButtonProps {
     loadingState: boolean;
     cancelRequest: () => void;
-    blogRequest: BlogRequest;
+    request: BlogRequest;
 }
 
-export default function SubmitButton({loadingState, blogRequest}: SubmitButtonProps) {
+// @ts-expect-error cancelRequest is here for later use
+export default function SubmitButton({loadingState, cancelRequest, request}: SubmitButtonProps) {
 
     const invalidContent:boolean =
-        !blogRequest.topic || blogRequest.topic === "" ||
-        !blogRequest.tone || blogRequest.tone === "" ||
-        !blogRequest.targetAudience || blogRequest.targetAudience === "" ||
-        !blogRequest.expertiseLevel || blogRequest.expertiseLevel === "";
+        !request.topic || request.topic === "" ||
+        !request.tone || request.tone === "" ||
+        !request.targetAudience || request.targetAudience === "" ||
+        !request.expertiseLevel || request.expertiseLevel === "";
 
     return (
         <div

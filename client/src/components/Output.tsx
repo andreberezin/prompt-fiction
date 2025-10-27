@@ -24,8 +24,8 @@ interface OutputProps {
     setIsTextEdited: React.Dispatch<React.SetStateAction<boolean>>;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     updateOutput: Function;
-    showCEO: boolean;
-    setShowCEO: React.Dispatch<React.SetStateAction<boolean>>;
+    showSEO: boolean;
+    setShowSEO: React.Dispatch<React.SetStateAction<boolean>>;
     retryCounter: number;
     status: string;
     stompClient: React.RefObject<StompClient | null | undefined>;
@@ -33,7 +33,7 @@ interface OutputProps {
     blogResponseRef: React.RefObject<BlogResponseType>;
 }
 
-export default function Output({blogResponse, setBlogResponse, loadingState, error, showForm, setShowForm, generationTime, setError, isTextEdited, setIsTextEdited, updateOutput, showCEO, setShowCEO, retryCounter, status, stompClient, setIsEditingMarkdown, blogResponseRef}: OutputProps) {
+export default function Output({blogResponse, setBlogResponse, loadingState, error, showForm, setShowForm, generationTime, setError, isTextEdited, setIsTextEdited, updateOutput, showSEO, setShowSEO, retryCounter, status, stompClient, setIsEditingMarkdown, blogResponseRef}: OutputProps) {
     const [copyText, setCopyText] = useState<string>("Copy");
     const [currentFormat, setCurrentFormat] = useState<{markdown: boolean, plainText: boolean}>({markdown: true, plainText: false});
 
@@ -187,9 +187,9 @@ export default function Output({blogResponse, setBlogResponse, loadingState, err
                     <button
                         id='seo-button'
                         data-tooltip='SEO keywords'
-                        className={`hover-icon-button ${blogResponse.metadata.seoKeywords.length === 0 ? "disabled" : ""} ${showCEO ? "active" : ""}`}
+                        className={`hover-icon-button ${blogResponse.metadata.seoKeywords.length === 0 ? "disabled" : ""} ${showSEO ? "active" : ""}`}
                         disabled={blogResponse.metadata.seoKeywords.length === 0}
-                        onClick={() => setShowCEO(!showCEO)}
+                        onClick={() => setShowSEO(!showSEO)}
                     >
                         <TbSeo className='icon'/>
                     </button>
@@ -270,7 +270,7 @@ export default function Output({blogResponse, setBlogResponse, loadingState, err
 							</button>
 						</div>
                     }
-                    {showCEO && <SEOkeywords keywords={blogResponse.metadata?.seoKeywords} />}
+                    {showSEO && <SEOkeywords keywords={blogResponse.metadata?.seoKeywords} />}
                 </div>
                 {/*<OutputSideMenu/>*/}
             </div>

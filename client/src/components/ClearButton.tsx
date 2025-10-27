@@ -4,13 +4,13 @@ import * as React from "react";
 import type BlogFormData from "../types/BlogRequest.ts";
 
 interface ClearButtonProps {
-    setBlogRequest: React.Dispatch<React.SetStateAction<BlogFormData>>,
+    setRequest: React.Dispatch<React.SetStateAction<BlogFormData>>,
     loadingState: boolean;
     // setOutput: React.Dispatch<React.SetStateAction<Output>;
 }
 
 
-export default function ClearButton({setBlogRequest, loadingState}: ClearButtonProps) {
+export default function ClearButton({setRequest, loadingState}: ClearButtonProps) {
 
     return (
         <div
@@ -22,7 +22,7 @@ export default function ClearButton({setBlogRequest, loadingState}: ClearButtonP
                 className={`${loadingState ? "disabled" : ""}`}
                 disabled={loadingState}
                 onClick={() => {
-                    setBlogRequest({
+                    setRequest({
                         aimodel: {model: "gemini-2.5-flash", tooltip: "Fast and intelligent"},
                         contentType: "blog",
                         topic: '',

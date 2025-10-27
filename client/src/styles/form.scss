@@ -135,8 +135,11 @@
 		  cursor: pointer;
 		  height: 18%;
 		  transition: all 0.1s ease-in-out;
-		  writing-mode: vertical-lr;
 		  //flex-grow: 1;
+
+		  &.vertical {
+			writing-mode: vertical-lr;
+		  }
 
 		  &:hover,
 		  &:focus {

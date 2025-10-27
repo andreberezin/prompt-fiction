@@ -1,7 +1,5 @@
 import '../styles/form.scss'
 import Output from "./Output.tsx";
-import SubmitButton from "./SubmitButton.tsx";
-import ClearButton from "./ClearButton.tsx";
 import * as React from "react";
 import axios from 'axios';
 import {useEffect, useRef, useState} from "react";
@@ -9,6 +7,10 @@ import type BlogRequestType from "../types/BlogRequest.ts";
 import type BlogResponseType from "../types/BlogResponse.ts";
 import AImodel from "./AImodel.tsx";
 import type {Client} from "@stomp/stompjs";
+import {DeleteAndSubmitButtonContainer} from "./DeleteAndSubmitButtonContainer.tsx";
+import {TextInput} from "./TextInput.tsx";
+import {RangeInput} from "./RangeInput.tsx";
+import {CheckBoxInput} from "./CheckBoxInput.tsx";
 
 interface BlogFormProps {
     blogResponse: BlogResponseType;
@@ -21,7 +23,6 @@ interface BlogFormProps {
     setIsEditingMarkdown: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-
 export default function BlogForm({blogResponse, setBlogResponse, retryCounter, setRetryCounter, status, setStatus, stompClient, setIsEditingMarkdown}: BlogFormProps) {
     const errorTimeoutId = useRef<number>(null);
     const abortControllerRef = useRef<AbortController | null>(null);
@@ -32,9 +33,8 @@ export default function BlogForm({blogResponse, setBlogResponse, retryCounter, s
     const [isTextEdited, setIsTextEdited] = useState<boolean>(false);
     const [generationTime, setGenerationTime] = useState<number>(0);
     const [showForm, setShowForm] = useState(true);
-    const [showCEO, setShowCEO] = useState<boolean>(true);
+    const [showSEO, setShowSEO] = useState<boolean>(true);
     const [error, setError] = useState<string>("");
-    //const [markdown, setMarkdown] = useState(blogResponse.exportFormats.markdown);
     const [blogRequest, setBlogRequest] = useState<BlogRequestType>({
         aimodel: {
             model: 'gemini-2.5-flash-lite',
@@ -58,27 +58,8 @@ export default function BlogForm({blogResponse, setBlogResponse, retryCounter, s
         blogResponseRef.current = blogResponse;
     }, [blogResponse]);
 
-    const togglePlaceholder = (value: string, labelId: string ) => {
-        const labelElement = document.getElementById(labelId);
-        if (value && labelElement) {labelElement.classList.add('filled');}
-        if (!value && labelElement) {labelElement.classList.remove('filled');}
-    }
 
-    const showPlaceholder = (labelId: string) => {
-        const labelElement = document.getElementById(labelId);
-        if (labelElement) {
-            labelElement.classList.add('filled');
-        }
-    }
-
-    const hideplaceholder = (value: string, labelId: string) => {
-        const labelElement = document.getElementById(labelId);
-        if (labelElement && !value) {
-            labelElement.classList.remove('filled');
-        }
-    }
-
-    const setData = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const setValue = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
         setBlogRequest((current) => ({
             ...current,
@@ -211,7 +192,7 @@ export default function BlogForm({blogResponse, setBlogResponse, retryCounter, s
             abortControllerRef.current?.abort("manual");
             // abortControllerRef.current.abort();
         }
-        setShowCEO(false);
+        setShowSEO(false);
         if (errorTimeoutId.current) clearTimeout(errorTimeoutId.current);
         if (generationTimeInterval.current) clearInterval(generationTimeInterval.current);
         setGenerationTime(0)
@@ -235,165 +216,35 @@ export default function BlogForm({blogResponse, setBlogResponse, retryCounter, s
                         handleSubmit(e);
                     }}
 				>
-
 					<div className='fields-column fields-column-1' tabIndex={0}>
-
-						<label
-							id='topic'
-							className='long placeholder'
-							data-placeholder='topic'
-							onMouseEnter={(e) => showPlaceholder(e.currentTarget.id)}
-							onMouseLeave={(e) => hideplaceholder(blogRequest.topic, e.currentTarget.id)}
-						>
-							<input
-								autoFocus={true}
-								type='text'
-								name='topic'
-								maxLength={100}
-								placeholder='topic'
-								value={blogRequest.topic}
-								onChange={(e) => {
-                                    togglePlaceholder(e.target.value, e.target.name);
-                                    setData(e);
-                                }}
-								onFocus={(e) => showPlaceholder(e.target.name)}
-								onBlur={(e) => hideplaceholder(e.target.value, e.target.name)}
-							/>
-						</label>
-
+                        <TextInput request={blogRequest} setRequest={setBlogRequest} id={'topic'} placeholder={'topic'} setValue={setValue} autoFocus/>
 					</div>
+
 					<div className='fields-column fields-column-2' tabIndex={0}>
-						<div
-							className='double'
-						>
-							<label
-								id='targetAudience'
-								className='short placeholder'
-								data-placeholder='audience'
-								onMouseEnter={(e) => showPlaceholder(e.currentTarget.id)}
-								onMouseLeave={(e) => hideplaceholder(blogRequest.targetAudience, e.currentTarget.id)}
-							>
-								<input
-									type='text'
-									name='targetAudience'
-									maxLength={50}
-									placeholder='target audience'
-									value={blogRequest.targetAudience}
-									onChange={(e) => {
-                                        togglePlaceholder(e.target.value, e.target.name);
-                                        setData(e);
-                                    }}
-									onFocus={(e) => showPlaceholder(e.target.name)}
-									onBlur={(e) => hideplaceholder(e.target.value, e.target.name)}
-								/>
-							</label>
-
-                            {/*todo might switch to a <select> dropdown menu later*/}
-							<label
-								id='tone'
-								className='short placeholder'
-								data-placeholder='tone'
-								onMouseEnter={(e) => showPlaceholder(e.currentTarget.id)}
-								onMouseLeave={(e) => hideplaceholder(blogRequest.tone, e.currentTarget.id)}
-							>
-								<input
-									className='filled'
-									type='text'
-									name='tone'
-									maxLength={20}
-									placeholder='tone'
-									value={blogRequest.tone}
-									onChange={(e) => {
-                                        togglePlaceholder(e.target.value, e.target.name);
-                                        setData(e);
-                                    }}
-									onFocus={(e) => showPlaceholder(e.target.name)}
-									onBlur={(e) => hideplaceholder(e.target.value, e.target.name)}
-								/>
-							</label>
+						<div className='double'>
+							<TextInput request={blogRequest} setRequest={setBlogRequest} id={'targetAudience'} placeholder={'audience'} setValue={setValue} short/>
+							<TextInput request={blogRequest} setRequest={setBlogRequest} id={'tone'} placeholder={'tone'} setValue={setValue} short/>
 						</div>
-
 					</div>
 
 					<div className='fields-column fields-column-3' tabIndex={0}>
 						<div className='double'>
-
-                            {/*todo might switch to a <select> dropdown menu later*/}
-							<label
-								id='expertiseLevel'
-								className='short placeholder'
-								data-placeholder='expertise'
-								onMouseEnter={(e) => showPlaceholder(e.currentTarget.id)}
-								onMouseLeave={(e) => hideplaceholder(blogRequest.expertiseLevel, e.currentTarget.id)}
-							>
-								<input
-									type='text'
-									name='expertiseLevel'
-									placeholder='expertise level'
-									maxLength={50}
-									value={blogRequest.expertiseLevel}
-									onChange={(e) => {
-                                        togglePlaceholder(e.target.value, e.target.name);
-                                        setData(e);
-                                    }}
-									onFocus={(e) => showPlaceholder(e.target.name)}
-									onBlur={(e) => hideplaceholder(e.target.value, e.target.name)}
-								/>
-							</label>
-
-							<label
-								id='seoFocus'
-								className='short'
-                                // data-placeholder='seo'
-							>
-								Seo Focus
-								<input
-									type='checkbox'
-									name='seoFocus'
-									checked={blogRequest.seoFocus}
-									onChange={(e) => {
-                                        setData(e);
-                                    }}
-								/>
-							</label>
+							<TextInput request={blogRequest} setRequest={setBlogRequest} id={'expertiseLevel'} placeholder={'expertise'} setValue={setValue} short/>
+                            <CheckBoxInput value={blogRequest.seoFocus} setValue={setValue} id={'seoFocus'} text={'Seo Focus'}/>
 						</div>
 					</div>
 
 					<div className='slider-column' tabIndex={0}>
-						<label
-							id='wordCount'
-							className='long placeholder'
-							data-placeholder='words'
-						>
-                            {blogRequest.wordCount}
-							<input
-								type='range'
-								name='wordCount'
-								placeholder='word count'
-								min={300}
-								max={2000}
-								step={10}
-								value={blogRequest.wordCount}
-								onChange={(e) => {
-                                    togglePlaceholder(e.target.value, e.target.name);
-                                    setData(e);
-                                }}
-								onFocus={(e) => showPlaceholder(e.target.name)}
-								onBlur={(e) => hideplaceholder(e.target.value, e.target.name)}
-							/>
-						</label>
+						<RangeInput value={blogRequest.wordCount} setValue={setValue} id={'wordCount'} placeholder={'words'} vertical/>
 					</div>
 
 					<AImodel blogRequest={blogRequest} setBlogRequest={setBlogRequest}/>
 
-					<div className='button-container'>
-						<SubmitButton loadingState={loadingState} cancelRequest={cancelRequest} blogRequest={blogRequest}/>
-						<ClearButton loadingState={loadingState} setBlogRequest={setBlogRequest}/>
-					</div>
+					<DeleteAndSubmitButtonContainer loadingState={loadingState} cancelRequest={cancelRequest} request={blogRequest} setRequest={setBlogRequest} />
 				</form>
             }
 
-            <Output blogResponse={blogResponse} setBlogResponse={setBlogResponse} loadingState={loadingState} error={error} showForm={showForm} setShowForm={setShowForm} generationTime={generationTime} setError={setError} isTextEdited={isTextEdited} setIsTextEdited={setIsTextEdited} updateOutput={updateOutput} showCEO={showCEO} setShowCEO={setShowCEO} retryCounter={retryCounter} status={status} stompClient={stompClient} setIsEditingMarkdown={setIsEditingMarkdown} blogResponseRef={blogResponseRef}/>
+            <Output blogResponse={blogResponse} setBlogResponse={setBlogResponse} loadingState={loadingState} error={error} showForm={showForm} setShowForm={setShowForm} generationTime={generationTime} setError={setError} isTextEdited={isTextEdited} setIsTextEdited={setIsTextEdited} updateOutput={updateOutput} showSEO={showSEO} setShowSEO={setShowSEO} retryCounter={retryCounter} status={status} stompClient={stompClient} setIsEditingMarkdown={setIsEditingMarkdown} blogResponseRef={blogResponseRef}/>
         </div>
     )
 }
