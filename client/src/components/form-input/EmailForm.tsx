@@ -1,5 +1,5 @@
-import '../styles/form.scss'
-import Output from "./Output.tsx";
+import '../../styles/form.scss'
+import Output from "../form-output/Output.tsx";
 import {useState} from "react";
 
 export default function EmailForm() {

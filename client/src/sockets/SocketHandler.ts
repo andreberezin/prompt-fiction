@@ -22,8 +22,7 @@ export default class SocketHandler {
     createSocketConnection(
         setRetryCounter?: React.Dispatch<React.SetStateAction<number>>,
         setStatus?: React.Dispatch<React.SetStateAction<string>>,
-        setBlogResponse?: React.Dispatch<React.SetStateAction<BlogResponseType>>,
-        isEditingMarkdown?: boolean
+        setBlogResponse?: React.Dispatch<React.SetStateAction<BlogResponseType>>
     ) {
         if (this.#client) {
             console.log("Socket connection already connected");

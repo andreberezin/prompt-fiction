@@ -1,7 +1,7 @@
-import '../styles/aimodels.scss'
+import '../../styles/aimodels.scss'
 import * as React from "react";
-import type BlogRequest from "../types/BlogRequest.ts";
-import {type AIMODELObject, AImodels} from "../types/AImodels.ts";
+import type BlogRequest from "../../types/BlogRequest.ts";
+import {type AIMODELObject, AImodels} from "../../types/AImodels.ts";
 
 interface AImodelProps {
     blogRequest: BlogRequest;
@@ -41,7 +41,7 @@ const renderAImodels = ({ blogRequest, setBlogRequest }: AImodelProps) => {
 
 
 
-export default function AImodel(props: AImodelProps) {
+export default function AImodelChoice(props: AImodelProps) {
 
     return (
         <div

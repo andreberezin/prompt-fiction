@@ -1,4 +1,4 @@
-import '../styles/keywords.scss'
+import '../../styles/keywords.scss'
 
 interface SEOkeywordsProps {
     keywords?: string[];

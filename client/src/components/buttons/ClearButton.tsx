@@ -1,7 +1,7 @@
 import { RiDeleteBin2Line } from "react-icons/ri";
-import '../styles/buttons.scss'
+import '../../styles/buttons.scss'
 import * as React from "react";
-import type BlogFormData from "../types/BlogRequest.ts";
+import type BlogFormData from "../../types/BlogRequest.ts";
 
 interface ClearButtonProps {
     setRequest: React.Dispatch<React.SetStateAction<BlogFormData>>,

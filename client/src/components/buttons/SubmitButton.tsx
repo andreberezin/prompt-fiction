@@ -1,15 +1,13 @@
 import {MdKeyboardDoubleArrowRight} from "react-icons/md";
-import '../styles/buttons.scss'
-import type BlogRequest from "../types/BlogRequest.ts";
+import '../../styles/buttons.scss'
+import type BlogRequest from "../../types/BlogRequest.ts";
 
 interface SubmitButtonProps {
     loadingState: boolean;
-    cancelRequest: () => void;
     request: BlogRequest;
 }
 
-// @ts-expect-error cancelRequest is here for later use
-export default function SubmitButton({loadingState, cancelRequest, request}: SubmitButtonProps) {
+export default function SubmitButton({loadingState, request}: SubmitButtonProps) {
 
     const invalidContent:boolean =
         !request.topic || request.topic === "" ||

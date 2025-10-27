@@ -10,7 +10,7 @@ interface RangeInputProps {
     max?: number;
 }
 
-export function RangeInput({vertical = false, value, setValue, id, placeholder, min = 300, max = 2000 }: RangeInputProps) {
+export default function RangeInput({vertical = false, value, setValue, id, placeholder, min = 300, max = 2000 }: RangeInputProps) {
 
     return (
             <label

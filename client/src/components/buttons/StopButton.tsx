@@ -1,5 +1,5 @@
 import { MdKeyboardDoubleArrowRight } from "react-icons/md";
-import '../styles/buttons.scss'
+import '../../styles/buttons.scss'
 
 export default function StopButton() {
 

@@ -7,7 +7,7 @@ interface CheckBoxInputProps {
     text: string;
 }
 
-export function CheckBoxInput({value, setValue, id, text}:CheckBoxInputProps) {
+export default function CheckBoxInput({value, setValue, id, text}:CheckBoxInputProps) {
     return (
             <label
                 id={id}

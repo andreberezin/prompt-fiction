@@ -1,15 +1,17 @@
-import '../styles/output.scss'
-import '../styles/hover-icon-button.scss'
+import '../../styles/output.scss'
+import '../../styles/hover-icon-button.scss'
 import * as React from "react";
 import {AiOutlineCopy, AiOutlineFile, AiOutlineFileMarkdown, AiOutlineFilePdf} from "react-icons/ai";
 import {useState} from "react";
 import {RiFullscreenExitFill, RiFullscreenFill} from "react-icons/ri";
-import axios from "axios";
 import {SEOkeywords} from "./SEOkeywords.tsx";
 import {TbReload, TbSeo} from "react-icons/tb";
 import type {Client as StompClient} from "@stomp/stompjs";
-import useDebounce from "../utils/debounce.ts";
-import type BlogResponseType from "../types/BlogResponse.ts";
+import type BlogResponseType from "../../types/BlogResponse.ts";
+import copyToClipboard from "../../utils/copyToClipboard.ts";
+import toggleFormat from "../../utils/toggleFormat.ts";
+import useAutoUpdateResponse from "../../hooks/useAutoUpdateResponse.ts";
+import downloadPdf from "../../utils/downloadPdf.ts";
 
 interface OutputProps {
     blogResponse: BlogResponseType;
@@ -22,88 +24,29 @@ interface OutputProps {
     setError: React.Dispatch<React.SetStateAction<string>>;
     isTextEdited: boolean;
     setIsTextEdited: React.Dispatch<React.SetStateAction<boolean>>;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-    updateOutput: Function;
+    updateResponseObject: (e: React.MouseEvent<HTMLButtonElement>) => void;
     showSEO: boolean;
     setShowSEO: React.Dispatch<React.SetStateAction<boolean>>;
     retryCounter: number;
     status: string;
-    stompClient: React.RefObject<StompClient | null | undefined>;
-    setIsEditingMarkdown: React.Dispatch<React.SetStateAction<boolean>>;
+    stompClient: React.RefObject<StompClient>;
     blogResponseRef: React.RefObject<BlogResponseType>;
 }
 
-export default function Output({blogResponse, setBlogResponse, loadingState, error, showForm, setShowForm, generationTime, setError, isTextEdited, setIsTextEdited, updateOutput, showSEO, setShowSEO, retryCounter, status, stompClient, setIsEditingMarkdown, blogResponseRef}: OutputProps) {
+export default function Output({blogResponse, setBlogResponse, loadingState, error, showForm, setShowForm, generationTime, setError, isTextEdited, setIsTextEdited, updateResponseObject, showSEO, setShowSEO, retryCounter, status, stompClient, blogResponseRef}: OutputProps) {
     const [copyText, setCopyText] = useState<string>("Copy");
     const [currentFormat, setCurrentFormat] = useState<{markdown: boolean, plainText: boolean}>({markdown: true, plainText: false});
 
     const currentOutputContent =
         currentFormat.markdown ? blogResponse.exportFormats?.markdown || "" : blogResponse.exportFormats?.plainText || "";
 
-    function copyToClipboard() {
-        navigator.clipboard.writeText(currentOutputContent);
-        setCopyText('Copied!')
 
-        setTimeout(() => {
-            setCopyText('Copy')
-        }, 1500);
-    }
-
-    function toggleFormat(key: "markdown" | "plainText") {
-        const activeCount = Object.values(currentFormat).filter(Boolean).length;
-        if (activeCount === 1 && currentFormat[key]) return;
-        setCurrentFormat({ ...currentFormat, [key]: !currentFormat[key] });
-    }
-
-    const downloadPdf = async () => {
-
-        try {
-            const response = await axios.post(
-                '/api/blog/pdf',
-                blogResponseRef.current,
-                {
-                    headers: { 'Content-Type': 'application/json' },
-                    responseType: 'blob',
-                }
-            );
-
-            const contentDisposition = response.headers['content-disposition'];
-            let fileName = 'Ghostwriter_blogPost.pdf';
-
-            if (contentDisposition) {
-                const fileNameMatch = contentDisposition.match(/filename="?(.+)"?/);
-                if (fileNameMatch && fileNameMatch.length > 1) {
-                    fileName = fileNameMatch[1];
-                }
-            }
-
-            // Create a temporary download link
-            const blob = new Blob([response.data], { type: "application/pdf" });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', fileName);
-            document.body.appendChild(link);
-            link.click();
-
-            // cleanup
-            link.remove();
-            URL.revokeObjectURL(url);
-        } catch (err: unknown) {
-            console.error(`Unexpected error: ${err}`);
-            setError(`${err}`)
-        }
-    }
-
-
-    const handleUpdateOutput = useDebounce(() => {
-        if (stompClient.current?.connected) {
-            stompClient.current.publish({
-                destination: "/app/blog/update-auto",
-                body: JSON.stringify(blogResponseRef.current),
-            });
-        }
-    }, 10);
+    const handleAutoUpdateResponse = useAutoUpdateResponse({
+        contentType: 'blog',
+        stompClient,
+        responseRef: blogResponseRef,
+        debounceDelay: 10, // optional
+    });
 
     return (
         <div
@@ -118,7 +61,7 @@ export default function Output({blogResponse, setBlogResponse, loadingState, err
                         data-tooltip='Markdown'
                         disabled={loadingState}
                         className={`hover-icon-button ${currentFormat.markdown ? "active" : ""}`}
-                        onClick={() => {toggleFormat("markdown")}}
+                        onClick={() => {toggleFormat("markdown", currentFormat, setCurrentFormat)}}
                     >
                         <AiOutlineFileMarkdown className='icon'/>
                     </button>
@@ -127,7 +70,7 @@ export default function Output({blogResponse, setBlogResponse, loadingState, err
                         data-tooltip='Plain text'
                         disabled={loadingState}
                         className={`hover-icon-button ${currentFormat.plainText ? "active" : ""}`}
-                        onClick={() => {toggleFormat("plainText")}}
+                        onClick={() => {toggleFormat("plainText", currentFormat, setCurrentFormat)}}
                     >
                         <AiOutlineFile className='icon'/>
                     </button>
@@ -137,20 +80,13 @@ export default function Output({blogResponse, setBlogResponse, loadingState, err
                         disabled={loadingState || !blogResponse.exportFormats.pdfReady}
                         className={`hover-icon-button ${!blogResponse.exportFormats.pdfReady ? "disabled" : ""}`}
                         onClick={ async(e) => {
-                            await updateOutput(e);
-                            await downloadPdf();
+                            await updateResponseObject(e);
+                            await downloadPdf({blogResponseRef, setError});
                         }}
                     >
                         <AiOutlineFilePdf className='icon'/>
                     </button>
                 </div>
-
-                {/*<div id='timer-container'>*/}
-                {/*    <div className='data'>*/}
-                {/*        <p id='value'>{generationTime || 0}</p>*/}
-                {/*        <p id='text'>generation time</p>*/}
-                {/*    </div>*/}
-                {/*</div>*/}
 
                 {/*todo update word count when content is edited*/}
                 <div id='metadata-container'>
@@ -161,8 +97,6 @@ export default function Output({blogResponse, setBlogResponse, loadingState, err
                         >
                             {generationTime > 0 ? (generationTime / 1000).toFixed(2) : "0.00"}
                         </p>
-                        {/*<p className='text' id='attempts-count'>{output.attempts || 0}</p>*/}
-                        {/*<p className='text'>gen</p>*/}
                     </div>
                     <div className='data'>
                         <p className='value'>{blogResponse.metadata?.wordCount || 0}</p>
@@ -180,7 +114,7 @@ export default function Output({blogResponse, setBlogResponse, loadingState, err
                         data-tooltip='Update'
                         className={`hover-icon-button ${!isTextEdited? "disabled" : "flash"}`}
                         disabled={!isTextEdited}
-                        onClick={(e) => updateOutput(e)}
+                        onClick={(e) => updateResponseObject(e)}
                     >
                         <TbReload className='icon'/>
                     </button>
@@ -197,7 +131,6 @@ export default function Output({blogResponse, setBlogResponse, loadingState, err
                         id='fullscreen-button'
                         data-tooltip='Fullscreen'
                         className='hover-icon-button'
-                        // disabled={loadingState}
                         onClick={() => setShowForm(!showForm)}
                     >
                         {showForm &&  <RiFullscreenFill className='icon'/>}
@@ -212,30 +145,19 @@ export default function Output({blogResponse, setBlogResponse, loadingState, err
             >
                 <div id='textareas-container'>
                     {currentFormat.markdown &&
-
-                        // todo make it so when one is edited the other stays in sync
-                        // todo make into a component because it's used twice
 						<div className='textarea-container'>
                         <textarea
 							id='markdown-text'
 							className={`output-text ${error ? "error" : (loadingState ? "loading" : "")}`}
 							value={error ? error : (status ? status: (blogResponse.exportFormats.markdown ? blogResponse.exportFormats.markdown : ""))}
 							readOnly={error !== "" || status !== ""}
-							// onChange={(e) => {
-                            //     setBlogResponse({ ...blogResponse, exportFormats: { ...blogResponse.exportFormats, markdown: e.target.value } });
-                            //     setIsTextEdited(true);
-                            //     handleUpdateOutput();
-                            // }
-                            // }
-							onFocus={() => setIsEditingMarkdown(true)}
-							onBlur={() => setIsEditingMarkdown(false)}
 							onChange={(e) => {
                                 setBlogResponse(prev => ({
                                     ...prev,
                                     exportFormats: { ...prev.exportFormats, markdown: e.target.value }
                                 }));
                                 setIsTextEdited(true);
-                                handleUpdateOutput();
+                                handleAutoUpdateResponse();
                             }
                             }
 						/>
@@ -245,7 +167,8 @@ export default function Output({blogResponse, setBlogResponse, loadingState, err
 								className='hover-icon-button'
 								data-tooltip={copyText}
 								disabled={loadingState}
-								onClick={copyToClipboard}>
+								onClick={() => copyToClipboard(currentOutputContent, setCopyText)}
+                            >
 								<AiOutlineCopy className='icon'/>
 							</button>
 						</div>
@@ -265,7 +188,8 @@ export default function Output({blogResponse, setBlogResponse, loadingState, err
 								className='hover-icon-button'
 								data-tooltip={copyText}
 								disabled={loadingState}
-								onClick={copyToClipboard}>
+								onClick={() => copyToClipboard(currentOutputContent, setCopyText)}
+                            >
 								<AiOutlineCopy className='icon'/>
 							</button>
 						</div>

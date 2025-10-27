@@ -11,7 +11,7 @@ interface TextInputProps<T extends object> {
 }
 
 // @ts-expect-error cancelRequest is here for later use
-export function TextInput<T extends object>({request, setRequest, id, placeholder, setValue, autoFocus = false, short = false}: TextInputProps<T>){
+export default function TextInput<T extends object>({request, setRequest, id, placeholder, setValue, autoFocus = false, short = false}: TextInputProps<T>){
 
     const togglePlaceholder = (value: string, labelId: string ) => {
         const labelElement = document.getElementById(labelId);
@@ -35,7 +35,7 @@ export function TextInput<T extends object>({request, setRequest, id, placeholde
             id={String(id)}
             className={`${!short ? "long" : "short"} placeholder`}
             data-placeholder={placeholder}
-            onMouseEnter={() => showPlaceholder(placeholder)}
+            onMouseEnter={() => showPlaceholder(String(id))}
             onMouseLeave={() => hideplaceholder(String(value ?? ""), String(id))}
         >
             <input
