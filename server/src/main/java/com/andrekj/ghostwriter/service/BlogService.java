@@ -31,13 +31,13 @@ public class BlogService extends BaseService {
         this.messagingTemplate = messagingTemplate;
     }
 
-    public BlogResponse generateBlogPost(BlogRequest request, int attempt) {
+    public BlogResponse generateContent(BlogRequest request, int attempt) {
         this.blogRequest = request;
 
         //messagingTemplate.convertAndSend("/topic/blog-retry", "Starting generation...");
         if (attempt == 1) messagingTemplate.convertAndSend("/topic/blog-status", "Generating blog..");
 
-        try {
+        //try {
             // set max retries based on selected ai model
             if (request.getAimodel().equalsIgnoreCase("gemini-2.5-pro")) {
                 MAX_RETRIES = 2;
@@ -95,84 +95,11 @@ public class BlogService extends BaseService {
 
             // return response object
             return blogResponse;
-        } catch (Exception e) {
-            System.err.println("Error during blog generation: " + e.getMessage());
-            throw new RuntimeException("Failed to generate blog post", e);
-        }
-    }
-//
-//    public BlogResponse generateBlogPost(BlogRequest request, int attempt) {
-//        this.blogRequest = request;
-//
-//        messagingTemplate.convertAndSend("/topic/blog-retry", "Starting generation...");
-//        if (attempt == 1) messagingTemplate.convertAndSend("/topic/blog-status", "Generating blog..");
-//
-//        try {
-//            // set max retries based on selected ai model
-//            if (request.getAimodel().equalsIgnoreCase("gemini-2.5-pro")) {
-//                MAX_RETRIES = 2;
-//            }
-//            // 1. Normalize input (word count range, tone, etc.)
-//            normalizeBlogInput(request);
-//
-//            // 2. Build a prompt string based on request data
-//            String prompt = generateBlogPrompt(request);
-////            if (attempt == 1) {
-////                prompt = generateBlogPrompt(request);
-////            } else {
-////                prompt = regenerateBlogPrompt(this.blogResponse)
-////            }
-//
-//
-//            // 3. Call AI API
-//            GenerateContentConfig config = buildConfig(request);
-//            GenerateContentResponse response = callAiAPI(request, prompt, config);
-//
-//            // 4. Process AI response (parse JSON or text)
-//            BlogResponse blogResponse = new BlogResponse();
-//            processResponse(blogResponse, response.text());
-//
-//            // 5. Validate response
-//            List<String> validationErrors = validateResponse(blogResponse, request);
-//
-//            // 5.1 retry if validation failed
-//            if (!validationErrors.isEmpty()) {
-//                if (attempt < MAX_RETRIES) {
-//                    attempt++;
-//                    System.out.println("Retrying blog generation (attempt " + (attempt) + ")");
-//                    messagingTemplate.convertAndSend("/topic/blog-status", "Generated content was not up to code. Retrying...");
-//                    blogResponse.setAttempts(attempt);
-//
-//                    String newPrompt = regenerateBlogPrompt(request, blogResponse, validationErrors);
-//
-//                    config = buildConfig(request);
-//                    response = callAiAPI(request, newPrompt, config);
-//
-//                    BlogResponse newBlogResponse = new BlogResponse();
-//                    processResponse(newBlogResponse, response.text());
-//
-//                    return generateBlogPost(request, attempt);
-//                } else {
-//                    System.out.println("Too many retries");
-//                    String payload = "Blog generation failed after " + MAX_RETRIES + " attempts.";
-//                    messagingTemplate.convertAndSend("/topic/blog-status", payload);
-//                    throw new ContentGenerationException("Blog generation failed after " + MAX_RETRIES + " attempts.");
-//                }
-//            }
-//
-//            // 6. clean up response
-//            cleanupResponse(blogResponse);
-//
-//            // 7. prepare pdf format
-//            preparePdfFormat(blogResponse);
-//
-//            // return response object
-//            return blogResponse;
 //        } catch (Exception e) {
 //            System.err.println("Error during blog generation: " + e.getMessage());
 //            throw new RuntimeException("Failed to generate blog post", e);
 //        }
-//    }
+    }
 
     private void normalizeBlogInput(BlogRequest request) {
         request.setTopic(request.getTopic().trim().toLowerCase());
@@ -507,9 +434,7 @@ public class BlogService extends BaseService {
                 .collect(Collectors.joining("\n"));
     }
 
-     public BlogResponse updateBlogPost(BlogResponse editedResponse) {
-         System.out.println("Updating blog post");
-
+     public BlogResponse updateContent(BlogResponse editedResponse) {
          String markdown = editedResponse.getExportFormats().getMarkdown();
          if (markdown == null || markdown.trim().isEmpty()) {
              return new BlogResponse(
