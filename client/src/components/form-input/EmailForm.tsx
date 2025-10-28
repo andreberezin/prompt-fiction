@@ -1,5 +1,5 @@
 import '../../styles/form.scss'
-import Output from "../form-output/Output.tsx";
+import BlogOutput from "../form-output/BlogOutput.tsx";
 import {useState} from "react";
 
 export default function EmailForm() {
@@ -15,7 +15,7 @@ export default function EmailForm() {
                 Output: subject line, email body
                 Parameters: tone, urgency level, CTA
             </form>
-            <Output output={output} setOutput={setOutput}/>
+            <BlogOutput output={output} setOutput={setOutput}/>
         </div>
     )
 }

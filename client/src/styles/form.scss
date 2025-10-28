@@ -1,14 +1,16 @@
 @use 'variables';
 @use 'mixins';
 
-.container {
-  height: calc(100% - 50px);
-  width: 90%;
+.form-container {
+  height: 100%;
+  width: 100%;
+  //height: calc(100% - 50px);
+  //width: 90%;
   @include mixins.flex-centered;
   flex-direction: column;
 
-  #blog-form,
-  #email-form {
+  form#blog-form,
+  form#email-form {
 	margin: 2rem 0 2rem 0;
 	border-radius: 20px 0 20px 0;
 	border: 2px solid variables.$border-color;
@@ -21,7 +23,7 @@
 	align-items: center;
 	width: 100%;
 	justify-content: center;
-	height: 55%;
+	height: 100%;
 
 	&:not(.loading):not(.error):focus, // &:not(.loading):not(.error):has(> textarea:focus)
 	&:not(.loading):not(.error):focus-within {
@@ -138,6 +140,7 @@
 		  width: 50px;
 		  cursor: pointer;
 		  height: 18%;
+		  max-height: 300px;
 		  transition: all 0.1s ease-in-out;
 		  //flex-grow: 1;
 

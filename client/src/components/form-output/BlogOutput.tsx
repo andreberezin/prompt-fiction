@@ -6,7 +6,7 @@ import {useState} from "react";
 import {RiFullscreenExitFill, RiFullscreenFill} from "react-icons/ri";
 import {SEOkeywords} from "./SEOkeywords.tsx";
 import {TbReload, TbSeo} from "react-icons/tb";
-import type {Client as StompClient} from "@stomp/stompjs";
+import type {Client} from "@stomp/stompjs";
 import type BlogResponseType from "../../types/BlogResponse.ts";
 import copyToClipboard from "../../utils/copyToClipboard.ts";
 import toggleFormat from "../../utils/toggleFormat.ts";
@@ -29,11 +29,11 @@ interface OutputProps {
     setShowSEO: React.Dispatch<React.SetStateAction<boolean>>;
     retryCounter: number;
     status: string;
-    stompClient: React.RefObject<StompClient>;
+    stompClient: React.RefObject<Client | null>;
     blogResponseRef: React.RefObject<BlogResponseType>;
 }
 
-export default function Output({blogResponse, setBlogResponse, loadingState, error, showForm, setShowForm, generationTime, setError, isTextEdited, setIsTextEdited, updateResponseObject, showSEO, setShowSEO, retryCounter, status, stompClient, blogResponseRef}: OutputProps) {
+export default function BlogOutput({blogResponse, setBlogResponse, loadingState, error, showForm, setShowForm, generationTime, setError, isTextEdited, setIsTextEdited, updateResponseObject, showSEO, setShowSEO, retryCounter, status, stompClient, blogResponseRef}: OutputProps) {
     const [copyText, setCopyText] = useState<string>("Copy");
     const [currentFormat, setCurrentFormat] = useState<{markdown: boolean, plainText: boolean}>({markdown: true, plainText: false});
 

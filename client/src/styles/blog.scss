@@ -1,0 +1,9 @@
+@use 'mixins';
+
+#blog {
+  height: calc(100% - 50px);
+  width: 90%;
+  @include mixins.flex-centered;
+  flex-direction: column;
+}
+
