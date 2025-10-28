@@ -12,6 +12,15 @@ interface ClearButtonProps<T> {
 
 export default function ClearButton<T>({setRequest, loadingState, resetValue}: ClearButtonProps<T>) {
 
+    const handleClear = () => {
+        // Reset the request state
+        setRequest(resetValue);
+
+        // Find all input elements with "filled" class and remove the class
+        const filledInputs = document.querySelectorAll<HTMLLabelElement>('label.filled');
+        filledInputs.forEach(input => input.classList.remove('filled'));
+    };
+
     return (
         <div
             className='clear-container button-container'
@@ -21,7 +30,7 @@ export default function ClearButton<T>({setRequest, loadingState, resetValue}: C
                 id='clear-button'
                 className={`${loadingState ? "disabled" : ""}`}
                 disabled={loadingState}
-                onClick={() => setRequest(resetValue)}
+                onClick={handleClear}
             >
                 <RiDeleteBin2Line className='icon' id={'clear-icon'}/>
             </button>

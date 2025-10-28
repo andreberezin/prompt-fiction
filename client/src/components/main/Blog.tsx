@@ -35,7 +35,7 @@ export default function Blog() {
         targetAudience: 'anyone',
         tone: 'engaging',
         expertiseLevel: 'beginner',
-        wordCount: 300,
+        wordCount: 400,
         seoFocus: true,
     })
     const [blogResponse, setBlogResponse] = useState<BlogResponseType>(emptyBLogResponse);
