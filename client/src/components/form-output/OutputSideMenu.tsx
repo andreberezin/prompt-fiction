@@ -1,4 +1,4 @@
-import '../../styles/output-side-menu.scss'
+import '../../styles/outputSideMenu.scss'
 import {GrUpdate} from "react-icons/gr";
 import {TbSeo} from "react-icons/tb";
 

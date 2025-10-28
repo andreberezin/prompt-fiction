@@ -17,36 +17,36 @@ import java.util.Date;
 
 @RestController
 @RequestMapping("/api")
-public class ContentController {
+public class BlogContentController {
 
     private final BlogService blogService;
     private final PDFGeneratorService pdfGeneratorService;
 
-    public ContentController(BlogService blogservice, PDFGeneratorService pdfGeneratorService) {
+    public BlogContentController(BlogService blogservice, PDFGeneratorService pdfGeneratorService) {
         this.blogService = blogservice;
         this.pdfGeneratorService = pdfGeneratorService;
     }
 
     @PostMapping("/blog/generate")
     public BlogResponse generateBlogPost(@RequestBody BlogRequest request) {
-        return blogService.generateBlogPost(request, 1);
+        return blogService.generateContent(request, 1);
     }
 
     @MessageMapping("/blog/update-auto")
     @SendTo("/topic/blog-updated")
     public BlogResponse handleAutoUpdate(@RequestBody BlogResponse editedResponse) {
-        return blogService.updateBlogPost(editedResponse);
+        return blogService.updateContent(editedResponse);
     }
 
     @PostMapping("/blog/update-manual")
     public BlogResponse handleManualUpdate(@RequestBody BlogResponse editedResponse) {
-        return blogService.updateBlogPost(editedResponse);
+        return blogService.updateContent(editedResponse);
     }
 
 
     @PostMapping("/blog/pdf")
     public ResponseEntity<byte[]> generatePdf(@RequestBody BlogResponse editedResponse) {
-        //BlogResponse updatedResponse = blogService.updateBlogPost(editedResponse);
+        //BlogResponse updatedResponse = blogService.updateContent(editedResponse);
 
         byte[] pdfBytes = pdfGeneratorService.generateBlogPDF(editedResponse);
 

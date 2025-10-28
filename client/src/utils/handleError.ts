@@ -20,8 +20,9 @@ export default function handleError(
         // err.response might be undefined
         if (err.response && err.response.data) {
             const { error, message, status } = err.response.data;
-            console.error(`Error: ${error}\n${message}`);
-            setError(`(${status}) ${message}`);
+            console.error(`Error: ${status} ${error}\n${message}`);
+            //setError(`(${status}) ${message}`);
+            setError(`${message}`);
         } else {
             // fallback if no response data
             console.error("Axios error without response data:", err.message);
@@ -35,5 +36,5 @@ export default function handleError(
 
     errorTimeoutId.current = setTimeout(() => {
         setError("")
-    }, 10000)
+    }, 100000)
 }

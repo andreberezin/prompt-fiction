@@ -9,15 +9,43 @@
   width: 100%;
   font-size: 0.8rem;
   margin-top: auto;
+  position: relative;
+
+  &::before {
+	content: 'Gemini 2.5 AI models';
+	position: absolute;
+	letter-spacing: 3px;
+	top: -10px;
+	left: 50%;
+	transform: translateX(-50%);
+	color: variables.$text-color-dark;
+	white-space: nowrap;
+  }
 
   label {
 	@include mixins.flex-centered;
 	position: relative;
-	width: fit-content;
+	//width: fit-content;
 	cursor: pointer;
 	transition: color 0.1s ease-in-out;
 	padding: 0.5rem;
 	margin-bottom: 0 !important;
+	white-space: nowrap;
+	//overflow: hidden;
+	width: 33%;
+
+	.model-short {
+	  display: none;
+	}
+
+	@media (max-width: 600px) {
+	  .model-full {
+		display: none;
+	  }
+	  .model-short {
+		display: inline;
+	  }
+	}
 
 	input[type="radio"] {
 	  display: none;
@@ -38,16 +66,17 @@
 	&::after {
 	  content: attr(data-tooltip);
 	  position: absolute;
-	  bottom: -10px;
+	  bottom: -8px;
 	  right: 50%;
 	  transform: translateX(50%);
 	  width: fit-content;
 	  white-space: nowrap;
 	  opacity: 0;
 	  background-color: transparent;
-	  color: variables.$text-color-light;
+	  color: variables.$text-color-dark;
 	  border-radius: 10px;
 	  transition: all 0.1s ease-in-out;
+	  font-size: 0.75rem;
 	}
 
 	&:hover {

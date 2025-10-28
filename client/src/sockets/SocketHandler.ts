@@ -1,30 +1,25 @@
 import SockJS from 'sockjs-client'
-import {Client, type IMessage} from "@stomp/stompjs";
+import {Client, type IMessage, type StompSubscription} from "@stomp/stompjs";
 import * as React from "react";
-import type BlogResponseType from "../types/BlogResponse.ts";
+import type {ContentType} from "../types/ContentType.ts";
 
-// interface socketProps {
-//     setRetryCounter: React.Dispatch<React.SetStateAction<number>>;
-//     setStatus: React.Dispatch<React.SetStateAction<string>>;
-// }
+interface HasExportFormats {
+    exportFormats: {
+        markdown: string;
+        plainText: string;
+        richText: string;
+        pdfReady: boolean;
+    };
+}
 
 export default class SocketHandler {
-    // eslint-disable-next-line
-    // @ts-ignore
-    #client: Client;
+    private client: Client | null = null;
 
     constructor() {}
 
-    setClient(client: Client) {
-        this.#client = client;
-    }
+    createSocketConnection(setIsConnected: React.Dispatch<React.SetStateAction<boolean>>) {
 
-    createSocketConnection(
-        setRetryCounter?: React.Dispatch<React.SetStateAction<number>>,
-        setStatus?: React.Dispatch<React.SetStateAction<string>>,
-        setBlogResponse?: React.Dispatch<React.SetStateAction<BlogResponseType>>
-    ) {
-        if (this.#client) {
+        if (this.client && this.client.active) {
             console.log("Socket connection already connected");
             return;
         }
@@ -37,57 +32,85 @@ export default class SocketHandler {
             reconnectDelay: 5000,
             onConnect: () => {
                 console.log("Socket Connected");
-
-                stompClient.subscribe('/topic/blog-status', (message: IMessage) => {
-                    //setStatus(message.body);
-                    // setTimeout(() => {
-                    //     setStatus("")
-                    // }, 3000)
-                    //const data = JSON.parse(message.body);
-                    if (setStatus) setStatus(message.body ?? "");
-                    console.log("Status update:", message.body);
-                })
-
-                stompClient.subscribe('/topic/blog-retry', (message: IMessage) => {
-                    //setRetryCounter((prev: number) => prev + 1);
-                    //const data = JSON.parse(message.body);
-                    if (setRetryCounter) {setRetryCounter((prev: number) => prev + 1)}
-                    console.log(message.body);
-                })
-
-                stompClient.subscribe('/topic/blog-updated', (message: IMessage) => {
-                    const data = JSON.parse(message.body);
-                    if (setBlogResponse) {
-                        setBlogResponse(prev => ({
-                            ...prev, // keep everything from local state
-                            ...data,
-                            exportFormats: {
-                                ...prev.exportFormats,
-                                plainText: data.exportFormats.plainText,
-                                pdfReady: data.exportFormats.pdfReady,
-                                // markdown untouched
-                            }
-                        }));
-                    }
-                })
-
-                // stompClient.subscribe('/email', (data) => {
-                //     // callback
-                //     console.log(data);
-                // })
+                setIsConnected(true);
             },
             onStompError: (frame) => {
                 console.error("Broker reported error: ", frame);
             },
             onDisconnect: () => {
                 console.log("Socket disconnected");
+                setIsConnected(false);
             }
         })
 
-        this.setClient(stompClient);
+        this.client = stompClient;
 
         stompClient.activate();
         return stompClient;
+    }
+
+    disconnect() {
+        if (this.client && this.client.active) {
+            this.client.deactivate();
+            this.client = null;
+        }
+    }
+
+
+    getClient() {
+        return this.client;
+    }
+
+    subscribeToStatusUpdates(
+        contentType: ContentType,
+        setStatus: React.Dispatch<React.SetStateAction<string>>
+    ): StompSubscription | null {
+        if (this.client && this.client.active) {
+            return this.client.subscribe(`/topic/${contentType}-status`, (message: IMessage) => {
+                const body = message.body ?? "";
+                if (setStatus) setStatus(body);
+                console.log("Status update:", body);
+            });
+        } else {
+            console.warn("Socket not connected — cannot subscribe yet.");
+            return null;
+        }
+    }
+
+    subscribeToRetry(contentType: ContentType, setRetryCounter: React.Dispatch<React.SetStateAction<number>>): StompSubscription | null {
+        if (this.client && this.client.active) {
+            return this.client.subscribe(`/topic/${contentType}-retry`, (message: IMessage) => {
+                if (setRetryCounter) setRetryCounter((prev: number) => prev + 1)
+                console.log(message.body);
+            });
+        } else {
+            console.warn("Socket not connected — cannot subscribe yet.");
+            return null;
+        }
+    }
+
+    subscribeToAutoUpdate<T extends HasExportFormats>(contentType: ContentType, setResponse: React.Dispatch<React.SetStateAction<T>>): StompSubscription | null {
+        if (this.client && this.client.active) {
+            return this.client.subscribe(`/topic/${contentType}-updated`, (message: IMessage) => {
+                const data = JSON.parse(message.body);
+                if (setResponse) {
+                    setResponse(prev => ({
+                        ...prev, // keep everything from local state
+                        ...data,
+                        exportFormats: {
+                            ...prev.exportFormats,
+                            plainText: data.exportFormats.plainText,
+                            richText: data.exportFormats.richText,
+                            pdfReady: data.exportFormats.pdfReady,
+                            // markdown untouched
+                        }
+                    }));
+                }
+            })
+        } else {
+            console.warn("Socket not connected — cannot subscribe yet.");
+            return null;
+        }
     }
 
 }

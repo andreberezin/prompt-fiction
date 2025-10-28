@@ -42,7 +42,7 @@
   &::after {
 	content: attr(data-tooltip);
 	position: absolute;
-	top: -30px;
+	top: -18px;
 	right: 50%;
 	transform: translateX(50%);
 	width: fit-content;
@@ -52,7 +52,7 @@
 	color: variables.$text-color-light;
 	border-radius: 10px;
 	transition: all 0.1s ease-in-out;
-	font-size: 0.8rem;
+	font-size: 0.75rem;
   }
 
   &#copy-button::after {

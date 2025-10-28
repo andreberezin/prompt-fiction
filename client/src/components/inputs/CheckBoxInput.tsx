@@ -11,7 +11,6 @@ export default function CheckBoxInput({value, setValue, id, text}:CheckBoxInputP
     return (
             <label
                 id={id}
-                className='short'
             >
                 {text}
                 <input

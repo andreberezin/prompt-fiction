@@ -1,50 +1,22 @@
 import './styles/App.scss'
-import NavBar from "./components/NavBar.tsx";
-import {useEffect, useRef, useState} from "react";
+import NavBar from "./components/main/NavBar.tsx";
+import {useState} from "react";
 import type {ContentType} from "./types/ContentType.ts";
-import BlogForm from "./components/form-input/BlogForm.tsx";
-import EmailForm from "./components/form-input/EmailForm.tsx";
-import SocketHandler from "./sockets/SocketHandler.ts";
-import type {Client} from "@stomp/stompjs";
-import type BlogResponseType from "./types/BlogResponse.ts";
+import Blog from "./components/main/Blog.tsx";
+import {SocketProvider} from "./components/context/SocketProvider.tsx";
+import Email from "./components/main/Email.tsx";
 
 function App() {
     const [contentType, setContentType] = useState<ContentType>('blog');
-    const [retryCounter, setRetryCounter] = useState<number>(0);
-    const [status, setStatus] = useState<string>("");
-    const stompClientRef = useRef<Client | null | undefined>(null);
-
-    const [blogResponse, setBlogResponse] = useState<BlogResponseType>({
-        title: '',
-        sections: [],
-        metadata: {
-            wordCount: 0,
-            estimatedReadTime: '0 min',
-            seoKeywords: [],
-        },
-        exportFormats: {
-            markdown: '',
-            plainText: '',
-            pdfReady: false,
-        },
-        content: '',
-        attempts: 0,
-    });
-
-    // establish a websocket connection
-    useEffect(() => {
-        const socketHandler = new SocketHandler();
-        stompClientRef.current = socketHandler.createSocketConnection(setRetryCounter, setStatus, setBlogResponse);
-        return () => {stompClientRef.current?.deactivate()}
-    }, [])
-
 
   return (
-    <div id={'ghostwriter'}>
+      <SocketProvider>
+    <div className={'ghostwriter'}>
         <NavBar contentType={contentType} setContentType={setContentType}/>
-        {contentType === 'blog' && <BlogForm blogResponse={blogResponse} setBlogResponse={setBlogResponse} retryCounter={retryCounter} setRetryCounter={setRetryCounter} status={status} setStatus={setStatus} stompClient={stompClientRef}/> }
-        {contentType === 'email' && <EmailForm/> }
+        {contentType === 'blog' && <Blog/> }
+        {contentType === 'email' && <Email/> }
     </div>
+      </SocketProvider>
   )
 }
 

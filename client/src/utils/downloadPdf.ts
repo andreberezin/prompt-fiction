@@ -1,18 +1,17 @@
 import axios from "axios";
 import * as React from "react";
-import type BlogResponseType from "../types/BlogResponse.ts";
 
-interface DownloadPdfProps{
-    blogResponseRef: React.RefObject<BlogResponseType>;
+interface DownloadPdfProps<T> {
+    responseRef: React.RefObject<T>;
     setError: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export default async function downloadPdf ({blogResponseRef, setError}: DownloadPdfProps) {
+export default async function downloadPdf<T> ({responseRef, setError}: DownloadPdfProps<T>) {
 
     try {
         const response = await axios.post(
             '/api/blog/pdf',
-            blogResponseRef.current,
+            responseRef.current,
             {
                 headers: { 'Content-Type': 'application/json' },
                 responseType: 'blob',

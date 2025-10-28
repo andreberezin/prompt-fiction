@@ -14,6 +14,7 @@ export type Section = {
 export type ExportFormats = {
     markdown: string;
     plainText: string;
+    richText: string;
     pdfReady: boolean;
 }
 
@@ -26,4 +27,22 @@ export default interface BlogResponseType {
     attempts: number;
     // wordCount?: number;
     // keywords?: string[];
+}
+
+export const emptyBLogResponse: BlogResponseType = {
+    title: '',
+    sections: [],
+    metadata: {
+        wordCount: 0,
+        estimatedReadTime: '0 min',
+        seoKeywords: [],
+    },
+    exportFormats: {
+        markdown: '',
+        plainText: '',
+        richText: '',
+        pdfReady: false,
+    },
+    content: '',
+    attempts: 0
 }

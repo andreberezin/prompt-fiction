@@ -1,19 +1,12 @@
 import {MdKeyboardDoubleArrowRight} from "react-icons/md";
-import '../../styles/buttons.scss'
-import type BlogRequest from "../../types/BlogRequest.ts";
+import '../../styles/clearAndSubmitButtons.scss'
 
 interface SubmitButtonProps {
     loadingState: boolean;
-    request: BlogRequest;
+    isValid: boolean;
 }
 
-export default function SubmitButton({loadingState, request}: SubmitButtonProps) {
-
-    const invalidContent:boolean =
-        !request.topic || request.topic === "" ||
-        !request.tone || request.tone === "" ||
-        !request.targetAudience || request.targetAudience === "" ||
-        !request.expertiseLevel || request.expertiseLevel === "";
+export default function SubmitButton({loadingState, isValid}: SubmitButtonProps) {
 
     return (
         <div
@@ -23,8 +16,8 @@ export default function SubmitButton({loadingState, request}: SubmitButtonProps)
                 // todo disable if some fields are empty
                 type='submit'
                 id={'submit-button'}
-                className={`${(loadingState || invalidContent) ? "disabled" : ""}`}
-                disabled={loadingState || invalidContent}
+                className={`${(loadingState || !isValid) ? "disabled" : ""}`}
+                disabled={loadingState || !isValid}
             >
                 <MdKeyboardDoubleArrowRight className='icon' id={'submit-icon'}/>
             </button>

@@ -1,16 +1,16 @@
 import { RiDeleteBin2Line } from "react-icons/ri";
-import '../../styles/buttons.scss'
+import '../../styles/clearAndSubmitButtons.scss'
 import * as React from "react";
-import type BlogFormData from "../../types/BlogRequest.ts";
 
-interface ClearButtonProps {
-    setRequest: React.Dispatch<React.SetStateAction<BlogFormData>>,
+
+interface ClearButtonProps<T> {
+    setRequest: React.Dispatch<React.SetStateAction<T>>,
     loadingState: boolean;
-    // setOutput: React.Dispatch<React.SetStateAction<Output>;
+    resetValue: T;
 }
 
 
-export default function ClearButton({setRequest, loadingState}: ClearButtonProps) {
+export default function ClearButton<T>({setRequest, loadingState, resetValue}: ClearButtonProps<T>) {
 
     return (
         <div
@@ -21,18 +21,7 @@ export default function ClearButton({setRequest, loadingState}: ClearButtonProps
                 id='clear-button'
                 className={`${loadingState ? "disabled" : ""}`}
                 disabled={loadingState}
-                onClick={() => {
-                    setRequest({
-                        aimodel: {model: "gemini-2.5-flash", tooltip: "Fast and intelligent"},
-                        contentType: "blog",
-                        topic: '',
-                        targetAudience: '',
-                        tone: '',
-                        expertiseLevel: '',
-                        wordCount: 1000,
-                        seoFocus: false
-                    })
-                }}
+                onClick={() => setRequest(resetValue)}
             >
                 <RiDeleteBin2Line className='icon' id={'clear-icon'}/>
             </button>

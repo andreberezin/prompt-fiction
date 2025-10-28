@@ -6,12 +6,11 @@ import axios from "axios";
 import type {PrepareForRequestProps} from "./prepareForRequest.ts";
 import * as React from "react";
 import type {ContentType} from "../types/ContentType.ts";
-import type BlogResponseType from "../types/BlogResponse.ts";
 
 interface updateResponseObjectProps<T> extends PrepareForRequestProps {
     responseRef:  React.RefObject<T>;
     abortControllerRef: React.RefObject<AbortController | null>;
-    setResponse: React.Dispatch<React.SetStateAction<BlogResponseType>>;
+    setResponse: React.Dispatch<React.SetStateAction<T>>;
     setStatus: React.Dispatch<React.SetStateAction<string>>;
     setError: React.Dispatch<React.SetStateAction<string>>;
     type: ContentType;
@@ -30,6 +29,7 @@ export default async function updateResponseObject<T>( {setGenerationTime, gener
         console.log("Response:", response);
         setStatus("")
     } catch (err) {
+        setStatus("")
         handleError(err, setError, errorTimeoutId);
     } finally {
         cleanupAfterApiRequest(generationTimeInterval, abortControllerRef, setLoadingState);
