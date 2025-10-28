@@ -1,17 +1,16 @@
 import * as React from "react";
 
-interface TextInputProps<T extends object> {
+interface TextInputProps<T> {
     request: T;
-    setRequest: React.Dispatch<React.SetStateAction<T>>;
     id: keyof T;
     placeholder: string;
     autoFocus?: boolean;
     short?: boolean;
+    required?: boolean;
     setValue: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-// @ts-expect-error cancelRequest is here for later use
-export default function TextInput<T extends object>({request, setRequest, id, placeholder, setValue, autoFocus = false, short = false}: TextInputProps<T>){
+export default function TextInput<T>({request, id, placeholder, setValue, autoFocus = false, short = false, required = false}: TextInputProps<T>){
 
     const togglePlaceholder = (value: string, labelId: string ) => {
         const labelElement = document.getElementById(labelId);
@@ -34,7 +33,7 @@ export default function TextInput<T extends object>({request, setRequest, id, pl
         <label
             id={String(id)}
             className={`${!short ? "long" : "short"} placeholder`}
-            data-placeholder={placeholder}
+            data-placeholder={required ? `${placeholder}*` : placeholder}
             onMouseEnter={() => showPlaceholder(String(id))}
             onMouseLeave={() => hideplaceholder(String(value ?? ""), String(id))}
         >
@@ -43,7 +42,7 @@ export default function TextInput<T extends object>({request, setRequest, id, pl
                 type='text'
                 name={String(id)}
                 maxLength={100}
-                placeholder={placeholder}
+                placeholder={required ? `${placeholder}*` : placeholder}
                 value={String(value ?? "")}
                 onChange={(e) => {
                     togglePlaceholder(e.target.value, String(id));

@@ -4,16 +4,16 @@ import '../../styles/outputUpperContainer.scss'
 import '../../styles/HoverIconButtons.scss'
 import * as React from "react";
 import {useState} from "react";
-import type BlogResponseType from "../../types/BlogResponseType.ts";
 import {TextArea} from "./TextArea.tsx";
 import type {FormatOptions} from "../../types/FormatType.ts";
 import {FormatContainer} from "./FormatContainer.tsx";
 import {MetadataContainer} from "./MetadataContainer.tsx";
 import {ButtonContainer} from "./ButtonContainer.tsx";
+import type EmailResponseType from "../../types/EmailResponseType.ts";
 
-interface BlogOutputProps {
-    blogResponse: BlogResponseType;
-    setBlogResponse: React.Dispatch<React.SetStateAction<BlogResponseType>>;
+interface EmailOutputProps {
+    response: EmailResponseType;
+    setResponse: React.Dispatch<React.SetStateAction<EmailResponseType>>;
     loadingState: boolean;
     error: string;
     showForm: boolean;
@@ -27,11 +27,11 @@ interface BlogOutputProps {
     setShowSEO: React.Dispatch<React.SetStateAction<boolean>>;
     retryCounter: number;
     status: string;
-    blogResponseRef: React.RefObject<BlogResponseType>;
+    responseRef: React.RefObject<EmailResponseType>;
 }
 
-export default function BlogOutput({blogResponse, setBlogResponse, loadingState, error, showForm, setShowForm, generationTime, setError, isTextEdited, setIsTextEdited, updateResponseObject,
-                                       showSEO, setShowSEO, retryCounter, status, blogResponseRef}: BlogOutputProps) {
+export default function EmailOutput({response, setResponse, loadingState, error, showForm, setShowForm, generationTime, setError, isTextEdited, setIsTextEdited, updateResponseObject,
+                                       showSEO, setShowSEO, retryCounter, status, responseRef}: EmailOutputProps) {
     const [currentFormat, setCurrentFormat] = useState<FormatOptions>({markdown: true, plainText: false, richText: false});
 
     return (
@@ -41,12 +41,12 @@ export default function BlogOutput({blogResponse, setBlogResponse, loadingState,
             tabIndex={0}
         >
             <div id='upper-container'>
-                <FormatContainer<BlogResponseType>
+                <FormatContainer
                     loadingState={loadingState}
                     currentFormat={currentFormat}
                     setCurrentFormat={setCurrentFormat}
-                    response={blogResponse}
-                    responseRef={blogResponseRef}
+                    response={response}
+                    responseRef={responseRef}
                     setError={setError}
                     markdown={true}
                     plainText={true}
@@ -55,23 +55,23 @@ export default function BlogOutput({blogResponse, setBlogResponse, loadingState,
                     updateResponseObject={updateResponseObject}
                 />
 
-                <MetadataContainer<BlogResponseType>
+                <MetadataContainer
                     retryCounter={retryCounter}
                     generationTime={generationTime}
-                    response={blogResponse}
+                    response={response}
                     wordCount={true}
                     estimateReadTime={true}
                     generationTimer={true}/>
 
                 <ButtonContainer
                     isTextEdited={isTextEdited}
-                    response={blogResponse}
+                    response={response}
                     showSEO={showSEO}
                     setShowSEO={setShowSEO}
                     showForm={showForm}
                     setShowForm={setShowForm}
                     updateResponseObject={updateResponseObject}
-                    SEO={true}
+                    SEO={false}
                     refresh={true}
                     fullscreen={true}
                 />
@@ -81,11 +81,11 @@ export default function BlogOutput({blogResponse, setBlogResponse, loadingState,
             <div
                 id='lower-container'
             >
-                <TextArea<BlogResponseType>
+                <TextArea
                     currentFormat={currentFormat}
-                    response={blogResponse}
-                    setResponse={setBlogResponse}
-                    responseRef={blogResponseRef}
+                    response={response}
+                    setResponse={setResponse}
+                    responseRef={responseRef}
                     status={status}
                     error={error}
                     setIsTextEdited={setIsTextEdited}

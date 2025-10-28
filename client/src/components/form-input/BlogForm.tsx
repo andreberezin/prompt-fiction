@@ -1,6 +1,6 @@
 import '../../styles/form.scss'
 import * as React from "react";
-import type BlogResponseType from "../../types/BlogResponse.ts";
+import type BlogResponseType from "../../types/BlogResponseType.ts";
 import AImodelChoice from "../buttons/AImodel.tsx";
 import DeleteAndSubmitButtonContainer from "../buttons/DeleteAndSubmitButtonContainer.tsx";
 import TextInput from "../inputs/TextInput.tsx";
@@ -8,36 +8,27 @@ import RangeInput from "../inputs/RangeInput.tsx";
 import CheckBoxInput from "../inputs/CheckBoxInput.tsx";
 import setValue from "../../utils/setValue.ts";
 import prepareForRequest from "../../utils/prepareForRequest.ts";
-import resetResponseObject from "../../utils/resetResponseObject.ts";
 import handleSubmit from "../../utils/handleSubmit.ts";
-import type BlogRequestType from "../../types/BlogRequest.ts";
+import type BlogRequestType from "../../types/BlogRequestType.ts";
+import { emptyBlogRequest } from "../../types/BlogRequestType.ts";
+import type {BaseFormProps} from "../../types/BaseFormProps.ts";
+import resetBlogResponseObject from "../../utils/resetBlogResponseObject.ts";
+import {useEffect} from "react";
 
-interface BlogFormProps {
+interface BlogFormProps extends BaseFormProps{
     setBlogResponse: React.Dispatch<React.SetStateAction<BlogResponseType>>;
-
-    setGenerationTime: React.Dispatch<React.SetStateAction<number>>;
-    generationTimeInterval: React.RefObject<number>;
-
-    setIsTextEdited: React.Dispatch<React.SetStateAction<boolean>>;
-    setLoadingState: React.Dispatch<React.SetStateAction<boolean>>;
-
-    errorTimeoutId: React.RefObject<number | null>;
-
-    setStatus: React.Dispatch<React.SetStateAction<string>>;
-    setError: React.Dispatch<React.SetStateAction<string>>;
-    setRetryCounter: React.Dispatch<React.SetStateAction<number>>;
-
-    abortControllerRef: React.RefObject<AbortController>;
-
     blogRequest: BlogRequestType;
     setBlogRequest: React.Dispatch<React.SetStateAction<BlogRequestType>>;
-
-    loadingState: boolean;
 }
 
 export default function BlogForm({setBlogResponse, setGenerationTime,generationTimeInterval, setIsTextEdited, setLoadingState, errorTimeoutId,
                       setStatus, setError, setRetryCounter, abortControllerRef, blogRequest, setBlogRequest, loadingState}: BlogFormProps) {
 
+    const [isValid, setIsValid] = React.useState<boolean>(false);
+
+    useEffect(() => {
+        setIsValid(Boolean(blogRequest.expertiseLevel && blogRequest.targetAudience && blogRequest.tone && blogRequest.topic));
+    }, [blogRequest]);
 
     return (
         <div
@@ -51,59 +42,59 @@ export default function BlogForm({setBlogResponse, setGenerationTime,generationT
 					onSubmit={(e) => {
                         e.preventDefault();
                         prepareForRequest({setGenerationTime, generationTimeInterval, setIsTextEdited, setLoadingState, errorTimeoutId, setStatus, setError, setRetryCounter});
-                        resetResponseObject("blog", setBlogResponse);
+                        resetBlogResponseObject(setBlogResponse);
                         handleSubmit({setError, setStatus, setLoadingState, abortControllerRef, request: blogRequest, setResponse: setBlogResponse, errorTimeoutId, generationTimeInterval});
                     }}
 				>
 					<div className='fields-column fields-column-1' tabIndex={0}>
                         <TextInput
                             request={blogRequest}
-                            setRequest={setBlogRequest}
                             id={'topic'} placeholder={'topic'}
                             setValue={(e) => setValue(e, setBlogRequest)}
                             autoFocus
+                            required
                         />
 					</div>
 
 					<div className='fields-column fields-column-2' tabIndex={0}>
-						<div className='double'>
-							<TextInput
-                                request={blogRequest}
-                                setRequest={setBlogRequest}
-                                id={'targetAudience'}
-                                placeholder={'audience'}
-                                setValue={(e) => setValue(e, setBlogRequest)}
-                                short
-                            />
-							<TextInput
-                                request={blogRequest}
-                                setRequest={setBlogRequest}
-                                id={'tone'}
-                                placeholder={'tone'}
-                                setValue={(e) => setValue(e, setBlogRequest)}
-                                short
-                            />
-						</div>
+                        <TextInput
+                            request={blogRequest}
+                            id={'targetAudience'}
+                            placeholder={'audience'}
+                            setValue={(e) => setValue(e, setBlogRequest)}
+                            required
+                        />
 					</div>
 
 					<div className='fields-column fields-column-3' tabIndex={0}>
 						<div className='double'>
 							<TextInput
                                 request={blogRequest}
-                                setRequest={setBlogRequest}
                                 id={'expertiseLevel'}
                                 placeholder={'expertise'}
                                 setValue={(e) => setValue(e, setBlogRequest)}
+                                required
                                 short
                             />
+                            <TextInput
+                                request={blogRequest}
+                                id={'tone'}
+                                placeholder={'tone'}
+                                setValue={(e) => setValue(e, setBlogRequest)}
+                                required
+                                short
+                            />
+						</div>
+					</div>
+
+                    <div className='fields-column fields-column-4 narrow' tabIndex={0}>
                             <CheckBoxInput
                                 value={blogRequest.seoFocus}
                                 setValue={(e) => setValue(e, setBlogRequest)}
                                 id={'seoFocus'}
                                 text={'Seo Focus'}
                             />
-						</div>
-					</div>
+                    </div>
 
 					<div className='slider-column' tabIndex={0}>
 						<RangeInput
@@ -115,9 +106,9 @@ export default function BlogForm({setBlogResponse, setGenerationTime,generationT
                         />
 					</div>
 
-					<AImodelChoice blogRequest={blogRequest} setBlogRequest={setBlogRequest}/>
+					<AImodelChoice<BlogRequestType> request={blogRequest} setRequest={setBlogRequest}/>
 
-					<DeleteAndSubmitButtonContainer loadingState={loadingState} request={blogRequest} setRequest={setBlogRequest} />
+					<DeleteAndSubmitButtonContainer loadingState={loadingState} setRequest={setBlogRequest} resetValue={emptyBlogRequest} isValid={isValid} />
 				</form>
         </div>
     )

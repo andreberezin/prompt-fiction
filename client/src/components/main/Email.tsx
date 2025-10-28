@@ -1,15 +1,15 @@
-import BlogForm from "../form-input/BlogForm.tsx";
-import BlogOutput from "../form-output/BlogOutput.tsx";
-import updateResponseObject from "../../utils/updateResponseObject.ts";
 import {useEffect, useRef, useState} from "react";
-import type BlogResponseType from "../../types/BlogResponseType.ts";
-import { emptyBLogResponse } from "../../types/BlogResponseType.ts";
 import {useSocket} from "../context/useSocket.tsx";
 import type {StompSubscription} from "@stomp/stompjs";
-import type BlogRequestType from "../../types/BlogRequestType.ts";
 import '../../styles/main.scss'
+import type EmailRequestType from "../../types/EmailRequestType.ts";
+import type EmailResponseType from "../../types/EmailResponseType.ts";
+import { emptyEmailResponse } from "../../types/EmailResponseType.ts";
+import EmailForm from "../form-input/EmailForm.tsx";
+import EmailOutput from "../form-output/EmailOutput.tsx";
+import updateResponseObject from "../../utils/updateResponseObject.ts";
 
-export default function Blog() {
+export default function Email() {
     const {stompClient, socketHandler, isConnected} = useSocket();
 
     const errorTimeoutId = useRef<number>(0);
@@ -25,21 +25,22 @@ export default function Blog() {
     const [showSEO, setShowSEO] = useState<boolean>(true);
     const [error, setError] = useState<string>("");
 
-    const [blogRequest, setBlogRequest] = useState<BlogRequestType>({
+    const [emailRequest, setEmailRequest] = useState<EmailRequestType>({
         aimodel: {
             model: 'gemini-2.5-flash-lite',
             tooltip: 'ultra fast'
         },
-        contentType: 'blog',
-        topic: 'How to cook pasta',
-        targetAudience: 'anyone',
-        tone: 'engaging',
-        expertiseLevel: 'beginner',
-        wordCount: 300,
-        seoFocus: true,
+        contentType: 'email',
+        wordCount: 100,
+        purpose: 'Get the spreadsheet done this week',
+        keyPoints: '',
+        recipientContext: 'colleague',
+        tone: 'passive-aggressive',
+        urgencyLevel: 'very urgent',
+        cta: '',
     })
-    const [blogResponse, setBlogResponse] = useState<BlogResponseType>(emptyBLogResponse);
-    const blogResponseRef = useRef(blogResponse);
+    const [emailResponse, setEmailResponse] = useState<EmailResponseType>(emptyEmailResponse);
+    const emailResponseRef = useRef(emailResponse);
 
     // handle the necessary socket connection subscriptions
     useEffect(() => {
@@ -47,14 +48,14 @@ export default function Blog() {
 
         const subs: StompSubscription[] = [];
 
-        const blogStatusSub = socketHandler.current.subscribeToStatusUpdates("blog", setStatus);
-        if (blogStatusSub) subs.push(blogStatusSub);
+        const emailStatusSub = socketHandler.current.subscribeToStatusUpdates("email", setStatus);
+        if (emailStatusSub) subs.push(emailStatusSub);
 
-        const blogRetrySub = socketHandler.current.subscribeToRetry("blog", setRetryCounter);
-        if (blogRetrySub) subs.push(blogRetrySub);
+        const emailRetrySub = socketHandler.current.subscribeToRetry("email", setRetryCounter);
+        if (emailRetrySub) subs.push(emailRetrySub);
 
-        const blogUpdatedSub = socketHandler.current.subscribeToAutoUpdate("blog", setBlogResponse);
-        if (blogUpdatedSub) subs.push(blogUpdatedSub);
+        const emailUpdatedSub = socketHandler.current.subscribeToAutoUpdate("email", setEmailResponse);
+        if (emailUpdatedSub) subs.push(emailUpdatedSub);
 
         return () => {
             subs.forEach((sub) => sub.unsubscribe());
@@ -68,14 +69,14 @@ export default function Blog() {
     }, [])
 
     useEffect(() => {
-        blogResponseRef.current = blogResponse;
-    }, [blogResponse]);
+        emailResponseRef.current = emailResponse;
+    }, [emailResponse]);
 
     return (
-        <div id={'blog'}>
+        <div id={'email'}>
             {showForm &&
-				<BlogForm
-					setBlogResponse={setBlogResponse}
+				<EmailForm
+					setEmailResponse={setEmailResponse}
                     setGenerationTime={setGenerationTime}
                     generationTimeInterval={generationTimeInterval}
                     setIsTextEdited={setIsTextEdited}
@@ -85,14 +86,14 @@ export default function Blog() {
                     setError={setError}
                     setRetryCounter={setRetryCounter}
                     abortControllerRef={abortControllerRef}
-                    blogRequest={blogRequest}
-                    setBlogRequest={setBlogRequest}
+                    emailRequest={emailRequest}
+                    setEmailRequest={setEmailRequest}
                     loadingState={loadingState}
 				/>
             }
 
-            <BlogOutput blogResponse={blogResponse}
-                        setBlogResponse={setBlogResponse}
+            <EmailOutput response={emailResponse}
+                        setResponse={setEmailResponse}
                         loadingState={loadingState}
                         error={error}
                         setError={setError}
@@ -105,16 +106,16 @@ export default function Blog() {
                         setShowSEO={setShowSEO}
                         retryCounter={retryCounter}
                         status={status}
-                        blogResponseRef={blogResponseRef}
+                        responseRef={emailResponseRef}
                         updateResponseObject={() => updateResponseObject({
                             setGenerationTime,
                             generationTimeInterval,
                             setIsTextEdited,
                             setLoadingState,
                             errorTimeoutId,
-                            responseRef: blogResponseRef,
+                            responseRef: emailResponseRef,
                             abortControllerRef,
-                            setResponse: setBlogResponse,
+                            setResponse: setEmailResponse,
                             setStatus,
                             setError,
                             type: "blog"

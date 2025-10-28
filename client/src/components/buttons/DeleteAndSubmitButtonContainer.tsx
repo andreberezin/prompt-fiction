@@ -1,19 +1,19 @@
 import SubmitButton from "./SubmitButton.tsx";
 import ClearButton from "./ClearButton.tsx";
-import type BlogRequestType from "../../types/BlogRequest.ts";
 import * as React from "react";
 
-interface DeleteAndSubmitButtonContainerProps {
+interface DeleteAndSubmitButtonContainerProps<T> {
     loadingState: boolean;
-    request: BlogRequestType;
-    setRequest: React.Dispatch<React.SetStateAction<BlogRequestType>>;
+    setRequest: React.Dispatch<React.SetStateAction<T>>;
+    resetValue: T;
+    isValid: boolean;
 }
 
-export default function DeleteAndSubmitButtonContainer({loadingState, request, setRequest}: DeleteAndSubmitButtonContainerProps) {
+export default function DeleteAndSubmitButtonContainer<T>({loadingState, setRequest, resetValue, isValid}: DeleteAndSubmitButtonContainerProps<T>) {
     return (
-        <div className='button-container'>
-            <SubmitButton loadingState={loadingState} request={request}/>
-            <ClearButton loadingState={loadingState} setRequest={setRequest}/>
+        <div className='form-buttons-container'>
+            <SubmitButton loadingState={loadingState} isValid={isValid}/>
+            <ClearButton loadingState={loadingState} setRequest={setRequest} resetValue={resetValue}/>
         </div>
     )
 }

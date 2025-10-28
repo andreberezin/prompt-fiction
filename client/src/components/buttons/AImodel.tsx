@@ -1,47 +1,50 @@
 import '../../styles/aimodels.scss'
 import * as React from "react";
-import type BlogRequest from "../../types/BlogRequest.ts";
 import {type AIMODELObject, AImodels} from "../../types/AImodels.ts";
+import type {HasAImodel} from "../../types/HasAImodel.ts";
 
-interface AImodelProps {
-    blogRequest: BlogRequest;
-    setBlogRequest: React.Dispatch<React.SetStateAction<BlogRequest>>,
+
+interface AImodelProps<T extends HasAImodel> {
+    request: T;
+    setRequest: React.Dispatch<React.SetStateAction<T>>,
 }
 
-const renderAImodels = ({ blogRequest, setBlogRequest }: AImodelProps) => {
+const renderAImodels =  <T extends HasAImodel> ({ request, setRequest }: AImodelProps<T>) => {
 
+    // todo on narrower screens make the text shorter so it doesn't go on 2 lines
     return AImodels.map((modelObj: AIMODELObject) => (
         <label
             key={modelObj.model}
             className={`aimodel-button ${
-                blogRequest.aimodel.model === modelObj.model ? "active" : "inactive"
+                request.aimodel.model === modelObj.model ? "active" : "inactive"
             }`}
             data-tooltip={modelObj.tooltip}
         >
             <input
                 type='radio'
                 name='aimodel'
-                checked={blogRequest.aimodel.model === modelObj.model}
+                checked={request.aimodel.model === modelObj.model}
                 value={modelObj.model}
                 onChange={() => {
-                    setBlogRequest({
-                        ...blogRequest,
+                    setRequest({
+                        ...request,
                         aimodel: {
-                            ...blogRequest.aimodel,
+                            ...request.aimodel,
                             model: modelObj.model,
                         },
                     });
                 }}
 
             />
-            {modelObj.model}
+            <span className="model-full">{modelObj.model}</span>
+            <span className="model-short">{modelObj.short}</span>
         </label>
     ));
 };
 
 
 
-export default function AImodelChoice(props: AImodelProps) {
+export default function AImodelChoice<T extends HasAImodel>(props: AImodelProps<T>) {
 
     return (
         <div

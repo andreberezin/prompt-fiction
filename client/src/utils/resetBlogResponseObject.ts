@@ -1,11 +1,8 @@
-import type {ContentType} from "../types/ContentType.ts";
 import * as React from "react";
-import type BlogResponseType from "../types/BlogResponse.ts";
+import type BlogResponseType from "../types/BlogResponseType.ts";
 
-export default function resetResponseObject (
-    type: ContentType,
+export default function resetBlogResponseObject (
     setResponse: React.Dispatch<React.SetStateAction<BlogResponseType>>): void{
-    if (type === "blog") {
         setResponse({
             title: '',
             sections: [],
@@ -22,7 +19,4 @@ export default function resetResponseObject (
             content: '',
             attempts: 0,
         })
-    } else if (type === "email") {
-        console.log("resetting email response object")
-    }
 }

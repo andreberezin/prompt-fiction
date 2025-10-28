@@ -4,7 +4,7 @@ import type {Client} from "@stomp/stompjs";
 import type {ContentType} from "../types/ContentType.ts";
 
 interface HandleAutoUpdateResponseParams<T> {
-    stompClient: React.RefObject<Client | null>;
+    stompClient: React.RefObject<Client | null | undefined>;
     responseRef: React.RefObject<T>;
     debounceDelay?: number;
     contentType: ContentType;
