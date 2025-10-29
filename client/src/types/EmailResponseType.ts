@@ -18,15 +18,15 @@ export default interface EmailResponseType {
 
 export const emptyEmailResponse: EmailResponseType = {
     subject: '',
-        body: '',
-        metadata: {
+    body: '',
+    metadata: {
         wordCount: 0,
-            estimatedReadTime: '0 min',
+        estimatedReadTime: '0 min',
     },
     exportFormats: {
         markdown: '',
-            plainText: '',
-            richText: '',
-            pdfReady: false,
+        plainText: '',
+        richText: '',
+        pdfReady: false,
     },
 }
