@@ -35,10 +35,15 @@ export default function TextInput<T>({request, id, placeholder, setValue, autoFo
             className={`${!short ? "long" : "short"} placeholder`}
             data-placeholder={required ? `${placeholder}*` : placeholder}
             onMouseEnter={() => showPlaceholder(String(id))}
-            onMouseLeave={() => hideplaceholder(String(value ?? ""), String(id))}
+            onMouseLeave={() => {
+                if (document.activeElement !== document.getElementById(`${String(id)}-input`)) {
+                    hideplaceholder(String(value ?? ""), String(id))
+                }
+            }}
         >
             <input
                 autoFocus={autoFocus}
+                id={`${String(id)}-input`}
                 type='text'
                 name={String(id)}
                 maxLength={100}
