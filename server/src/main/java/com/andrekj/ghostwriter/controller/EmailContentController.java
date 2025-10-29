@@ -1,5 +1,6 @@
 package com.andrekj.ghostwriter.controller;
 
+import com.andrekj.ghostwriter.dto.EmailRequest;
 import com.andrekj.ghostwriter.dto.EmailResponse;
 import com.andrekj.ghostwriter.service.EmailService;
 import com.andrekj.ghostwriter.service.PDFGeneratorService;
@@ -30,34 +31,34 @@ public class EmailContentController {
     }
 
     @PostMapping("/email/generate")
-    public EmailResponse generateEmail(@RequestBody emailRequest request) {
-        return emailService.generateContent(request, 1);
+    public EmailResponse generateEmail(@RequestBody EmailRequest request) {
+        return emailService.generateEmail(request, 1);
     }
 
     @MessageMapping("/email/update-auto")
     @SendTo("/topic/email-updated")
     public EmailResponse handleAutoUpdate(@RequestBody EmailResponse editedResponse) {
-        return emailService.updateContent(editedResponse);
+        return emailService.updateEmailResponse(editedResponse);
     }
 
     @PostMapping("/email/update-manual")
     public EmailResponse handleManualUpdate(@RequestBody EmailResponse editedResponse) {
-        return emailService.updateContent(editedResponse);
+        return emailService.updateEmailResponse(editedResponse);
     }
 
 
-    @PostMapping("/email/pdf")
-    public ResponseEntity<byte[]> generatePdf(@RequestBody EmailResponse editedResponse) {
-        //EmailResponse updatedResponse = emailService.updateBlogPost(editedResponse);
-
-        byte[] pdfBytes = pdfGeneratorService.generateEmailPDF(editedResponse);
-
-        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
-        String currentDateTime = dateFormatter.format(new Date());
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=Ghostwriter_email_" + currentDateTime + ".pdf")
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(pdfBytes);
-    }
+//    @PostMapping("/email/pdf")
+//    public ResponseEntity<byte[]> generatePdf(@RequestBody EmailResponse editedResponse) {
+//        //EmailResponse updatedResponse = emailService.updateBlogPost(editedResponse);
+//
+//        byte[] pdfBytes = pdfGeneratorService.generateEmailPDF(editedResponse);
+//
+//        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
+//        String currentDateTime = dateFormatter.format(new Date());
+//
+//        return ResponseEntity.ok()
+//                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=Ghostwriter_email_" + currentDateTime + ".pdf")
+//                .contentType(MediaType.APPLICATION_PDF)
+//                .body(pdfBytes);
+//    }
 }

@@ -1,6 +1,7 @@
 package com.andrekj.ghostwriter.service;
 
 import com.andrekj.ghostwriter.exceptions.AIServiceException;
+import com.andrekj.ghostwriter.exceptions.ContentGenerationException;
 import com.andrekj.ghostwriter.interfaces.BaseResponse;
 import com.google.genai.Client;
 import com.andrekj.ghostwriter.interfaces.BaseRequest;
@@ -9,9 +10,12 @@ import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.ThinkingConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.lang.Math.ceil;
 import static java.lang.Math.min;
@@ -31,36 +35,6 @@ public abstract class BaseService {
     protected BaseService(Client geminiClient) {
         this.geminiClient = geminiClient;
     }
-
-//    public GenerateContentConfig buildConfig(BaseRequest request) {
-//        float temperature = switch (request.getContentType()) {
-//            case "blog" -> 0.7F;
-//            case "email" -> 0.5F;
-//            default -> 0.7F;
-//        };
-//
-//        //int maxTokens = (int) Math.min((int) (request.getWordCount() * 1.1) * 0.75, 5000);
-//        int desiredOutputTokens = (int) (ceil(request.getWordCount() / 0.75) * 1.1);
-//        System.out.println("\n" + "\u001B[32m" + "DesiredOutputTokens:" + desiredOutputTokens + "\u001B[0m");
-//
-//        //int thinkingBudget = min(0.25 * maxTokens, model_max_thinking_budget);
-//        int thinkingBudget = calculateThinkingBudget(request.getAimodel(), aiModels, desiredOutputTokens);
-//        int maxOutputTokens = desiredOutputTokens + thinkingBudget;
-//        System.out.println("\u001B[32m" + "MaxOutputTokens:" + maxOutputTokens + "\u001B[0m");
-//
-//        ThinkingConfig thinkingConfig = ThinkingConfig.builder()
-//                .thinkingBudget(thinkingBudget)
-//                .includeThoughts(false)
-//                .build();
-//
-//        return GenerateContentConfig.builder()
-//                .temperature(temperature)
-//                .topP(0.9F)
-//                .maxOutputTokens(maxOutputTokens)
-//                .thinkingConfig(thinkingConfig)
-//                .build();
-//    }
-
 
     private static final Map<String, Integer> MODEL_DEFAULT_THINKING = Map.of(
             "gemini-2.5-flash-lite", 512,
@@ -202,5 +176,39 @@ public abstract class BaseService {
         int lowerLimit = (int) Math.ceil(desiredWordCount * 0.9);
         int upperLimit = (int) Math.floor(desiredWordCount * 1.1);
         return actualWordCount >= lowerLimit && actualWordCount <= upperLimit;
+    }
+
+    protected String convertLineToPLainText(String line) {
+
+        String plainLine = line
+                .replaceAll("#+", "") // headers
+                .replaceAll("\\*", "") // remove seo markers (bold) ("\\*\\*(.*?)\\*\\*", "$1")
+                .replaceAll("_([^_]+)_", "$1") // italics
+                .trim();
+
+        return plainLine;
+    }
+
+    protected String cleanupText(String text) {
+        if (text == null) return "";
+        text = text.trim()
+                .replaceAll("\\r\\n|\\r", "\n")
+                .replaceAll("(?i)As an AI.*?\\.", "");
+        return Arrays.stream(text.split("\n"))
+                .map(String::stripTrailing)
+                .collect(Collectors.joining("\n"));
+    }
+
+    protected String calculateReadtime(int wordCount) {
+        int wordsPerMinute = 200;
+        int minutes = (int) Math.ceil(wordCount / (double) wordsPerMinute);
+        return (minutes + " min");
+    }
+
+    protected void handleTooManyRetriesError(String contentType, int retryCount, SimpMessagingTemplate messagingTemplate) {
+        System.out.println("Too many retries");
+        String payload = contentType.substring(0, 1).toUpperCase() + contentType.substring(1) + " generation failed after " + retryCount + " attempts.";
+        messagingTemplate.convertAndSend("/topic/" + contentType + "-status", payload);
+        throw new ContentGenerationException(payload);
     }
 }

@@ -16,48 +16,47 @@ import java.util.stream.Collectors;
 
 @Service
 public class BlogService extends BaseService {
-    private GenerateContentResponse response;
-    private BlogRequest blogRequest;
-    private BlogResponse blogResponse;
-    private String modifications;
-    private GenerateContentConfig config;
+//    private GenerateContentResponse response;
+//    private BlogRequest blogRequest;
+//    private BlogResponse blogResponse;
+//    private String modifications;
+//    private GenerateContentConfig config;
 
     private final PDFGeneratorService pdfGeneratorService;
     private final SimpMessagingTemplate messagingTemplate;
 
 
-    public BlogService(Client geminiClient, PDFGeneratorService pdfGeneratorService, SimpMessagingTemplate messagingTemplate) {super(geminiClient);
+    public BlogService (Client geminiClient, PDFGeneratorService pdfGeneratorService, SimpMessagingTemplate messagingTemplate) {super(geminiClient);
         this.pdfGeneratorService = pdfGeneratorService;
         this.messagingTemplate = messagingTemplate;
     }
 
-    public BlogResponse generateContent(BlogRequest request, int attempt) {
-        this.blogRequest = request;
+    public BlogResponse generateBlog(BlogRequest request, int attempt) {
+        //this.blogRequest = request;
 
         //messagingTemplate.convertAndSend("/topic/blog-retry", "Starting generation...");
         if (attempt == 1) messagingTemplate.convertAndSend("/topic/blog-status", "Generating blog..");
 
         //try {
-            // set max retries based on selected ai model
-            if (request.getAimodel().equalsIgnoreCase("gemini-2.5-pro")) {
-                MAX_RETRIES = 2;
-            }
-            // 1. Normalize input (word count range, tone, etc.)
-            normalizeBlogInput(request);
 
+        // gemini-2.5-pro has max 2 requests per minute on free tier
+            if (request.getAimodel().equalsIgnoreCase("gemini-2.5-pro")) MAX_RETRIES = 2;
+
+            // 1. Normalize input (word count range, tone, etc.)
+            normalizeBlogRequest(request);
+
+            // 1.5 prepare for prompt building and validation
             String prompt = null;
             BlogResponse blogResponse = null;
             List<String> validationErrors = new ArrayList<>();
             int currentAttempt = attempt;
 
+            // 2. build the prompt
             for (; currentAttempt <= MAX_RETRIES; currentAttempt++) {
                 messagingTemplate.convertAndSend("/topic/blog-retry", "Starting generation...");
-                // 2. build prompt
-                if (currentAttempt == 1) {
-                    // 2.1 regular prompt
+                if (currentAttempt == 1) { // 2.1 regular prompt
                     prompt = generateBlogPrompt(request);
-                } else {
-                    // 2.2 Regenerate prompt based on last response and errors
+                } else { // 2.2 Regenerate prompt based on last response and errors
                     prompt = regenerateBlogPrompt(request, blogResponse, validationErrors);
                     System.out.println("Retrying blog generation (attempt " + currentAttempt + ")\n");
                     messagingTemplate.convertAndSend("/topic/blog-status", "Generated content was not up to code. Retrying...");
@@ -80,17 +79,14 @@ public class BlogService extends BaseService {
                 }
             }
 
-            if (validationErrors != null && !validationErrors.isEmpty()) {
-                System.out.println("Too many retries");
-                String payload = "Blog generation failed after " + MAX_RETRIES + " attempts.";
-                messagingTemplate.convertAndSend("/topic/blog-status", payload);
-                throw new ContentGenerationException("Blog generation failed after " + MAX_RETRIES + " attempts.");
+            if (!validationErrors.isEmpty()) {
+                handleTooManyRetriesError("blog", MAX_RETRIES, messagingTemplate);
             }
 
             // 6. clean up response
             cleanupResponse(blogResponse);
 
-            // 7. prepare pdf format
+            // 7. Prepare pdf format
             preparePdfFormat(blogResponse);
 
             // return response object
@@ -101,12 +97,12 @@ public class BlogService extends BaseService {
 //        }
     }
 
-    private void normalizeBlogInput(BlogRequest request) {
+    private void normalizeBlogRequest(BlogRequest request) {
         request.setTopic(request.getTopic().trim().toLowerCase());
         request.setTargetAudience(request.getTargetAudience().trim().toLowerCase());
         request.setTone(request.getTone().trim().toLowerCase());
         request.setExpertiseLevel(request.getExpertiseLevel().trim().toLowerCase());
-        request.setWordCount(Math.max(10, Math.min(request.getWordCount(), 2000)));
+        request.setWordCount(Math.max(100, Math.min(request.getWordCount(), 2000)));
     }
 
 
@@ -116,19 +112,49 @@ public class BlogService extends BaseService {
          int minWordCount = (int) (request.getWordCount() * 0.90); // because the valid range is -10% to +10% and gemini keeps overshooting it
          int maxWordCount = (int) (request.getWordCount() * 1.10);
 
-        // todo edit prompt - doesn't always include a conclusion
-         String prompt = "You are an expert content writer specializing in " + request.getContentType() + "s.\n" +
-                 "Write a " + request.getTone() + ", " + request.getExpertiseLevel() + "-level " + request.getContentType() + " about '" + request.getTopic() + "' for " +
-                 request.getTargetAudience() + ".  Target length is between " + minWordCount + " and " + maxWordCount + " words, do not exceed this limit" + ".\n" +
-//                 "Requirements:\n" +
-//                 "- Target length: " + request.getWordCount() + " words\n" +
-//                 "- Tone: " + request.getTone() + "\n" +
-                 "- Structure: #Title, ##Introduction, " + sectionCount + " main sections (titled ##), a short ##Conclusion\n" +
-                 (request.isSeoFocus() ? "- Include 5 SEO keywords and wrap them in _italics_ markdown \n" : "") +
-                  "Format your response in Markdown.";
+         //StringBuilder prompt2 = new StringBuilder();
 
+//         prompt2.append("You are an expert content writer specializing in ").append(request.getContentType()).append("s.\n")
+//                 .append("Write a ").append(request.getTone()).append(" ").append(", ").append(request.getExpertiseLevel()).append("-level").append();
+
+//         String prompt = "You are an expert content writer specializing in " + request.getContentType() + "s.\n" +
+//                 "Write a " + request.getTone() + ", " + request.getExpertiseLevel() + "-level " + request.getContentType() + " about '" + request.getTopic() + "' for " +
+//                 request.getTargetAudience() + ".  Target length is between " + minWordCount + " and " + maxWordCount + " words, do not exceed this limit" + ".\n" +
+////                 "Requirements:\n" +
+////                 "- Target length: " + request.getWordCount() + " words\n" +
+////                 "- Tone: " + request.getTone() + "\n" +
+//                 "- Structure: #Title, ##Introduction, " + sectionCount + " main sections (titled ##), a short ##Conclusion\n" +
+//                 (request.isSeoFocus() ? "- Include 5 SEO keywords and wrap them in _italics_ markdown \n" : "") +
+//                  "Format your response in Markdown.";
+
+         String basePrompt = String.format("""
+                 You are an expert blog post writer.
+                 Write a %s %s-level blog post about %s for %s.
+                 """,
+                 request.getTone(),
+                 request.getExpertiseLevel(),
+                 request.getTopic(),
+                 request.getTargetAudience());
+
+         String structurePart = String.format("""
+                 Target length: between %d and %d words. Do not exceed this limit.
+                 Format the blog post in markdown without commentary and with these sections:
+                  - #Title
+                  - ##Introduction
+                  - %s ## body sections
+                  - a short ##Conclusion
+                 """,
+                 minWordCount,
+                 maxWordCount,
+                 sectionCount
+                 );
+
+         String seoPart = request.isSeoFocus()
+                 ? ("- Include 5 SEO keywords and wrap them in _italics_ markdown.")
+                 : "";
+
+         String prompt = basePrompt + structurePart + seoPart;
          System.out.println("\n" + "\u001B[34m" + "Prompt: \n" + prompt + "\u001B[0m \n");
-
          return prompt;
      }
 
@@ -143,39 +169,69 @@ public class BlogService extends BaseService {
         String adjustAction = prevWordCount > maxWordCount ? "remove" : "add";
         int wordsToAdjust = Math.abs(prevWordCount - request.getWordCount());
 
-        String prompt = """
-                Here is the blog content previously generated:
-                %s
-                It did not meet the validation requirements because: %s
-                
+        String previousPromptPart = previousResponse.getContent();
+
+        String validationErrorsPart = String.format("""
+                It did not meed the validation requirements because: %s
+                """,
+                reasons);
+
+        // - Preserve valuable existing text when possible
+        String requirementsPart = String.format("""
                 Regenerate the blog so that:
-                - is follows the structure: #Title, ##Introduction, %s main sections (titled ##), a short ##Conclusion
-                - The total word count must be between %d and %d
-                  The previous version had %d words, so please %s approximately %d words to fall within the target range.
+                - It follows the structure:
+                    - #Title
+                    - ##Introduction
+                    - %s ## main sections
+                    - a short ##Conclusion
+                - the total word count must be between %d and %d
+                The previous version had %d words, so %s approximately %d word
                 - The tone, expertise level and target audience remain the same
-                - Preserve valuable existing text when possible
-                - Return Markdown only, no explanations
-                """.formatted(
-                        previousResponse.getContent(),
-                        reasons,
-                        sectionCount,
-                        minWordCount,
-                        maxWordCount,
-                        prevWordCount,
-                        adjustAction,
-                        wordsToAdjust
+                - Return  markdown only, no explanations.
+                """,
+                sectionCount,
+                minWordCount,
+                maxWordCount,
+                prevWordCount,
+                adjustAction,
+                wordsToAdjust
                 );
+
+//        String prompt = """
+//                Here is the blog content previously generated:
+//                %s
+//                It did not meet the validation requirements because: %s
+//
+//                Regenerate the blog so that:
+//                - it follows the structure: #Title, ##Introduction, %s main sections (titled ##), a short ##Conclusion
+//                - The total word count must be between %d and %d
+//                  The previous version had %d words, so %s approximately %d words to fall within the target range.
+//                - The tone, expertise level and target audience remain the same
+//                - Preserve valuable existing text when possible
+//                - Return Markdown only, no explanations
+//                """.formatted(
+//                        previousResponse.getContent(),
+//                        reasons,
+//                        sectionCount,
+//                        minWordCount,
+//                        maxWordCount,
+//                        prevWordCount,
+//                        adjustAction,
+//                        wordsToAdjust
+//                );
+
+        String prompt = previousPromptPart +  validationErrorsPart + requirementsPart;
 
         System.out.println("\n" + "\u001B[34m" + "New prompt: \n" + prompt + "\u001B[0m \n");
 
         return prompt;
     }
 
-     private void processResponse(BlogResponse blogResponse, String markdownResponse ) {
-         if (markdownResponse == null || markdownResponse.isBlank()) return;
-         blogResponse.setContent(markdownResponse);
+     private void processResponse(BlogResponse blogResponse, String rawResponse ) {
+         if (rawResponse == null || rawResponse.isBlank()) return;
+         blogResponse.setContent(rawResponse);
 //        cleanUpAiArtifacts(blogResponse);
-        structureParsing(blogResponse, markdownResponse);
+        structureParsing(blogResponse, rawResponse);
      }
 
      private void structureParsing(BlogResponse blogResponse, String rawText) {
@@ -195,11 +251,11 @@ public class BlogService extends BaseService {
 
         for (String line : lines) {
             line = line.trim();
-            if (line.isEmpty()) continue;
+            if (line.isBlank()) continue;
 
-            String plainline = setPlainText(line); // get plain text format
+            String plainLine = convertLineToPLainText(line); // get plain text format
 
-            metadata.setWordCount(metadata.getWordCount() + countWords(plainline)); // get wordcount
+            metadata.setWordCount(metadata.getWordCount() + countWords(plainLine)); // get wordcount
 
             findSeoKeywords(line, metadata); // find seo keywords
 
@@ -208,13 +264,13 @@ public class BlogService extends BaseService {
             if (cleanLine.startsWith("# ")) { // title
                 blogResponse.setTitle(line.substring(1).trim());
 
-                plainTextBuilder.append("\n").append(plainline).append("\n\n");
+                plainTextBuilder.append("\n").append(plainLine).append("\n\n");
 //                if (!plainTextBuilder.isEmpty()) {
-//                    plainTextBuilder.append("\n").append(plainline).append("\n\\n");
+//                    plainTextBuilder.append("\n").append(plainLine).append("\n\\n");
 //                }
             } else if (cleanLine.startsWith("## ")) { // section
 
-                plainTextBuilder.append("\n").append(plainline).append("\n");
+                plainTextBuilder.append("\n").append(plainLine).append("\n");
 
                 // previous section
                 if (currentSectionType != null && !currentSectionMarkdownContent.isEmpty()) {
@@ -248,10 +304,10 @@ public class BlogService extends BaseService {
                 currentSectionMarkdownContent = new StringBuilder();
                 currentSectionPlainTextContent = new StringBuilder();
             } else {
-                plainTextBuilder.append(plainline).append("\n");
+                plainTextBuilder.append(plainLine).append("\n");
 
                 currentSectionMarkdownContent.append(line).append("\n");
-                currentSectionPlainTextContent.append(plainline).append("\n");
+                currentSectionPlainTextContent.append(plainLine).append("\n");
             }
         }
 
@@ -268,31 +324,17 @@ public class BlogService extends BaseService {
          BlogResponse.ExportFormats exportFormats = new BlogResponse.ExportFormats(
                  rawText, // markdown
                  plainTextBuilder.toString().trim(), // plain text
+                 "", // rich text tbd
                  false // pdf ready
          );
 
          // estimated read time
-         int wordsPerMinute = 200;
-         int minutes = (int) Math.ceil(metadata.getWordCount() / (double) wordsPerMinute);
-         metadata.setEstimatedReadTime(minutes + " min");
+         metadata.setEstimatedReadTime(calculateReadtime(metadata.getWordCount()));
 
          // set all final fields
          blogResponse.setSections(sections);
          blogResponse.setMetadata(metadata);
          blogResponse.setExportFormats(exportFormats);
-     }
-
-     private String setPlainText(String line) {
-
-         String plainLine = line
-                 .replaceAll("#+", "") // headers
-                 .replaceAll("\\*", "") // remove seo markers (bold) ("\\*\\*(.*?)\\*\\*", "$1")
-                 .replaceAll("_([^_]+)_", "$1") // italics
-                 .trim();
-
-//         plainTextBuilder.append(plainLine);
-
-         return plainLine;
      }
 
      private void findSeoKeywords(String line, BlogResponse.Metadata metadata) {
@@ -334,7 +376,7 @@ public class BlogService extends BaseService {
          boolean validWordCount = validateWordCount(blogRequest.getWordCount(), blogResponse.getMetadata().getWordCount());
 
          // validate title
-         boolean hasTitle = blogResponse.getTitle() != null && !blogResponse.getTitle().isEmpty();
+         boolean hasTitle = blogResponse.getTitle() != null && !blogResponse.getTitle().trim().isEmpty();
 
          // validate structure
          boolean firstIsIntro = sections.getFirst().getType().equalsIgnoreCase("introduction");
@@ -421,27 +463,18 @@ public class BlogService extends BaseService {
          for (BlogResponse.Section section : sections) {
              section.setPlainTextContent(cleanupText(section.getPlainTextContent()));
              section.setMarkdownContent(cleanupText(section.getMarkdownContent()));
+             section.setRichTextContent(cleanupText(section.getRichTextContent()));
          }
      }
 
-    private String cleanupText(String text) {
-        if (text == null) return "";
-        text = text.trim()
-                .replaceAll("\\r\\n|\\r", "\n")
-                .replaceAll("(?i)As an AI.*?\\.", "");
-        return Arrays.stream(text.split("\n"))
-                .map(String::stripTrailing)
-                .collect(Collectors.joining("\n"));
-    }
-
-     public BlogResponse updateContent(BlogResponse editedResponse) {
+     public BlogResponse updateBlogResponse(BlogResponse editedResponse) {
          String markdown = editedResponse.getExportFormats().getMarkdown();
          if (markdown == null || markdown.trim().isEmpty()) {
              return new BlogResponse(
                      "", // title
                      Collections.emptyList(), // sections
                      new BlogResponse.Metadata(0, new HashSet<>(), "0 min"), // metadata with empty set
-                     new BlogResponse.ExportFormats("", "", false), // exportFormats
+                     new BlogResponse.ExportFormats("", "", "", false), // exportFormats
                      "", // content
                      0 // attempts
              );

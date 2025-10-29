@@ -29,18 +29,18 @@ public class BlogContentController {
 
     @PostMapping("/blog/generate")
     public BlogResponse generateBlogPost(@RequestBody BlogRequest request) {
-        return blogService.generateContent(request, 1);
+        return blogService.generateBlog(request, 1);
     }
 
     @MessageMapping("/blog/update-auto")
     @SendTo("/topic/blog-updated")
     public BlogResponse handleAutoUpdate(@RequestBody BlogResponse editedResponse) {
-        return blogService.updateContent(editedResponse);
+        return blogService.updateBlogResponse(editedResponse);
     }
 
     @PostMapping("/blog/update-manual")
     public BlogResponse handleManualUpdate(@RequestBody BlogResponse editedResponse) {
-        return blogService.updateContent(editedResponse);
+        return blogService.updateBlogResponse(editedResponse);
     }
 
 

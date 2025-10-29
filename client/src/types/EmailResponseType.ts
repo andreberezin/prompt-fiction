@@ -9,9 +9,19 @@ export type ExportFormats = {
     pdfReady: boolean;
 }
 
+export type Section = {
+    type: string;
+    title: string;
+    markdownContent: string;
+    plainTextContent: string;
+    richTextContent: string;
+}
+
 export default interface EmailResponseType {
     subject: string;
     body: string;
+    sections: Array<Section>;
+    content: string;
     metadata: Metadata;
     exportFormats: ExportFormats;
 }
@@ -19,6 +29,8 @@ export default interface EmailResponseType {
 export const emptyEmailResponse: EmailResponseType = {
     subject: '',
     body: '',
+    sections: [],
+    content: '',
     metadata: {
         wordCount: 0,
         estimatedReadTime: '0 min',

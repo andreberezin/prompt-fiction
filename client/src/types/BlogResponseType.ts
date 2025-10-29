@@ -9,6 +9,7 @@ export type Section = {
     title: string;
     markdownContent: string;
     plainTextContent: string;
+    richTextContent: string;
 }
 
 export type ExportFormats = {

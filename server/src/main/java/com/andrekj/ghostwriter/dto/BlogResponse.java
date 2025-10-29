@@ -1,5 +1,6 @@
 package com.andrekj.ghostwriter.dto;
 
+import kotlin.text.UStringsKt;
 import lombok.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class BlogResponse {
         private String title;
         private String markdownContent;
         private String plainTextContent;
+        private String richTextContent;
     }
 
     @Data
@@ -41,6 +43,7 @@ public class BlogResponse {
     public static class ExportFormats {
         private String markdown;
         private String plainText;
+        private String richText;
         private boolean pdfReady;
     }
 }
