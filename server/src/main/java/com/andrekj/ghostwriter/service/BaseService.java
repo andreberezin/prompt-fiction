@@ -173,8 +173,8 @@ public abstract class BaseService {
     }
 
     protected boolean validateWordCount(int desiredWordCount, int actualWordCount) {
-        int lowerLimit = (int) Math.ceil(desiredWordCount * 0.7);
-        int upperLimit = (int) Math.floor(desiredWordCount * 1.3);
+        int lowerLimit = (int) Math.ceil(desiredWordCount * 0.9);
+        int upperLimit = (int) Math.floor(desiredWordCount * 1.1);
         return actualWordCount >= lowerLimit && actualWordCount <= upperLimit;
     }
 

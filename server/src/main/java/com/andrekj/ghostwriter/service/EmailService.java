@@ -88,8 +88,8 @@ public class EmailService extends BaseService {
     }
 
     private String generateEmailPrompt(EmailRequest request) {
-        int minWordCount = (int) (request.getWordCount() * 0.70); // because the valid range is -10% to +10% and gemini keeps overshooting it
-        int maxWordCount = (int) (request.getWordCount() * 1.30);
+        int minWordCount = (int) (request.getWordCount() * 0.9); // because the valid range is -10% to +10% and gemini keeps overshooting it
+        int maxWordCount = (int) (request.getWordCount() * 1.10);
 
 //        String prompt = "You are an expert email copywriter.\n" +
 //                "Write a " + request.getTone() + " email with a sense of";
