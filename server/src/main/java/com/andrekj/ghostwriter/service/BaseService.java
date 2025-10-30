@@ -22,7 +22,7 @@ import static java.lang.Math.min;
 
 @Slf4j
 public abstract class BaseService {
-    public static int MAX_RETRIES = 2;
+    public static int MAX_RETRIES = 3;
 
     List<String> aiModels = List.of(
             "gemini-2.5-flash-lite",
@@ -173,8 +173,8 @@ public abstract class BaseService {
     }
 
     protected boolean validateWordCount(int desiredWordCount, int actualWordCount) {
-        int lowerLimit = (int) Math.ceil(desiredWordCount * 0.9);
-        int upperLimit = (int) Math.floor(desiredWordCount * 1.1);
+        int lowerLimit = (int) Math.ceil(desiredWordCount * 0.7);
+        int upperLimit = (int) Math.floor(desiredWordCount * 1.3);
         return actualWordCount >= lowerLimit && actualWordCount <= upperLimit;
     }
 

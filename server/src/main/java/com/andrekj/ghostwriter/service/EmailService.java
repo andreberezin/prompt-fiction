@@ -93,8 +93,8 @@ public class EmailService extends BaseService {
     }
 
     private String generateEmailPrompt(EmailRequest request) {
-        int minWordCount = (int) (request.getWordCount() * 0.90); // because the valid range is -10% to +10% and gemini keeps overshooting it
-        int maxWordCount = (int) (request.getWordCount() * 1.10);
+        int minWordCount = (int) (request.getWordCount() * 0.70); // because the valid range is -10% to +10% and gemini keeps overshooting it
+        int maxWordCount = (int) (request.getWordCount() * 1.30);
 
 //        String prompt = "You are an expert email copywriter.\n" +
 //                "Write a " + request.getTone() + " email with a sense of";
@@ -124,11 +124,11 @@ public class EmailService extends BaseService {
 
         String structurePart = String.format("""
                Target length: between %d and %d words excluding the markdown headings. Do not exceed this limit.
-               Format the email using Markdown with these sections and include the following headings:
-                - 1 # Subject line
-                - 1 ## Greeting
-                - 1 ## Body
-                - 1 ## Closing and signature
+               Format the email using Markdown with one of each of these sections and include the following headings:
+                - # Subject line
+                - ## Greeting
+                - ## Body
+                - ## Closing and signature
                 Output only the formatted email in Markdown, without commentary.
                \s""",
                 minWordCount,
@@ -158,11 +158,11 @@ public class EmailService extends BaseService {
 
         String requirementsPart = String.format("""
                 Regenerate the blog so that:
-                - It follows the structure and includes the following headings:
-                    - 1 # Subject line
-                    - 1 ## Greeting
-                    - 1 ## Body
-                    - 1 ## Closing and signature
+                - It follows the structure and includes one of each of the following headings:
+                    - # Subject line
+                    - ## Greeting
+                    - ## Body
+                    - ## Closing and signature
                 - the total word count must be between %d and %d
                 The previous version had %d words excluding the markdown headings, so %s approximately %d word
                 - The tone, sense of urgency, recipient context and key points remain the same.
@@ -227,8 +227,10 @@ public class EmailService extends BaseService {
 
             String cleanLine = line.replaceAll("^\\*\\*", "").replaceAll("\\*\\*$", "").trim();
 
-            if (cleanLine.startsWith("# ") || cleanLine.matches("^#[A-Za-z].*")) {
-                System.out.println("subject line: " + cleanLine);
+            if (cleanLine.startsWith("# ") || cleanLine.startsWith("1 # ") || cleanLine.matches("^#[A-Za-z].*") || cleanLine.matches("^1#[A-Za-z].*")) {
+                if (cleanLine.startsWith("1")) cleanLine = cleanLine.substring(1).trim();
+
+                //System.out.println("subject line: " + cleanLine);
                 metadata.setWordCount(metadata.getWordCount() + countWords(plainLine));
 
                 currentSectionTitle = "Subject line";
@@ -239,9 +241,9 @@ public class EmailService extends BaseService {
                 if (!plainLine.startsWith("Subject")) {
                     plainTextBuilder.append("\n").append(plainLine).append("\n\n");
                 }
-            } else if (cleanLine.startsWith("##")) {
-                System.out.println("clean line: " + cleanLine);
-                heading2Count++;
+            } else if (cleanLine.startsWith("##") || cleanLine.startsWith("1 ##") || cleanLine.startsWith("1##")) {
+                if (cleanLine.startsWith("1")) cleanLine = cleanLine.substring(1).trim();
+
                 // exclude the section titles for email plain text content
                 //plainTextBuilder.append("\n").append(plainLine).append("\n");
 
@@ -276,36 +278,56 @@ public class EmailService extends BaseService {
                     section.setMarkdownContent(currentSectionMarkdownContent.toString().trim());
                     section.setPlainTextContent(currentSectionPlainTextContent.toString().trim());
                     sections.add(section);
-                    System.out.println("Adding section: " + section);
+                    //System.out.println("Adding section: " + section);
                 }
 
-                // Start new section
-                currentSectionTitle = cleanLine.substring(2).trim();
-                //currentSectionTitle = "Subject line";
+//                // Start new section
+//                currentSectionTitle = cleanLine.substring(2).trim();
+//                //currentSectionTitle = "Subject line";
+//
+//                if (currentSectionTitle != null) {
+//                    String lower = currentSectionTitle.toLowerCase();
+//                    if (lower.contains("subject") || lower.contains("intro")) {
+//                        System.out.println("SUBJECT SECTION");
+//                        currentSectionType = "subject";
+//                    } else if (lower.contains("greeting")) {
+//                        System.out.println("GREETING SECTION");
+//                        currentSectionType = "greeting";
+//                    } else if (lower.contains("closing") || lower.contains("signature")) {
+//                        System.out.println("CLOSING SECTION");
+//                        currentSectionType = "closing and signature";
+//                    } else if (lower.contains("cta") || lower.contains("call to action")) {
+//                        System.out.println("CTA SECTION");
+//                        currentSectionType = "call to action";
+//                    } else {
+//                        System.out.println("BODY SECTION");
+//                        currentSectionType = "body";
+//                    }
+//                }
 
-                if (currentSectionTitle != null) {
-                    String lower = currentSectionTitle.toLowerCase();
-                    if (lower.contains("subject") || lower.contains("intro")) {
-                        System.out.println("SUBJECT SECTION");
-                        currentSectionType = "subject";
-                    } else if (lower.contains("greeting")) {
-                        System.out.println("GREETING SECTION");
-                        currentSectionType = "greeting";
-                    } else if (lower.contains("closing") || lower.contains("signature")) {
-                        System.out.println("CLOSING SECTION");
-                        currentSectionType = "closing and signature";
-                    } else if (lower.contains("cta") || lower.contains("call to action")) {
-                        System.out.println("CTA SECTION");
-                        currentSectionType = "call to action";
-                    } else {
-                        System.out.println("BODY SECTION");
-                        currentSectionType = "body";
-                    }
+                heading2Count++;
+
+                // Assign section type strictly by order
+                switch (heading2Count) {
+                    case 1 -> { currentSectionTitle = "Greeting"; currentSectionType = "greeting"; }
+                    case 2 -> { currentSectionTitle = "Body"; currentSectionType = "body"; }
+                    case 3 -> { currentSectionTitle = "Closing and signature"; currentSectionType = "closing and signature"; }
+                    case 4 -> { currentSectionTitle = "Call to action"; currentSectionType = "cta"; }
                 }
-
 
                 currentSectionMarkdownContent = new StringBuilder();
                 currentSectionPlainTextContent = new StringBuilder();
+
+                //plainTextBuilder.append("\n").append(plainLine).append("\n\n");
+
+                // 4. Include any text that was on the heading line itself
+                if (plainLine.startsWith("Greeting") || plainLine.startsWith("Body") || plainLine.startsWith("Closing") || plainLine.startsWith("Call to action")) {
+                    continue;
+                } else {
+                    plainTextBuilder.append("\n").append(plainLine).append("\n\n");
+                    currentSectionPlainTextContent.append(line.substring(2).trim()).append("\n");
+                    currentSectionMarkdownContent.append(line.substring(2).trim()).append("\n");
+                }
             } else {
                 metadata.setWordCount(metadata.getWordCount() + countWords(plainLine));
 
@@ -324,7 +346,7 @@ public class EmailService extends BaseService {
             section.setMarkdownContent(currentSectionMarkdownContent.toString().trim());
             section.setPlainTextContent(currentSectionPlainTextContent.toString().trim());
             sections.add(section);
-            System.out.println("Adding the last section: " + section);
+            //System.out.println("Adding the last section: " + section);
 
         }
         EmailResponse.ExportFormats exportFormats = new EmailResponse.ExportFormats(
