@@ -27,9 +27,6 @@ export function TextArea<T extends HasExportFormats & HasMetaData & HasSections>
                             setIsTextEdited, loadingState, showSEO, contentType}: TextAreaProps<T>) {
     const {stompClient} = useSocket();
 
-    const currentOutputContent =
-        currentFormat.markdown ? response.exportFormats?.markdown || "" : response.exportFormats?.plainText || "";
-
     const hasSeo = Boolean(response?.metadata?.seoKeywords?.length);
 
     const handleAutoUpdateResponse = useAutoUpdateResponse({
@@ -57,10 +54,8 @@ export function TextArea<T extends HasExportFormats & HasMetaData & HasSections>
                         status={status}
                         loadingState={loadingState}
                         response={response}
-                        currentOutputContent={currentOutputContent}
                         currentFormat={currentFormat}
                         handleChange={handleChange}
-                        contentType={contentType}
                     />
 
                 }
@@ -71,9 +66,7 @@ export function TextArea<T extends HasExportFormats & HasMetaData & HasSections>
                         status={status}
                         loadingState={loadingState}
                         response={response}
-                        currentOutputContent={currentOutputContent}
                         currentFormat={currentFormat}
-						contentType={contentType}
                     />
                 }
                 {/*todo implement the rich text format*/}
@@ -84,9 +77,7 @@ export function TextArea<T extends HasExportFormats & HasMetaData & HasSections>
 						status={status}
 						loadingState={loadingState}
 						response={response}
-						currentOutputContent={currentOutputContent}
 						currentFormat={currentFormat}
-						contentType={contentType}
 					/>
                 }
                 {hasSeo && showSEO && <SEOkeywords keywords={response.metadata?.seoKeywords} />}
