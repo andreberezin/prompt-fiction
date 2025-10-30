@@ -22,7 +22,7 @@ import static java.lang.Math.min;
 
 @Slf4j
 public abstract class BaseService {
-    public static int MAX_RETRIES = 5;
+    public static int MAX_RETRIES = 2;
 
     List<String> aiModels = List.of(
             "gemini-2.5-flash-lite",

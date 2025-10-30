@@ -124,7 +124,7 @@ public class EmailService extends BaseService {
 
         String structurePart = String.format("""
                Target length: between %d and %d words excluding the markdown headings. Do not exceed this limit.
-               Format the email using Markdown with these sections:
+               Format the email using Markdown with these sections and include the following headings:
                 - 1 # Subject line
                 - 1 ## Greeting
                 - 1 ## Body
@@ -158,7 +158,7 @@ public class EmailService extends BaseService {
 
         String requirementsPart = String.format("""
                 Regenerate the blog so that:
-                - It follows the structure:
+                - It follows the structure and includes the following headings:
                     - 1 # Subject line
                     - 1 ## Greeting
                     - 1 ## Body
@@ -197,7 +197,7 @@ public class EmailService extends BaseService {
         String[] lines = rawResponse.split("\n");
 
         String currentSectionTitle = null;
-        String currentSectionType = "subject";
+        String currentSectionType = null;
         StringBuilder currentSectionMarkdownContent = new StringBuilder();
         StringBuilder currentSectionPlainTextContent = new StringBuilder();
         List<EmailResponse.Section> sections = new ArrayList<>();
@@ -206,6 +206,7 @@ public class EmailService extends BaseService {
         StringBuilder plainTextBuilder = new StringBuilder();
 
         int blankLineCount = 0;
+        int heading2Count = 0;
 
         for (String line : lines) {
             line = line.trim();
@@ -226,45 +227,85 @@ public class EmailService extends BaseService {
 
             String cleanLine = line.replaceAll("^\\*\\*", "").replaceAll("\\*\\*$", "").trim();
 
-            if (cleanLine.startsWith("##")) {
-                // exclude the section titles for email plain text content
-                //plainTextBuilder.append("\n").append(plainLine).append("\n");
+            if (cleanLine.startsWith("# ") || cleanLine.matches("^#[A-Za-z].*")) {
+                System.out.println("subject line: " + cleanLine);
+                metadata.setWordCount(metadata.getWordCount() + countWords(plainLine));
 
-                if (currentSectionType != null && !currentSectionMarkdownContent.isEmpty()) {
-                    EmailResponse.Section section = new EmailResponse.Section();
-                    section.setType(currentSectionType);
-                    section.setTitle(currentSectionTitle);
-                    section.setMarkdownContent(currentSectionMarkdownContent.toString().trim());
-                    section.setPlainTextContent(currentSectionPlainTextContent.toString().trim());
-                    sections.add(section);
-                }
-
-                currentSectionTitle = cleanLine.substring(2).trim();
-
-                if (currentSectionTitle != null) {
-                    String lower = currentSectionTitle.toLowerCase();
-                    if (lower.contains("subject") || lower.contains("intro")) {
-                        currentSectionType = "subject";
-                    } else if (lower.contains("greeting")) {
-                        currentSectionType = "greeting";
-                    } else if (lower.contains("closing") || lower.contains("signature")) {
-                        currentSectionType = "closing";
-                    } else if (lower.contains("cta") || lower.contains("call to action")) {
-                        currentSectionType = "cta";
-                    } else {
-                        currentSectionType = "body";
-                    }
-                }
-
-                currentSectionMarkdownContent = new StringBuilder();
-                currentSectionPlainTextContent = new StringBuilder();
-            } else if (cleanLine.startsWith("#")) {
+                currentSectionTitle = "Subject line";
+                currentSectionType = "subject";
                 emailResponse.setSubject(line.substring(1).trim());
 
                 //exclude the section titles for email plain text content
                 if (!plainLine.startsWith("Subject")) {
                     plainTextBuilder.append("\n").append(plainLine).append("\n\n");
                 }
+            } else if (cleanLine.startsWith("##")) {
+                System.out.println("clean line: " + cleanLine);
+                heading2Count++;
+                // exclude the section titles for email plain text content
+                //plainTextBuilder.append("\n").append(plainLine).append("\n");
+
+//                String headingText = cleanLine.substring(2).trim();
+
+                // if the AI included headings
+//                if ((heading2Count == 1 && plainLine.equalsIgnoreCase("Greeting"))
+//                || (heading2Count == 2 && plainLine.equalsIgnoreCase("Body"))
+//                || (heading2Count == 3 && plainLine.equalsIgnoreCase("Closing and signature"))
+//                || (heading2Count == 4 && plainLine.equalsIgnoreCase("Call to action"))) {
+//                    currentSectionTitle = plainLine;
+//                    currentSectionType = plainLine.toLowerCase();
+//                    System.out.println("Ai included headings:\n" + "Title: " + currentSectionTitle + "\n type: " + currentSectionType );
+//                } else {
+//                    // if the AI didn't include headings
+//                    switch (heading2Count) {
+//                        case 1 -> {currentSectionTitle = "Greeting"; currentSectionType = "greeting";}
+//                        case 2 -> {currentSectionTitle = "Body"; currentSectionType = "body";}
+//                        case 3 -> {currentSectionTitle = "Closing and signature"; currentSectionType = "closing and signature";}
+//                        case 4 -> {currentSectionTitle = "Call to action"; currentSectionType = "call to action";}
+//                    }
+//                    System.out.println("Ai didnt include headings:\n" + "Title: " + currentSectionTitle + "\n type: " + currentSectionType );
+//                    // append the titles manually if the response doesn't include them
+//                    currentSectionMarkdownContent.append(currentSectionTitle).append("\n");
+//                    currentSectionPlainTextContent.append(currentSectionTitle).append("\n");
+//                }
+
+                if (currentSectionType != null && !currentSectionType.equalsIgnoreCase("subject") && !currentSectionMarkdownContent.isEmpty()) {
+                    EmailResponse.Section section = new EmailResponse.Section();
+                    section.setType(currentSectionType);
+                    section.setTitle(currentSectionTitle);
+                    section.setMarkdownContent(currentSectionMarkdownContent.toString().trim());
+                    section.setPlainTextContent(currentSectionPlainTextContent.toString().trim());
+                    sections.add(section);
+                    System.out.println("Adding section: " + section);
+                }
+
+                // Start new section
+                currentSectionTitle = cleanLine.substring(2).trim();
+                //currentSectionTitle = "Subject line";
+
+                if (currentSectionTitle != null) {
+                    String lower = currentSectionTitle.toLowerCase();
+                    if (lower.contains("subject") || lower.contains("intro")) {
+                        System.out.println("SUBJECT SECTION");
+                        currentSectionType = "subject";
+                    } else if (lower.contains("greeting")) {
+                        System.out.println("GREETING SECTION");
+                        currentSectionType = "greeting";
+                    } else if (lower.contains("closing") || lower.contains("signature")) {
+                        System.out.println("CLOSING SECTION");
+                        currentSectionType = "closing and signature";
+                    } else if (lower.contains("cta") || lower.contains("call to action")) {
+                        System.out.println("CTA SECTION");
+                        currentSectionType = "call to action";
+                    } else {
+                        System.out.println("BODY SECTION");
+                        currentSectionType = "body";
+                    }
+                }
+
+
+                currentSectionMarkdownContent = new StringBuilder();
+                currentSectionPlainTextContent = new StringBuilder();
             } else {
                 metadata.setWordCount(metadata.getWordCount() + countWords(plainLine));
 
@@ -283,8 +324,9 @@ public class EmailService extends BaseService {
             section.setMarkdownContent(currentSectionMarkdownContent.toString().trim());
             section.setPlainTextContent(currentSectionPlainTextContent.toString().trim());
             sections.add(section);
-        }
+            System.out.println("Adding the last section: " + section);
 
+        }
         EmailResponse.ExportFormats exportFormats = new EmailResponse.ExportFormats(
                 rawResponse, // markdown
                 plainTextBuilder.toString().trim(), // plain text
@@ -348,8 +390,8 @@ public class EmailService extends BaseService {
         // validate sections: 1 greeting, 1 body, 1 closing
         long greetingCount = sections.stream().filter(s -> "greeting".equalsIgnoreCase(s.getType())).count();
         long bodyCount = sections.stream().filter(s -> "body".equalsIgnoreCase(s.getType())).count();
-        long closingCount = sections.stream().filter(s -> "closing".equalsIgnoreCase(s.getType())).count();
-        long ctaCount = sections.stream().filter(s -> "cta".equalsIgnoreCase(s.getType())).count();
+        long closingCount = sections.stream().filter(s -> "closing and signature".equalsIgnoreCase(s.getType())).count();
+        long ctaCount = sections.stream().filter(s -> "call to action".equalsIgnoreCase(s.getType())).count();
         // validate that all sections have content
         boolean allHaveText = sections.stream().allMatch(s -> s.getMarkdownContent() != null && !s.getMarkdownContent().isEmpty() &&
                 s.getPlainTextContent() != null && !s.getPlainTextContent().isEmpty());
@@ -401,6 +443,11 @@ public class EmailService extends BaseService {
                 if (ctaCount > 1) errors.add("Too many ##Call to action sections, remove " + (ctaCount - 1));
                 if (ctaCount < 1) errors.add("No ##Call to action sections found, add one");
             };
+            // Catch all for any other structureValid failures not already logged
+            if (!structureValid && greetingCount == 1 && bodyCount == 1 && closingCount == 1 && hasSubject && allHaveText) {
+                System.out.println(" - Structure valid flags failed (unknown reason)");
+                errors.add("Unknown structure validation failure");
+            }
 
         } else {
             System.out.println("\n" + "\u001B[32m" +  "Response is valid" + "\u001B[0m");
