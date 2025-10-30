@@ -13,7 +13,7 @@ It connects a **React + TypeScript** frontend with a **Spring Boot + Java** back
 - 🧠 **Smart Validation & Re-Prompting** — Detects invalid or incomplete AI responses and automatically regenerates them.
 - ❗ **Smart Error Handling** — Lets the user know if the AI API ran into an error and which error it ran into.
 - 🪄 **Markdown format** — Responses include hierarchical headings and metadata, like SEO keywords, for easy parsing and formatting.
-- 📄 **Plain text format** — Responses also include a plain text format.
+- 📝 **Plain text format** — Responses also include a plain text format.
 - 📄 **PDF Export** — Export the response into a pdf format and download it.
 
 ---
@@ -29,7 +29,7 @@ Follow these steps to run both the backend (Spring Boot) and frontend (React + V
 **Setup:**
 1. Clone the repository and navigate to the directory.
     ```sh
-    git clone https://github.com/andreberezin/prompt-fiction.git
+   git clone https://github.com/andreberezin/prompt-fiction.git
    ```
     ```sh
    cd prompt-fiction
@@ -49,7 +49,7 @@ Follow these steps to run both the backend (Spring Boot) and frontend (React + V
    ```sh
    npm run dev
    ```
-- The backend will typically run on [http://localhost:8080](http://localhost:8080). 
+- The backend will run on [http://localhost:8080](http://localhost:8080). 
 - The frontend will run on [http://localhost:5173](http://localhost:5173).
 
 ---
