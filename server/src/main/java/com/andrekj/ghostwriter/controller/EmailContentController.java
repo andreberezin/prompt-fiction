@@ -47,18 +47,18 @@ public class EmailContentController {
     }
 
 
-//    @PostMapping("/email/pdf")
-//    public ResponseEntity<byte[]> generatePdf(@RequestBody EmailResponse editedResponse) {
-//        //EmailResponse updatedResponse = emailService.updateBlogPost(editedResponse);
-//
-//        byte[] pdfBytes = pdfGeneratorService.generateEmailPDF(editedResponse);
-//
-//        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
-//        String currentDateTime = dateFormatter.format(new Date());
-//
-//        return ResponseEntity.ok()
-//                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=Ghostwriter_email_" + currentDateTime + ".pdf")
-//                .contentType(MediaType.APPLICATION_PDF)
-//                .body(pdfBytes);
-//    }
+    @PostMapping("/email/pdf")
+    public ResponseEntity<byte[]> generatePdf(@RequestBody EmailResponse editedResponse) {
+        EmailResponse updatedResponse = emailService.updateEmailResponse(editedResponse);
+
+        byte[] pdfBytes = pdfGeneratorService.generateEmailPDF(updatedResponse);
+
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
+        String currentDateTime = dateFormatter.format(new Date());
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=Ghostwriter_email_" + currentDateTime + ".pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
+    }
 }

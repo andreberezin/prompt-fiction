@@ -22,7 +22,7 @@ import static java.lang.Math.min;
 
 @Slf4j
 public abstract class BaseService {
-    public static int MAX_RETRIES = 3;
+    public static int MAX_RETRIES = 5;
 
     List<String> aiModels = List.of(
             "gemini-2.5-flash-lite",
@@ -211,4 +211,6 @@ public abstract class BaseService {
         messagingTemplate.convertAndSend("/topic/" + contentType + "-status", payload);
         throw new ContentGenerationException(payload);
     }
+
+
 }

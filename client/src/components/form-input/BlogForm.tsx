@@ -43,7 +43,8 @@ export default function BlogForm({setBlogResponse, setGenerationTime,generationT
                         e.preventDefault();
                         prepareForRequest({setGenerationTime, generationTimeInterval, setIsTextEdited, setLoadingState, errorTimeoutId, setStatus, setError, setRetryCounter});
                         resetBlogResponseObject(setBlogResponse);
-                        handleSubmit({setError, setStatus, setLoadingState, abortControllerRef, request: blogRequest, setResponse: setBlogResponse, errorTimeoutId, generationTimeInterval});
+                        handleSubmit({setError, setStatus, setLoadingState, abortControllerRef, request: blogRequest, setResponse: setBlogResponse,
+                            errorTimeoutId, generationTimeInterval, contentType: "blog"});
                     }}
 				>
 					<div className='fields-column fields-column-1' tabIndex={0}>
@@ -101,7 +102,7 @@ export default function BlogForm({setBlogResponse, setGenerationTime,generationT
                             value={blogRequest.wordCount}
                             setValue={(e) => setValue(e, setBlogRequest)}
                             id={'wordCount'}
-                            placeholder={'words'}
+                            placeholder={`words`}
                             vertical
                         />
 					</div>

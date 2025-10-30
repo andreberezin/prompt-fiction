@@ -4,6 +4,7 @@ import handleError from "./handleError.ts";
 import cleanupAfterApiRequest from "./cleanupAfterApiRequest.ts";
 import * as React from "react";
 import type {HasAImodel} from "../types/HasAImodel.ts";
+import type {ContentType} from "../types/ContentType.ts";
 
 interface handleSubmitProps<Req extends HasAImodel, Res> {
     abortControllerRef: React.RefObject<AbortController | null>;
@@ -14,13 +15,14 @@ interface handleSubmitProps<Req extends HasAImodel, Res> {
     errorTimeoutId: React.RefObject<number | null>;
     generationTimeInterval: React.RefObject<number>;
     setLoadingState: React.Dispatch<React.SetStateAction<boolean>>;
-
+    contentType: ContentType;
 }
 
-export default async function handleSubmit<Req extends HasAImodel, Res> ({setError, setStatus, abortControllerRef, request, setResponse, errorTimeoutId, generationTimeInterval, setLoadingState}: handleSubmitProps<Req, Res>): Promise<void> {
+export default async function handleSubmit<Req extends HasAImodel, Res> ({setError, setStatus, abortControllerRef, request, setResponse, errorTimeoutId,
+         generationTimeInterval, setLoadingState, contentType}: handleSubmitProps<Req, Res>): Promise<void> {
     const payload = { ...request, aimodel: request.aimodel.model};
     try {
-        const response = await axios.post('/api/blog/generate', payload, {
+        const response = await axios.post(`/api/${contentType}/generate`, payload, {
             headers: {'Content-Type': 'application/json'},
             signal: newAbortSignal(120 * 1000, abortControllerRef)
         });

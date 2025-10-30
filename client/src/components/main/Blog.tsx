@@ -8,8 +8,14 @@ import {useSocket} from "../context/useSocket.tsx";
 import type {StompSubscription} from "@stomp/stompjs";
 import type BlogRequestType from "../../types/BlogRequestType.ts";
 import '../../styles/main.scss'
+import type {ContentType} from "../../types/ContentType.ts";
 
-export default function Blog() {
+
+interface BlogProps {
+    contentType: ContentType;
+}
+
+export default function Blog({contentType}: BlogProps) {
     const {stompClient, socketHandler, isConnected} = useSocket();
 
     const errorTimeoutId = useRef<number>(0);
@@ -30,7 +36,7 @@ export default function Blog() {
             model: 'gemini-2.5-flash-lite',
             tooltip: 'ultra fast'
         },
-        contentType: 'blog',
+        contentType: contentType,
         topic: 'How to cook pasta',
         targetAudience: 'anyone',
         tone: 'engaging',
@@ -47,13 +53,13 @@ export default function Blog() {
 
         const subs: StompSubscription[] = [];
 
-        const blogStatusSub = socketHandler.current.subscribeToStatusUpdates("blog", setStatus);
+        const blogStatusSub = socketHandler.current.subscribeToStatusUpdates(contentType, setStatus);
         if (blogStatusSub) subs.push(blogStatusSub);
 
-        const blogRetrySub = socketHandler.current.subscribeToRetry("blog", setRetryCounter);
+        const blogRetrySub = socketHandler.current.subscribeToRetry(contentType, setRetryCounter);
         if (blogRetrySub) subs.push(blogRetrySub);
 
-        const blogUpdatedSub = socketHandler.current.subscribeToAutoUpdate("blog", setBlogResponse);
+        const blogUpdatedSub = socketHandler.current.subscribeToAutoUpdate(contentType, setBlogResponse);
         if (blogUpdatedSub) subs.push(blogUpdatedSub);
 
         return () => {
@@ -72,7 +78,7 @@ export default function Blog() {
     }, [blogResponse]);
 
     return (
-        <div id={'blog'}>
+        <div id={contentType}>
             {showForm &&
 				<BlogForm
 					setBlogResponse={setBlogResponse}
@@ -106,6 +112,7 @@ export default function Blog() {
                         retryCounter={retryCounter}
                         status={status}
                         blogResponseRef={blogResponseRef}
+                        contentType={contentType}
                         updateResponseObject={() => updateResponseObject({
                             setGenerationTime,
                             generationTimeInterval,
@@ -117,7 +124,7 @@ export default function Blog() {
                             setResponse: setBlogResponse,
                             setStatus,
                             setError,
-                            type: "blog"
+                            type: contentType
                         })}
             />
         </div>

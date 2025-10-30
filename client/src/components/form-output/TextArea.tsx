@@ -6,9 +6,11 @@ import type {HasExportFormats} from "../../types/HasExportFormats.ts";
 import type {HasMetaData} from "../../types/HasMetadata.ts";
 import {TextFormat} from "./TextFormat.tsx";
 import type {FormatOptions} from "../../types/FormatType.ts";
+import type {ContentType} from "../../types/ContentType.ts";
+import type {HasSections} from "../../types/HasSections.ts";
 
 
-interface TextAreaProps<T extends HasExportFormats & HasMetaData> {
+interface TextAreaProps<T extends HasExportFormats & HasMetaData & HasSections> {
     currentFormat: FormatOptions;
     response: T;
     setResponse: React.Dispatch<React.SetStateAction<T>>;
@@ -18,10 +20,11 @@ interface TextAreaProps<T extends HasExportFormats & HasMetaData> {
     setIsTextEdited: React.Dispatch<React.SetStateAction<boolean>>;
     loadingState: boolean;
     showSEO: boolean;
+    contentType: ContentType;
 }
 
-export function TextArea<T extends HasExportFormats & HasMetaData>({currentFormat, response, setResponse, responseRef, status, error,
-                            setIsTextEdited, loadingState, showSEO}: TextAreaProps<T>) {
+export function TextArea<T extends HasExportFormats & HasMetaData & HasSections>({currentFormat, response, setResponse, responseRef, status, error,
+                            setIsTextEdited, loadingState, showSEO, contentType}: TextAreaProps<T>) {
     const {stompClient} = useSocket();
 
     const currentOutputContent =
@@ -30,7 +33,7 @@ export function TextArea<T extends HasExportFormats & HasMetaData>({currentForma
     const hasSeo = Boolean(response?.metadata?.seoKeywords?.length);
 
     const handleAutoUpdateResponse = useAutoUpdateResponse({
-        contentType: 'blog',
+        contentType,
         stompClient,
         responseRef: responseRef,
         debounceDelay: 10, // optional
@@ -57,6 +60,7 @@ export function TextArea<T extends HasExportFormats & HasMetaData>({currentForma
                         currentOutputContent={currentOutputContent}
                         currentFormat={currentFormat}
                         handleChange={handleChange}
+                        contentType={contentType}
                     />
 
                 }
@@ -69,6 +73,7 @@ export function TextArea<T extends HasExportFormats & HasMetaData>({currentForma
                         response={response}
                         currentOutputContent={currentOutputContent}
                         currentFormat={currentFormat}
+						contentType={contentType}
                     />
                 }
                 {/*todo implement the rich text format*/}
@@ -81,6 +86,7 @@ export function TextArea<T extends HasExportFormats & HasMetaData>({currentForma
 						response={response}
 						currentOutputContent={currentOutputContent}
 						currentFormat={currentFormat}
+						contentType={contentType}
 					/>
                 }
                 {hasSeo && showSEO && <SEOkeywords keywords={response.metadata?.seoKeywords} />}

@@ -4,8 +4,11 @@ import type {FormatType} from "../../types/FormatType.ts";
 import {useState} from "react";
 import type {HasExportFormats} from "../../types/HasExportFormats.ts";
 import * as React from "react";
+import type {HasSections} from "../../types/HasSections.ts";
+import type {ContentType} from "../../types/ContentType.ts";
+import type {HasMetaData} from "../../types/HasMetadata.ts";
 
-interface TextFormatProps<T extends HasExportFormats> {
+interface TextFormatProps<T extends HasExportFormats & HasMetaData & HasSections> {
     format: FormatType;
     error: string;
     status: string;
@@ -14,10 +17,16 @@ interface TextFormatProps<T extends HasExportFormats> {
     currentOutputContent: string;
     currentFormat: {markdown: boolean, plainText: boolean, richText: boolean};
     handleChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+    contentType: ContentType;
 }
 
-export function TextFormat<T extends HasExportFormats>({format, error, status, loadingState, response, currentOutputContent, handleChange}: TextFormatProps<T>) {
+export function TextFormat<T extends HasExportFormats & HasMetaData & HasSections>({format, error, status, loadingState, response, currentOutputContent, handleChange, contentType}: TextFormatProps<T>) {
     const [copyText, setCopyText] = useState<string>("Copy");
+
+    // const combinedSections =
+    //     response.sections?.length
+    //         ? response.sections.map(s => s.plainTextContent || "").join("\n\n")
+    //         : "";
 
     return (
             <div className='textarea-container'>
@@ -29,6 +38,21 @@ export function TextFormat<T extends HasExportFormats>({format, error, status, l
                                     ? (error || status || response.exportFormats?.markdown || "")
                                     : (response.exportFormats?.[format] ?? "")
                             }
+                            // value={
+                            //     format === "markdown"
+                            //         ? (error || status || response.exportFormats?.markdown || "")
+                            //         : (contentType === "email"
+                            //                 ? (
+                            //                     [
+                            //                         (response as any).subject || "",
+                            //                         combinedSections || ""
+                            //                     ].filter(Boolean).join("\n\n")
+                            //                     || response.exportFormats?.[format]
+                            //                     || ""
+                            //                 )
+                            //                 : (response.exportFormats?.[format] || "")
+                            //         )
+                            // }
                             readOnly={format !== 'markdown'}
                             onChange={format === 'markdown' ? handleChange : undefined}
                         />
@@ -38,7 +62,7 @@ export function TextFormat<T extends HasExportFormats>({format, error, status, l
                     className='hover-icon-button'
                     data-tooltip={copyText}
                     disabled={loadingState}
-                    onClick={() => copyToClipboard(currentOutputContent, setCopyText)}
+                    onClick={() => copyToClipboard(response.exportFormats?.[format] ?? "", setCopyText)}
                 >
                     <AiOutlineCopy className='icon'/>
                 </button>

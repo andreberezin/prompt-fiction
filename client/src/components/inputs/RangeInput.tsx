@@ -18,7 +18,7 @@ export default function RangeInput({vertical = false, value, setValue, id, place
                 className={`long placeholder`}
                 data-placeholder={placeholder}
             >
-                {value}
+                {`~${value}`}
                 <input
                     className={`${vertical ? 'vertical' : ''}`}
                     type='range'

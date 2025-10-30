@@ -13,8 +13,8 @@ function App() {
       <SocketProvider>
     <div className={'ghostwriter'}>
         <NavBar contentType={contentType} setContentType={setContentType}/>
-        {contentType === 'blog' && <Blog/> }
-        {contentType === 'email' && <Email/> }
+        {contentType === 'blog' && <Blog contentType={contentType}/> }
+        {contentType === 'email' && <Email contentType={contentType}/> }
     </div>
       </SocketProvider>
   )

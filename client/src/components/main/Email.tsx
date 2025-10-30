@@ -8,8 +8,13 @@ import { emptyEmailResponse } from "../../types/EmailResponseType.ts";
 import EmailForm from "../form-input/EmailForm.tsx";
 import EmailOutput from "../form-output/EmailOutput.tsx";
 import updateResponseObject from "../../utils/updateResponseObject.ts";
+import type {ContentType} from "../../types/ContentType.ts";
 
-export default function Email() {
+interface EmailProps {
+    contentType: ContentType;
+}
+
+export default function Email({contentType}: EmailProps) {
     const {stompClient, socketHandler, isConnected} = useSocket();
 
     const errorTimeoutId = useRef<number>(0);
@@ -30,10 +35,10 @@ export default function Email() {
             model: 'gemini-2.5-flash-lite',
             tooltip: 'ultra fast'
         },
-        contentType: 'email',
+        contentType: contentType,
         wordCount: 100,
         purpose: 'Get the spreadsheet done this week',
-        keyPoints: '',
+        keyPoints: 'please',
         recipientContext: 'colleague',
         tone: 'passive-aggressive',
         urgencyLevel: 'very urgent',
@@ -48,13 +53,13 @@ export default function Email() {
 
         const subs: StompSubscription[] = [];
 
-        const emailStatusSub = socketHandler.current.subscribeToStatusUpdates("email", setStatus);
+        const emailStatusSub = socketHandler.current.subscribeToStatusUpdates(contentType, setStatus);
         if (emailStatusSub) subs.push(emailStatusSub);
 
-        const emailRetrySub = socketHandler.current.subscribeToRetry("email", setRetryCounter);
+        const emailRetrySub = socketHandler.current.subscribeToRetry(contentType, setRetryCounter);
         if (emailRetrySub) subs.push(emailRetrySub);
 
-        const emailUpdatedSub = socketHandler.current.subscribeToAutoUpdate("email", setEmailResponse);
+        const emailUpdatedSub = socketHandler.current.subscribeToAutoUpdate(contentType, setEmailResponse);
         if (emailUpdatedSub) subs.push(emailUpdatedSub);
 
         return () => {
@@ -73,7 +78,7 @@ export default function Email() {
     }, [emailResponse]);
 
     return (
-        <div id={'email'}>
+        <div id={contentType}>
             {showForm &&
 				<EmailForm
 					setEmailResponse={setEmailResponse}
@@ -107,6 +112,7 @@ export default function Email() {
                         retryCounter={retryCounter}
                         status={status}
                         responseRef={emailResponseRef}
+                         contentType={contentType}
                         updateResponseObject={() => updateResponseObject({
                             setGenerationTime,
                             generationTimeInterval,
@@ -118,7 +124,7 @@ export default function Email() {
                             setResponse: setEmailResponse,
                             setStatus,
                             setError,
-                            type: "blog"
+                            type: contentType,
                         })}
             />
         </div>

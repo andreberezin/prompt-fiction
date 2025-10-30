@@ -10,6 +10,7 @@ import type {FormatOptions} from "../../types/FormatType.ts";
 import {FormatContainer} from "./FormatContainer.tsx";
 import {MetadataContainer} from "./MetadataContainer.tsx";
 import {ButtonContainer} from "./ButtonContainer.tsx";
+import type {ContentType} from "../../types/ContentType.ts";
 
 interface BlogOutputProps {
     blogResponse: BlogResponseType;
@@ -28,10 +29,11 @@ interface BlogOutputProps {
     retryCounter: number;
     status: string;
     blogResponseRef: React.RefObject<BlogResponseType>;
+    contentType: ContentType;
 }
 
 export default function BlogOutput({blogResponse, setBlogResponse, loadingState, error, showForm, setShowForm, generationTime, setError, isTextEdited, setIsTextEdited, updateResponseObject,
-                                       showSEO, setShowSEO, retryCounter, status, blogResponseRef}: BlogOutputProps) {
+                                       showSEO, setShowSEO, retryCounter, status, blogResponseRef, contentType}: BlogOutputProps) {
     const [currentFormat, setCurrentFormat] = useState<FormatOptions>({markdown: true, plainText: false, richText: false});
 
     return (
@@ -91,6 +93,7 @@ export default function BlogOutput({blogResponse, setBlogResponse, loadingState,
                     setIsTextEdited={setIsTextEdited}
                     loadingState={loadingState}
                     showSEO={showSEO}
+                    contentType={contentType}
                 />
             </div>
         </div>

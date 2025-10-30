@@ -212,6 +212,7 @@
 
 	  &.placeholder::after {
 		content: attr(data-placeholder);
+		//white-space: pre;
 		color: transparent;
 		position: absolute;
 		bottom: -8px;

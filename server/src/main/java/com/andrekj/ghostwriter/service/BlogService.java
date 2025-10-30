@@ -83,6 +83,7 @@ public class BlogService extends BaseService {
                 handleTooManyRetriesError("blog", MAX_RETRIES, messagingTemplate);
             }
 
+            assert blogResponse != null : "The response is empty";
             // 6. clean up response
             cleanupResponse(blogResponse);
 
@@ -161,7 +162,6 @@ public class BlogService extends BaseService {
     private String regenerateBlogPrompt(BlogRequest request, BlogResponse previousResponse, List<String> failedReasons) {
         String sectionCount = "2-4";
         String reasons = failedReasons.isEmpty() ? "The previous response was invalid" : String.join(", ", failedReasons);
-
         int minWordCount = (int) (request.getWordCount() * 0.90); // because the valid range is -10% to +10% and gemini keeps overshooting it
         int maxWordCount = (int) (request.getWordCount() * 1.10);
 

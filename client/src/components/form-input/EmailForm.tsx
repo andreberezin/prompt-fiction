@@ -42,7 +42,8 @@ export default function EmailForm({setEmailResponse, setGenerationTime,generatio
                     e.preventDefault();
                     prepareForRequest({setGenerationTime, generationTimeInterval, setIsTextEdited, setLoadingState, errorTimeoutId, setStatus, setError, setRetryCounter});
                     resetEmailResponseObject(setEmailResponse);
-                    handleSubmit({setError, setStatus, setLoadingState, abortControllerRef, request: emailRequest, setResponse: setEmailResponse, errorTimeoutId, generationTimeInterval});
+                    handleSubmit({setError, setStatus, setLoadingState, abortControllerRef, request: emailRequest, setResponse: setEmailResponse,
+                        errorTimeoutId, generationTimeInterval, contentType: "email"});
                 }}
             >
                 <div className='fields-column fields-column-1' tabIndex={0}>
@@ -110,8 +111,8 @@ export default function EmailForm({setEmailResponse, setGenerationTime,generatio
                         value={emailRequest.wordCount}
                         setValue={(e) => setValue(e, setEmailRequest)}
                         id={'wordCount'}
-                        placeholder={'words'}
-                        min={50}
+                        placeholder={`words`}
+                        min={100}
                         max={500}
                         vertical
                     />

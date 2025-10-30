@@ -10,6 +10,7 @@ import {FormatContainer} from "./FormatContainer.tsx";
 import {MetadataContainer} from "./MetadataContainer.tsx";
 import {ButtonContainer} from "./ButtonContainer.tsx";
 import type EmailResponseType from "../../types/EmailResponseType.ts";
+import type {ContentType} from "../../types/ContentType.ts";
 
 interface EmailOutputProps {
     response: EmailResponseType;
@@ -28,10 +29,11 @@ interface EmailOutputProps {
     retryCounter: number;
     status: string;
     responseRef: React.RefObject<EmailResponseType>;
+    contentType: ContentType;
 }
 
 export default function EmailOutput({response, setResponse, loadingState, error, showForm, setShowForm, generationTime, setError, isTextEdited, setIsTextEdited, updateResponseObject,
-                                       showSEO, setShowSEO, retryCounter, status, responseRef}: EmailOutputProps) {
+                                       showSEO, setShowSEO, retryCounter, status, responseRef, contentType}: EmailOutputProps) {
     const [currentFormat, setCurrentFormat] = useState<FormatOptions>({markdown: true, plainText: false, richText: false});
 
     return (
@@ -91,6 +93,7 @@ export default function EmailOutput({response, setResponse, loadingState, error,
                     setIsTextEdited={setIsTextEdited}
                     loadingState={loadingState}
                     showSEO={showSEO}
+                    contentType={contentType}
                 />
             </div>
         </div>
