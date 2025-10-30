@@ -4,6 +4,7 @@ import downloadPdf from "../../utils/downloadPdf.ts";
 import * as React from "react";
 import type {FormatOptions} from "../../types/FormatType.ts";
 import type {HasExportFormats} from "../../types/HasExportFormats.ts";
+import type {ContentType} from "../../types/ContentType.ts";
 
 interface FormatContainerProps<T extends HasExportFormats> {
     loadingState: boolean;
@@ -17,9 +18,10 @@ interface FormatContainerProps<T extends HasExportFormats> {
     plainText?: boolean;
     pdf?: boolean;
     updateResponseObject: (e: React.MouseEvent<HTMLButtonElement>) => void;
+    contentType: ContentType;
 }
 
-export function FormatContainer<T extends HasExportFormats>({loadingState, currentFormat, setCurrentFormat, response, responseRef, setError, updateResponseObject, richText = false, markdown = false, plainText = false, pdf = false}: FormatContainerProps<T>) {
+export function FormatContainer<T extends HasExportFormats>({loadingState, currentFormat, setCurrentFormat, response, responseRef, setError, updateResponseObject, richText = false, markdown = false, plainText = false, pdf = false, contentType}: FormatContainerProps<T>) {
 
     return (
         <div id='format-container'>
@@ -65,7 +67,7 @@ export function FormatContainer<T extends HasExportFormats>({loadingState, curre
 					className={`hover-icon-button ${!response.exportFormats.pdfReady ? "disabled" : ""}`}
 					onClick={ async(e) => {
                         await updateResponseObject(e);
-                        await downloadPdf({responseRef, setError});
+                        await downloadPdf({responseRef, setError, contentType});
                     }}
 				>
 					<AiOutlineFilePdf className='icon'/>

@@ -1,16 +1,18 @@
 import axios from "axios";
 import * as React from "react";
+import type {ContentType} from "../types/ContentType.ts";
 
 interface DownloadPdfProps<T> {
     responseRef: React.RefObject<T>;
     setError: React.Dispatch<React.SetStateAction<string>>;
+    contentType: ContentType;
 }
 
-export default async function downloadPdf<T> ({responseRef, setError}: DownloadPdfProps<T>) {
+export default async function downloadPdf<T> ({responseRef, setError, contentType}: DownloadPdfProps<T>) {
 
     try {
         const response = await axios.post(
-            '/api/blog/pdf',
+            `/api/${contentType}/pdf`,
             responseRef.current,
             {
                 headers: { 'Content-Type': 'application/json' },
@@ -19,7 +21,7 @@ export default async function downloadPdf<T> ({responseRef, setError}: DownloadP
         );
 
         const contentDisposition = response.headers['content-disposition'];
-        let fileName = 'Ghostwriter_blogPost.pdf';
+        let fileName = `Ghostwriter_${contentType}.pdf`;
 
         if (contentDisposition) {
             const fileNameMatch = contentDisposition.match(/filename="?(.+)"?/);

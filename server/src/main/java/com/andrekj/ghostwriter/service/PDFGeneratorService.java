@@ -54,8 +54,11 @@ public byte[] generateBlogPDF(BlogResponse blogResponse) {
             // fonts
             Font textFont = new Font(Font.FontFamily.TIMES_ROMAN, 12);
 
+            //document.add(new Paragraph(emailResponse.getExportFormats().getPlainText(), textFont));
+
+            document.add(new Paragraph(emailResponse.getSubject(), textFont));
+
             for (EmailResponse.Section section : emailResponse.getSections()) {
-                System.out.println("section: " + section.getPlainTextContent());
                 document.add(new Paragraph(section.getPlainTextContent(), textFont));
                 document.add(Chunk.NEWLINE);
             }

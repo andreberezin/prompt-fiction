@@ -1,8 +1,6 @@
 package com.andrekj.ghostwriter.service;
-import com.andrekj.ghostwriter.dto.BlogResponse;
 import com.andrekj.ghostwriter.dto.EmailRequest;
 import com.andrekj.ghostwriter.dto.EmailResponse;
-import com.andrekj.ghostwriter.exceptions.ContentGenerationException;
 import com.google.genai.Client;
 
 import com.google.genai.types.GenerateContentConfig;
@@ -10,10 +8,7 @@ import com.google.genai.types.GenerateContentResponse;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class EmailService extends BaseService {
@@ -200,6 +195,7 @@ public class EmailService extends BaseService {
         String currentSectionType = null;
         StringBuilder currentSectionMarkdownContent = new StringBuilder();
         StringBuilder currentSectionPlainTextContent = new StringBuilder();
+        StringBuilder bodyContent = new StringBuilder();
         List<EmailResponse.Section> sections = new ArrayList<>();
 
         EmailResponse.Metadata metadata = new EmailResponse.Metadata();
@@ -227,49 +223,50 @@ public class EmailService extends BaseService {
 
             String cleanLine = line.replaceAll("^\\*\\*", "").replaceAll("\\*\\*$", "").trim();
 
-            if (cleanLine.startsWith("# ") || cleanLine.startsWith("1 # ") || cleanLine.matches("^#[A-Za-z].*") || cleanLine.matches("^1#[A-Za-z].*")) {
+            if (cleanLine.startsWith("# ") || cleanLine.startsWith("1 # ") ||
+                    cleanLine.matches("^#[A-Za-z].*") || cleanLine.matches("^1#[A-Za-z].*")) {
+
                 if (cleanLine.startsWith("1")) cleanLine = cleanLine.substring(1).trim();
 
-                //System.out.println("subject line: " + cleanLine);
-                metadata.setWordCount(metadata.getWordCount() + countWords(plainLine));
+
+                // Determine if the AI included the "Subject line" heading
+                String subjectCandidate = cleanLine.substring(1).trim(); // raw subject line without the first #
+                String nextLine = ""; // we'll capture the next non-empty line if needed
+
+                // Skip "Subject line" title if present
+                if (subjectCandidate.toLowerCase().startsWith("subject")) {
+                    // Find the actual subject on the next line
+                    int currentIndex = Arrays.asList(lines).indexOf(line);
+                    for (int i = currentIndex + 1; i < lines.length; i++) {
+                        String potentialSubject = lines[i].trim();
+                        if (!potentialSubject.isEmpty() && !potentialSubject.startsWith("#")) {
+                            nextLine = potentialSubject;
+                            break;
+                        }
+                    }
+
+                    if (!nextLine.isEmpty()) {
+                        emailResponse.setSubject(nextLine);
+                        // todo fix this stupid -2 (I think it counts "Subject line" because the word count is always off by +2)
+                        metadata.setWordCount(metadata.getWordCount() + countWords(plainLine) - 2);
+                    }
+
+                } else {
+                    // Normal case: the line itself is the subject
+                    emailResponse.setSubject(subjectCandidate);
+                    metadata.setWordCount(metadata.getWordCount() + countWords(plainLine));
+                }
 
                 currentSectionTitle = "Subject line";
                 currentSectionType = "subject";
-                emailResponse.setSubject(line.substring(1).trim());
 
                 //exclude the section titles for email plain text content
                 if (!plainLine.startsWith("Subject")) {
                     plainTextBuilder.append("\n").append(plainLine).append("\n\n");
                 }
+
             } else if (cleanLine.startsWith("##") || cleanLine.startsWith("1 ##") || cleanLine.startsWith("1##")) {
                 if (cleanLine.startsWith("1")) cleanLine = cleanLine.substring(1).trim();
-
-                // exclude the section titles for email plain text content
-                //plainTextBuilder.append("\n").append(plainLine).append("\n");
-
-//                String headingText = cleanLine.substring(2).trim();
-
-                // if the AI included headings
-//                if ((heading2Count == 1 && plainLine.equalsIgnoreCase("Greeting"))
-//                || (heading2Count == 2 && plainLine.equalsIgnoreCase("Body"))
-//                || (heading2Count == 3 && plainLine.equalsIgnoreCase("Closing and signature"))
-//                || (heading2Count == 4 && plainLine.equalsIgnoreCase("Call to action"))) {
-//                    currentSectionTitle = plainLine;
-//                    currentSectionType = plainLine.toLowerCase();
-//                    System.out.println("Ai included headings:\n" + "Title: " + currentSectionTitle + "\n type: " + currentSectionType );
-//                } else {
-//                    // if the AI didn't include headings
-//                    switch (heading2Count) {
-//                        case 1 -> {currentSectionTitle = "Greeting"; currentSectionType = "greeting";}
-//                        case 2 -> {currentSectionTitle = "Body"; currentSectionType = "body";}
-//                        case 3 -> {currentSectionTitle = "Closing and signature"; currentSectionType = "closing and signature";}
-//                        case 4 -> {currentSectionTitle = "Call to action"; currentSectionType = "call to action";}
-//                    }
-//                    System.out.println("Ai didnt include headings:\n" + "Title: " + currentSectionTitle + "\n type: " + currentSectionType );
-//                    // append the titles manually if the response doesn't include them
-//                    currentSectionMarkdownContent.append(currentSectionTitle).append("\n");
-//                    currentSectionPlainTextContent.append(currentSectionTitle).append("\n");
-//                }
 
                 if (currentSectionType != null && !currentSectionType.equalsIgnoreCase("subject") && !currentSectionMarkdownContent.isEmpty()) {
                     EmailResponse.Section section = new EmailResponse.Section();
@@ -281,33 +278,9 @@ public class EmailService extends BaseService {
                     //System.out.println("Adding section: " + section);
                 }
 
-//                // Start new section
-//                currentSectionTitle = cleanLine.substring(2).trim();
-//                //currentSectionTitle = "Subject line";
-//
-//                if (currentSectionTitle != null) {
-//                    String lower = currentSectionTitle.toLowerCase();
-//                    if (lower.contains("subject") || lower.contains("intro")) {
-//                        System.out.println("SUBJECT SECTION");
-//                        currentSectionType = "subject";
-//                    } else if (lower.contains("greeting")) {
-//                        System.out.println("GREETING SECTION");
-//                        currentSectionType = "greeting";
-//                    } else if (lower.contains("closing") || lower.contains("signature")) {
-//                        System.out.println("CLOSING SECTION");
-//                        currentSectionType = "closing and signature";
-//                    } else if (lower.contains("cta") || lower.contains("call to action")) {
-//                        System.out.println("CTA SECTION");
-//                        currentSectionType = "call to action";
-//                    } else {
-//                        System.out.println("BODY SECTION");
-//                        currentSectionType = "body";
-//                    }
-//                }
-
                 heading2Count++;
 
-                // Assign section type strictly by order
+                // Assign section type manually because sometimes the AI response includes them but sometimes not
                 switch (heading2Count) {
                     case 1 -> { currentSectionTitle = "Greeting"; currentSectionType = "greeting"; }
                     case 2 -> { currentSectionTitle = "Body"; currentSectionType = "body"; }
@@ -318,12 +291,11 @@ public class EmailService extends BaseService {
                 currentSectionMarkdownContent = new StringBuilder();
                 currentSectionPlainTextContent = new StringBuilder();
 
-                //plainTextBuilder.append("\n").append(plainLine).append("\n\n");
-
-                // 4. Include any text that was on the heading line itself
+                //
                 if (plainLine.startsWith("Greeting") || plainLine.startsWith("Body") || plainLine.startsWith("Closing") || plainLine.startsWith("Call to action")) {
                     continue;
-                } else {
+                } else { // if the AI response doesn't include headings then append that line to the section's content
+                    bodyContent.append(plainLine).append("\n");
                     plainTextBuilder.append("\n").append(plainLine).append("\n\n");
                     currentSectionPlainTextContent.append(line.substring(2).trim()).append("\n");
                     currentSectionMarkdownContent.append(line.substring(2).trim()).append("\n");
@@ -332,6 +304,7 @@ public class EmailService extends BaseService {
                 metadata.setWordCount(metadata.getWordCount() + countWords(plainLine));
 
                 plainTextBuilder.append(plainLine).append("\n");
+                bodyContent.append(plainLine).append("\n");
 
                 currentSectionMarkdownContent.append(line).append("\n");
                 currentSectionPlainTextContent.append(plainLine).append("\n");
@@ -358,6 +331,7 @@ public class EmailService extends BaseService {
 
         metadata.setEstimatedReadTime(calculateReadtime(metadata.getWordCount()));
 
+        emailResponse.setBody(bodyContent.toString().trim());
         emailResponse.setSections(sections);
         emailResponse.setMetadata(metadata);
         emailResponse.setExportFormats(exportFormats);

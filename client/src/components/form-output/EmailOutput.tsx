@@ -55,6 +55,7 @@ export default function EmailOutput({response, setResponse, loadingState, error,
                     richText={false}
                     pdf={true}
                     updateResponseObject={updateResponseObject}
+                    contentType={contentType}
                 />
 
                 <MetadataContainer

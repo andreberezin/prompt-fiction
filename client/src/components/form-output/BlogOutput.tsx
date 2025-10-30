@@ -55,6 +55,7 @@ export default function BlogOutput({blogResponse, setBlogResponse, loadingState,
                     richText={false}
                     pdf={true}
                     updateResponseObject={updateResponseObject}
+                    contentType={contentType}
                 />
 
                 <MetadataContainer<BlogResponseType>

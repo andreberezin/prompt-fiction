@@ -49,9 +49,9 @@ public class EmailContentController {
 
     @PostMapping("/email/pdf")
     public ResponseEntity<byte[]> generatePdf(@RequestBody EmailResponse editedResponse) {
-        EmailResponse updatedResponse = emailService.updateEmailResponse(editedResponse);
+        //EmailResponse updatedResponse = emailService.updateEmailResponse(editedResponse);
 
-        byte[] pdfBytes = pdfGeneratorService.generateEmailPDF(updatedResponse);
+        byte[] pdfBytes = pdfGeneratorService.generateEmailPDF(editedResponse);
 
         DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
         String currentDateTime = dateFormatter.format(new Date());
