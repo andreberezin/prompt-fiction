@@ -8,7 +8,7 @@ COPY client/ ./
 RUN npm run build
 
 # ---------- Stage 2: Build Backend ----------
-FROM maven:3.9.3-eclipse-temurin-20 AS backend-build
+FROM maven:3.9.3-eclipse-temurin-21 AS backend-build
 
 WORKDIR /app/server
 COPY server/pom.xml .
@@ -19,7 +19,7 @@ COPY --from=frontend-build /app/client/dist/ src/main/resources/static/
 RUN mvn clean package -DskipTests
 
 # ---------- Stage 3: Final image ----------
-FROM eclipse-temurin:20-jdk-alpine
+FROM eclipse-temurin:21-jdk-alpine
 
 WORKDIR /app
 # Copy the backend jar
