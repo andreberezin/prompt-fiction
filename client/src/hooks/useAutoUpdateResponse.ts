@@ -1,7 +1,7 @@
 import useDebounce from "./useDebounce.ts";
 import * as React from "react";
 import type {Client} from "@stomp/stompjs";
-import type {ContentType} from "../types/ContentType.ts";
+import type {ContentType} from "../types/form-input/ContentType.ts";
 
 interface HandleAutoUpdateResponseParams<T> {
     stompClient: React.RefObject<Client | null | undefined>;

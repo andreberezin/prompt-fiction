@@ -4,7 +4,7 @@ import handleError from "./handleError.ts";
 import cleanupAfterApiRequest from "./cleanupAfterApiRequest.ts";
 import * as React from "react";
 import type {HasAImodel} from "../../types/props/HasAImodel.ts";
-import type {ContentType} from "../../types/ContentType.ts";
+import type {ContentType} from "../../types/form-input/ContentType.ts";
 
 interface handleSubmitProps<Req extends HasAImodel, Res> {
     abortControllerRef: React.RefObject<AbortController | null>;

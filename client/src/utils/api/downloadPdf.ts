@@ -1,6 +1,6 @@
 import axios from "axios";
 import * as React from "react";
-import type {ContentType} from "../../types/ContentType.ts";
+import type {ContentType} from "../../types/form-input/ContentType.ts";
 
 interface DownloadPdfProps<T> {
     responseRef: React.RefObject<T>;

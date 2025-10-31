@@ -1,7 +1,7 @@
 import './styles/main/App.scss'
 import NavBar from "./components/main/NavBar.tsx";
 import {useState} from "react";
-import type {ContentType} from "./types/ContentType.ts";
+import type {ContentType} from "./types/form-input/ContentType.ts";
 import Blog from "./components/main/Blog.tsx";
 import {SocketProvider} from "./components/context/SocketProvider.tsx";
 import Email from "./components/main/Email.tsx";
