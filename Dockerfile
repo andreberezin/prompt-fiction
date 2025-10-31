@@ -8,7 +8,7 @@ COPY client/ ./
 RUN npm run build
 
 # ---------- Stage 2: Build Backend ----------
-FROM maven:3.9.3-eclipse-temurin-21 AS backend-build
+FROM maven:3.9-eclipse-temurin-21-alpine AS backend-build
 
 WORKDIR /app/server
 COPY server/pom.xml .
