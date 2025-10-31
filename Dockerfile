@@ -14,7 +14,7 @@ WORKDIR /app/server
 COPY server/pom.xml .
 RUN mvn dependency:go-offline
 COPY server/ ./
-# Copy built frontend into backend static resources
+# Copy built frontend into Spring Boot static resources
 COPY --from=frontend-build /app/client/dist/ src/main/resources/static/
 RUN mvn clean package -DskipTests
 
@@ -22,8 +22,9 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:21-jdk-alpine
 
 WORKDIR /app
-# Copy the backend jar
+# Copy backend jar
 COPY --from=backend-build /app/server/target/*.jar app.jar
 
+# Expose the port Render sets via environment variable
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","app.jar"]
+ENTRYPOINT ["sh", "-c", "java -jar app.jar --server.port=${PORT:-8080}"]
