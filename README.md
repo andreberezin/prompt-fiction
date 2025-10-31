@@ -20,6 +20,9 @@ It connects a **React + TypeScript** frontend with a **Spring Boot + Java** back
 
 ## ⚙️ Installation & Setup
 
+If you want to skip all this then just go to the live Render website: https://prompt-fiction.onrender.com/
+- NB! Might take some time for the servers to wake up and the API requests and WS connections might be a bit slower to react.
+
 Follow these steps to run both the backend (Spring Boot) and frontend (React + Vite) locally:
 
 ### 1. Backend (Spring Boot)
