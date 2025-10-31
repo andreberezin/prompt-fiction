@@ -2,8 +2,8 @@ package com.andrekj.ghostwriter.controller;
 
 import com.andrekj.ghostwriter.dto.EmailRequest;
 import com.andrekj.ghostwriter.dto.EmailResponse;
-import com.andrekj.ghostwriter.service.EmailService;
-import com.andrekj.ghostwriter.service.PDFGeneratorService;
+import com.andrekj.ghostwriter.service.email.EmailService;
+import com.andrekj.ghostwriter.service.util.PDFGenerator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +23,9 @@ import java.util.Date;
 public class EmailContentController {
 
     private final EmailService emailService;
-    private final PDFGeneratorService pdfGeneratorService;
 
-    public EmailContentController(EmailService emailService, PDFGeneratorService pdfGeneratorService) {
+    public EmailContentController(EmailService emailService) {
         this.emailService = emailService;
-        this.pdfGeneratorService = pdfGeneratorService;
     }
 
     @PostMapping("/email/generate")
@@ -49,9 +47,7 @@ public class EmailContentController {
 
     @PostMapping("/email/pdf")
     public ResponseEntity<byte[]> generatePdf(@RequestBody EmailResponse editedResponse) {
-        //EmailResponse updatedResponse = emailService.updateEmailResponse(editedResponse);
-
-        byte[] pdfBytes = pdfGeneratorService.generateEmailPDF(editedResponse);
+        byte[] pdfBytes = PDFGenerator.generateEmailPDF(editedResponse);
 
         DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
         String currentDateTime = dateFormatter.format(new Date());

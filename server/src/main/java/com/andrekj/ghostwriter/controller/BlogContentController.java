@@ -2,8 +2,8 @@ package com.andrekj.ghostwriter.controller;
 
 import com.andrekj.ghostwriter.dto.BlogRequest;
 import com.andrekj.ghostwriter.dto.BlogResponse;
-import com.andrekj.ghostwriter.service.BlogService;
-import com.andrekj.ghostwriter.service.PDFGeneratorService;
+import com.andrekj.ghostwriter.service.blog.BlogService;
+import com.andrekj.ghostwriter.service.util.PDFGenerator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,11 +20,9 @@ import java.util.Date;
 public class BlogContentController {
 
     private final BlogService blogService;
-    private final PDFGeneratorService pdfGeneratorService;
 
-    public BlogContentController(BlogService blogservice, PDFGeneratorService pdfGeneratorService) {
+    public BlogContentController(BlogService blogservice) {
         this.blogService = blogservice;
-        this.pdfGeneratorService = pdfGeneratorService;
     }
 
     @PostMapping("/blog/generate")
@@ -46,9 +44,7 @@ public class BlogContentController {
 
     @PostMapping("/blog/pdf")
     public ResponseEntity<byte[]> generatePdf(@RequestBody BlogResponse editedResponse) {
-        //BlogResponse updatedResponse = blogService.updateContent(editedResponse);
-
-        byte[] pdfBytes = pdfGeneratorService.generateBlogPDF(editedResponse);
+        byte[] pdfBytes = PDFGenerator.generateBlogPDF(editedResponse);
 
         DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
         String currentDateTime = dateFormatter.format(new Date());
