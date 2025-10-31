@@ -10,7 +10,7 @@ import {FormatContainer} from "./FormatContainer.tsx";
 import {MetadataContainer} from "./MetadataContainer.tsx";
 import {ButtonContainer} from "./ButtonContainer.tsx";
 import type EmailResponseType from "../../types/form-output/EmailResponseType.ts";
-import type {ContentType} from "../../types/ContentType.ts";
+import type {ContentType} from "../../types/form-input/ContentType.ts";
 
 interface EmailOutputProps {
     response: EmailResponseType;

@@ -4,7 +4,7 @@ import downloadPdf from "../../utils/api/downloadPdf.ts";
 import * as React from "react";
 import type {FormatOptions} from "../../types/form-output/FormatType.ts";
 import type {HasExportFormats} from "../../types/props/HasExportFormats.ts";
-import type {ContentType} from "../../types/ContentType.ts";
+import type {ContentType} from "../../types/form-input/ContentType.ts";
 
 interface FormatContainerProps<T extends HasExportFormats> {
     loadingState: boolean;

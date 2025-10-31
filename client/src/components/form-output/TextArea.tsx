@@ -6,7 +6,7 @@ import type {HasExportFormats} from "../../types/props/HasExportFormats.ts";
 import type {HasMetaData} from "../../types/props/HasMetadata.ts";
 import {TextFormat} from "./TextFormat.tsx";
 import type {FormatOptions} from "../../types/form-output/FormatType.ts";
-import type {ContentType} from "../../types/ContentType.ts";
+import type {ContentType} from "../../types/form-input/ContentType.ts";
 import type {HasSections} from "../../types/props/HasSections.ts";
 
 

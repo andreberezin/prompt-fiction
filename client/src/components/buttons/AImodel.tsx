@@ -1,6 +1,6 @@
 import '../../styles/buttons/aimodels.scss'
 import * as React from "react";
-import {type AIMODELObject, AImodels} from "../../types/AImodels.ts";
+import {type AIMODELObject, AImodels} from "../../types/form-input/AImodels.ts";
 import type {HasAImodel} from "../../types/props/HasAImodel.ts";
 
 

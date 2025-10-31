@@ -6,9 +6,10 @@ import type BlogResponseType from "../../types/form-output/BlogResponseType.ts";
 import { emptyBLogResponse } from "../../types/form-output/BlogResponseType.ts";
 import {useSocket} from "../context/useSocket.tsx";
 import type {StompSubscription} from "@stomp/stompjs";
-import type BlogRequestType from "../../types/BlogRequestType.ts";
+import type BlogRequestType from "../../types/form-input/BlogRequestType.ts";
+import {emptyBlogRequest} from "../../types/form-input/BlogRequestType.ts";
 import '../../styles/main/App.scss'
-import type {ContentType} from "../../types/ContentType.ts";
+import type {ContentType} from "../../types/form-input/ContentType.ts";
 
 
 interface BlogProps {
@@ -31,19 +32,7 @@ export default function Blog({contentType}: BlogProps) {
     const [showSEO, setShowSEO] = useState<boolean>(true);
     const [error, setError] = useState<string>("");
 
-    const [blogRequest, setBlogRequest] = useState<BlogRequestType>({
-        aimodel: {
-            model: 'gemini-2.5-flash-lite',
-            tooltip: 'ultra fast'
-        },
-        contentType: contentType,
-        topic: 'How to cook pasta',
-        targetAudience: 'anyone',
-        tone: 'engaging',
-        expertiseLevel: 'beginner',
-        wordCount: 400,
-        seoFocus: true,
-    })
+    const [blogRequest, setBlogRequest] = useState<BlogRequestType>(emptyBlogRequest);
     const [blogResponse, setBlogResponse] = useState<BlogResponseType>(emptyBLogResponse);
     const blogResponseRef = useRef(blogResponse);
 

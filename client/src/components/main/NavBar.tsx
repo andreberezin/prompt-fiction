@@ -1,6 +1,6 @@
 import * as React from "react";
-import type {ContentType} from "../../types/ContentType.ts";
-import {CONTENTTYPES} from "../../types/ContentType.ts";
+import type {ContentType} from "../../types/form-input/ContentType.ts";
+import {CONTENTTYPES} from "../../types/form-input/ContentType.ts";
 import '../../styles/main/navbar.scss'
 
 interface NavBarProps {

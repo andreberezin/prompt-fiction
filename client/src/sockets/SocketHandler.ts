@@ -1,7 +1,7 @@
 import SockJS from 'sockjs-client'
 import {Client, type IMessage, type StompSubscription} from "@stomp/stompjs";
 import * as React from "react";
-import type {ContentType} from "../types/ContentType.ts";
+import type {ContentType} from "../types/form-input/ContentType.ts";
 
 interface HasExportFormats {
     exportFormats: {
@@ -61,7 +61,7 @@ export default class SocketHandler {
             return this.client.subscribe(`/topic/${contentType}-status`, (message: IMessage) => {
                 const body = message.body ?? "";
                 if (setStatus) setStatus(body);
-                console.log("Status update:", body);
+                console.log(body);
             });
         } else {
             console.warn("Socket not connected — cannot subscribe yet.");

@@ -2,13 +2,14 @@ import {useEffect, useRef, useState} from "react";
 import {useSocket} from "../context/useSocket.tsx";
 import type {StompSubscription} from "@stomp/stompjs";
 import '../../styles/main/App.scss'
-import type EmailRequestType from "../../types/EmailRequestType.ts";
+import type EmailRequestType from "../../types/form-input/EmailRequestType.ts";
+import { emptyEmailRequest } from "../../types/form-input/EmailRequestType.ts";
 import type EmailResponseType from "../../types/form-output/EmailResponseType.ts";
 import { emptyEmailResponse } from "../../types/form-output/EmailResponseType.ts";
 import EmailForm from "../form-input/EmailForm.tsx";
 import EmailOutput from "../form-output/EmailOutput.tsx";
 import updateResponseObject from "../../utils/api/updateResponseObject.ts";
-import type {ContentType} from "../../types/ContentType.ts";
+import type {ContentType} from "../../types/form-input/ContentType.ts";
 
 interface EmailProps {
     contentType: ContentType;
@@ -30,20 +31,7 @@ export default function Email({contentType}: EmailProps) {
     const [showSEO, setShowSEO] = useState<boolean>(true);
     const [error, setError] = useState<string>("");
 
-    const [emailRequest, setEmailRequest] = useState<EmailRequestType>({
-        aimodel: {
-            model: 'gemini-2.5-flash-lite',
-            tooltip: 'ultra fast'
-        },
-        contentType: contentType,
-        wordCount: 100,
-        purpose: 'Get the spreadsheet done this week',
-        keyPoints: 'please',
-        recipientContext: 'colleague',
-        tone: 'passive-aggressive',
-        urgencyLevel: 'very urgent',
-        cta: '',
-    })
+    const [emailRequest, setEmailRequest] = useState<EmailRequestType>(emptyEmailRequest)
     const [emailResponse, setEmailResponse] = useState<EmailResponseType>(emptyEmailResponse);
     const emailResponseRef = useRef(emailResponse);
 

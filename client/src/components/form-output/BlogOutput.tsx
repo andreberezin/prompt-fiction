@@ -10,7 +10,7 @@ import type {FormatOptions} from "../../types/form-output/FormatType.ts";
 import {FormatContainer} from "./FormatContainer.tsx";
 import {MetadataContainer} from "./MetadataContainer.tsx";
 import {ButtonContainer} from "./ButtonContainer.tsx";
-import type {ContentType} from "../../types/ContentType.ts";
+import type {ContentType} from "../../types/form-input/ContentType.ts";
 
 interface BlogOutputProps {
     blogResponse: BlogResponseType;

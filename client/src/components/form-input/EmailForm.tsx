@@ -2,8 +2,8 @@ import '../../styles/form-input/form.scss'
 import type {BaseFormProps} from "../../types/props/BaseFormProps.ts";
 import * as React from "react";
 import type EmailResponseType from "../../types/form-output/EmailResponseType.ts";
-import type EmailRequestType from "../../types/EmailRequestType.ts";
-import { emptyEmailRequest } from "../../types/EmailRequestType.ts";
+import type EmailRequestType from "../../types/form-input/EmailRequestType.ts";
+import { emptyEmailRequest } from "../../types/form-input/EmailRequestType.ts";
 import prepareForRequest from "../../utils/api/prepareForRequest.ts";
 import handleSubmit from "../../utils/api/handleSubmit.ts";
 import TextInput from "../inputs/TextInput.tsx";
