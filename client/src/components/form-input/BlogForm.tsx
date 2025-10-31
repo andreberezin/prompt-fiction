@@ -33,7 +33,6 @@ export default function BlogForm({setBlogResponse, setGenerationTime,generationT
     return (
         <div
             className='form-container'
-            tabIndex={0}
         >
 				<form
 					id='blog-form'
@@ -47,7 +46,7 @@ export default function BlogForm({setBlogResponse, setGenerationTime,generationT
                             errorTimeoutId, generationTimeInterval, contentType: "blog"});
                     }}
 				>
-					<div className='fields-column fields-column-1' tabIndex={0}>
+					<div className='fields-column fields-column-1'>
                         <TextInput
                             request={blogRequest}
                             id={'topic'} placeholder={'topic'}
@@ -57,7 +56,7 @@ export default function BlogForm({setBlogResponse, setGenerationTime,generationT
                         />
 					</div>
 
-					<div className='fields-column fields-column-2' tabIndex={0}>
+					<div className='fields-column fields-column-2'>
                         <TextInput
                             request={blogRequest}
                             id={'targetAudience'}
@@ -67,7 +66,7 @@ export default function BlogForm({setBlogResponse, setGenerationTime,generationT
                         />
 					</div>
 
-					<div className='fields-column fields-column-3' tabIndex={0}>
+					<div className='fields-column fields-column-3'>
 						<div className='double'>
 							<TextInput
                                 request={blogRequest}
@@ -88,7 +87,7 @@ export default function BlogForm({setBlogResponse, setGenerationTime,generationT
 						</div>
 					</div>
 
-                    <div className='fields-column fields-column-4 narrow' tabIndex={0}>
+                    <div className='fields-column fields-column-4 narrow'>
                             <CheckBoxInput
                                 value={blogRequest.seoFocus}
                                 setValue={(e) => setValue(e, setBlogRequest)}
@@ -97,7 +96,7 @@ export default function BlogForm({setBlogResponse, setGenerationTime,generationT
                             />
                     </div>
 
-					<div className='slider-column' tabIndex={0}>
+					<div className='slider-column'>
 						<RangeInput
                             value={blogRequest.wordCount}
                             setValue={(e) => setValue(e, setBlogRequest)}

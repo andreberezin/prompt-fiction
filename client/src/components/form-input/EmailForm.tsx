@@ -32,7 +32,6 @@ export default function EmailForm({setEmailResponse, setGenerationTime,generatio
     return (
         <div
             className='form-container'
-            tabIndex={0}
         >
             <form
                 id='email-form'
@@ -46,7 +45,7 @@ export default function EmailForm({setEmailResponse, setGenerationTime,generatio
                         errorTimeoutId, generationTimeInterval, contentType: "email"});
                 }}
             >
-                <div className='fields-column fields-column-1' tabIndex={0}>
+                <div className='fields-column fields-column-1'>
                         <TextInput
                             request={emailRequest}
                             id={'purpose'} placeholder={'purpose'}
@@ -56,7 +55,7 @@ export default function EmailForm({setEmailResponse, setGenerationTime,generatio
                         />
                 </div>
 
-                <div className='fields-column fields-column-2' tabIndex={0}>
+                <div className='fields-column fields-column-2'>
                     <TextInput
                         request={emailRequest}
                         id={'keyPoints'} placeholder={'key points'}
@@ -65,7 +64,7 @@ export default function EmailForm({setEmailResponse, setGenerationTime,generatio
                     />
                 </div>
 
-                <div className='fields-column fields-column-3' tabIndex={0}>
+                <div className='fields-column fields-column-3'>
                     <div className='double'>
                         <TextInput
                             request={emailRequest}
@@ -86,7 +85,7 @@ export default function EmailForm({setEmailResponse, setGenerationTime,generatio
                     </div>
                 </div>
 
-                <div className='fields-column fields-column-4' tabIndex={0}>
+                <div className='fields-column fields-column-4'>
                     <div className='double'>
                         <TextInput
                             request={emailRequest}
@@ -106,7 +105,7 @@ export default function EmailForm({setEmailResponse, setGenerationTime,generatio
                     </div>
                 </div>
 
-                <div className='slider-column' tabIndex={0}>
+                <div className='slider-column'>
                     <RangeInput
                         value={emailRequest.wordCount}
                         setValue={(e) => setValue(e, setEmailRequest)}
