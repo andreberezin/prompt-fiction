@@ -27,7 +27,7 @@ export default async function handleSubmit<Req extends HasAImodel, Res> ({setErr
             signal: newAbortSignal(120 * 1000, abortControllerRef)
         });
         if (setResponse) setResponse(response.data || "");
-        console.log("Response:", response);
+        //console.log("Response:", response);
         if (setStatus) setStatus("")
     } catch (err: unknown) {
         if (setStatus) setStatus("")
