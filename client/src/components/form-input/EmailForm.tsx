@@ -1,17 +1,17 @@
-import '../../styles/form.scss'
-import type {BaseFormProps} from "../../types/BaseFormProps.ts";
+import '../../styles/form-input/form.scss'
+import type {BaseFormProps} from "../../types/props/BaseFormProps.ts";
 import * as React from "react";
-import type EmailResponseType from "../../types/EmailResponseType.ts";
+import type EmailResponseType from "../../types/form-output/EmailResponseType.ts";
 import type EmailRequestType from "../../types/EmailRequestType.ts";
 import { emptyEmailRequest } from "../../types/EmailRequestType.ts";
-import prepareForRequest from "../../utils/prepareForRequest.ts";
-import handleSubmit from "../../utils/handleSubmit.ts";
+import prepareForRequest from "../../utils/api/prepareForRequest.ts";
+import handleSubmit from "../../utils/api/handleSubmit.ts";
 import TextInput from "../inputs/TextInput.tsx";
-import setValue from "../../utils/setValue.ts";
+import setValue from "../../utils/form-input/setValue.ts";
 import RangeInput from "../inputs/RangeInput.tsx";
 import AImodelChoice from "../buttons/AImodel.tsx";
 import DeleteAndSubmitButtonContainer from "../buttons/DeleteAndSubmitButtonContainer.tsx";
-import resetEmailResponseObject from "../../utils/resetEmailResponseObject.ts";
+import resetEmailResponseObject from "../../utils/form-input/resetEmailResponseObject.ts";
 import {useEffect} from "react";
 
 

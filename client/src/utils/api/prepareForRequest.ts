@@ -1,5 +1,5 @@
 import * as React from "react";
-import handleGenerationTimer from "./handleGenerationTimer.ts";
+import handleGenerationTimer from "../form-output/handleGenerationTimer.ts";
 
 export interface PrepareForRequestProps {
     setGenerationTime: React.Dispatch<React.SetStateAction<number>>;

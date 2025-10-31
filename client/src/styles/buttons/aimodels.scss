@@ -1,5 +1,5 @@
-@use 'mixins';
-@use 'variables';
+@use '../base/variables';
+@use '../base/mixins';
 
 .aimodel-container {
   display: flex;

@@ -1,5 +1,5 @@
 import { RiDeleteBin2Line } from "react-icons/ri";
-import '../../styles/clearAndSubmitButtons.scss'
+import '../../styles/buttons/clearAndSubmitButtons.scss'
 import * as React from "react";
 
 

@@ -1,11 +1,11 @@
-import copyToClipboard from "../../utils/copyToClipboard.ts";
+import copyToClipboard from "../../utils/form-output/copyToClipboard.ts";
 import {AiOutlineCopy} from "react-icons/ai";
-import type {FormatType} from "../../types/FormatType.ts";
+import type {FormatType} from "../../types/form-output/FormatType.ts";
 import {useState} from "react";
-import type {HasExportFormats} from "../../types/HasExportFormats.ts";
+import type {HasExportFormats} from "../../types/props/HasExportFormats.ts";
 import * as React from "react";
-import type {HasSections} from "../../types/HasSections.ts";
-import type {HasMetaData} from "../../types/HasMetadata.ts";
+import type {HasSections} from "../../types/props/HasSections.ts";
+import type {HasMetaData} from "../../types/props/HasMetadata.ts";
 
 interface TextFormatProps<T extends HasExportFormats & HasMetaData & HasSections> {
     format: FormatType;
@@ -20,10 +20,6 @@ interface TextFormatProps<T extends HasExportFormats & HasMetaData & HasSections
 export function TextFormat<T extends HasExportFormats & HasMetaData & HasSections>({format, error, status, loadingState, response, handleChange}: TextFormatProps<T>) {
     const [copyText, setCopyText] = useState<string>("Copy");
 
-    // const combinedSections =
-    //     response.sections?.length
-    //         ? response.sections.map(s => s.plainTextContent || "").join("\n\n")
-    //         : "";
 
     return (
             <div className='textarea-container'>

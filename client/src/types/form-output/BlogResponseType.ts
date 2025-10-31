@@ -26,8 +26,6 @@ export default interface BlogResponseType {
     exportFormats: ExportFormats;
     content: string;
     attempts: number;
-    // wordCount?: number;
-    // keywords?: string[];
 }
 
 export const emptyBLogResponse: BlogResponseType = {

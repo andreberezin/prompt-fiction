@@ -1,13 +1,13 @@
 import BlogForm from "../form-input/BlogForm.tsx";
 import BlogOutput from "../form-output/BlogOutput.tsx";
-import updateResponseObject from "../../utils/updateResponseObject.ts";
+import updateResponseObject from "../../utils/api/updateResponseObject.ts";
 import {useEffect, useRef, useState} from "react";
-import type BlogResponseType from "../../types/BlogResponseType.ts";
-import { emptyBLogResponse } from "../../types/BlogResponseType.ts";
+import type BlogResponseType from "../../types/form-output/BlogResponseType.ts";
+import { emptyBLogResponse } from "../../types/form-output/BlogResponseType.ts";
 import {useSocket} from "../context/useSocket.tsx";
 import type {StompSubscription} from "@stomp/stompjs";
 import type BlogRequestType from "../../types/BlogRequestType.ts";
-import '../../styles/main.scss'
+import '../../styles/main/App.scss'
 import type {ContentType} from "../../types/ContentType.ts";
 
 

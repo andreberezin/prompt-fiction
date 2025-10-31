@@ -1,5 +1,5 @@
 import * as React from "react";
-import type BlogResponseType from "../types/BlogResponseType.ts";
+import type BlogResponseType from "../../types/form-output/BlogResponseType.ts";
 
 export default function resetBlogResponseObject (
     setResponse: React.Dispatch<React.SetStateAction<BlogResponseType>>): void{
@@ -14,6 +14,7 @@ export default function resetBlogResponseObject (
             exportFormats: {
                 markdown: '',
                 plainText: '',
+                richText: '',
                 pdfReady: false,
             },
             content: '',

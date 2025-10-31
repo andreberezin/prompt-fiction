@@ -1,13 +1,13 @@
 import {useEffect, useRef, useState} from "react";
 import {useSocket} from "../context/useSocket.tsx";
 import type {StompSubscription} from "@stomp/stompjs";
-import '../../styles/main.scss'
+import '../../styles/main/App.scss'
 import type EmailRequestType from "../../types/EmailRequestType.ts";
-import type EmailResponseType from "../../types/EmailResponseType.ts";
-import { emptyEmailResponse } from "../../types/EmailResponseType.ts";
+import type EmailResponseType from "../../types/form-output/EmailResponseType.ts";
+import { emptyEmailResponse } from "../../types/form-output/EmailResponseType.ts";
 import EmailForm from "../form-input/EmailForm.tsx";
 import EmailOutput from "../form-output/EmailOutput.tsx";
-import updateResponseObject from "../../utils/updateResponseObject.ts";
+import updateResponseObject from "../../utils/api/updateResponseObject.ts";
 import type {ContentType} from "../../types/ContentType.ts";
 
 interface EmailProps {

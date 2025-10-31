@@ -1,15 +1,15 @@
-import '../../styles/output.scss'
-import '../../styles/outputLowerContainer.scss'
-import '../../styles/outputUpperContainer.scss'
-import '../../styles/HoverIconButtons.scss'
+import '../../styles/form-output/output.scss'
+import '../../styles/form-output/outputLowerContainer.scss'
+import '../../styles/form-output/outputUpperContainer.scss'
+import '../../styles/buttons/HoverIconButtons.scss'
 import * as React from "react";
 import {useState} from "react";
 import {TextArea} from "./TextArea.tsx";
-import type {FormatOptions} from "../../types/FormatType.ts";
+import type {FormatOptions} from "../../types/form-output/FormatType.ts";
 import {FormatContainer} from "./FormatContainer.tsx";
 import {MetadataContainer} from "./MetadataContainer.tsx";
 import {ButtonContainer} from "./ButtonContainer.tsx";
-import type EmailResponseType from "../../types/EmailResponseType.ts";
+import type EmailResponseType from "../../types/form-output/EmailResponseType.ts";
 import type {ContentType} from "../../types/ContentType.ts";
 
 interface EmailOutputProps {

@@ -16,7 +16,6 @@ export default function TextInput<T>({request, id, placeholder, setValue, autoFo
         const labelElement = document.getElementById(labelId);
         if (!labelElement) return;
         if (value && labelElement) {labelElement.classList.toggle('filled', !!value);}
-        // if (!value && labelElement) {labelElement.classList.remove('filled');}
     };
 
     const showPlaceholder = (labelId: string) => {

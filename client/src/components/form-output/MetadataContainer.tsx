@@ -1,4 +1,4 @@
-import type {HasMetaData} from "../../types/HasMetadata.ts";
+import type {HasMetaData} from "../../types/props/HasMetadata.ts";
 
 interface MetadataContainerProps<T extends HasMetaData> {
     retryCounter: number;

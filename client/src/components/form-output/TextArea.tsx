@@ -2,12 +2,12 @@ import useAutoUpdateResponse from "../../hooks/useAutoUpdateResponse.ts";
 import {useSocket} from "../context/useSocket.tsx";
 import * as React from "react";
 import {SEOkeywords} from "./SEOkeywords.tsx";
-import type {HasExportFormats} from "../../types/HasExportFormats.ts";
-import type {HasMetaData} from "../../types/HasMetadata.ts";
+import type {HasExportFormats} from "../../types/props/HasExportFormats.ts";
+import type {HasMetaData} from "../../types/props/HasMetadata.ts";
 import {TextFormat} from "./TextFormat.tsx";
-import type {FormatOptions} from "../../types/FormatType.ts";
+import type {FormatOptions} from "../../types/form-output/FormatType.ts";
 import type {ContentType} from "../../types/ContentType.ts";
-import type {HasSections} from "../../types/HasSections.ts";
+import type {HasSections} from "../../types/props/HasSections.ts";
 
 
 interface TextAreaProps<T extends HasExportFormats & HasMetaData & HasSections> {

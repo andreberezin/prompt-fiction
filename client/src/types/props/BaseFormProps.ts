@@ -1,8 +1,6 @@
 import * as React from "react";
 
 export interface BaseFormProps {
-    //setBlogResponse: React.Dispatch<React.SetStateAction<BlogResponseType>>;
-
     setGenerationTime: React.Dispatch<React.SetStateAction<number>>;
     generationTimeInterval: React.RefObject<number>;
 
@@ -16,9 +14,6 @@ export interface BaseFormProps {
     setRetryCounter: React.Dispatch<React.SetStateAction<number>>;
 
     abortControllerRef: React.RefObject<AbortController>;
-
-    //blogRequest: BlogRequestType;
-    //setBlogRequest: React.Dispatch<React.SetStateAction<BlogRequestType>>;
 
     loadingState: boolean;
 }

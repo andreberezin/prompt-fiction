@@ -1,18 +1,18 @@
-import '../../styles/form.scss'
+import '../../styles/form-input/form.scss'
 import * as React from "react";
-import type BlogResponseType from "../../types/BlogResponseType.ts";
+import type BlogResponseType from "../../types/form-output/BlogResponseType.ts";
 import AImodelChoice from "../buttons/AImodel.tsx";
 import DeleteAndSubmitButtonContainer from "../buttons/DeleteAndSubmitButtonContainer.tsx";
 import TextInput from "../inputs/TextInput.tsx";
 import RangeInput from "../inputs/RangeInput.tsx";
 import CheckBoxInput from "../inputs/CheckBoxInput.tsx";
-import setValue from "../../utils/setValue.ts";
-import prepareForRequest from "../../utils/prepareForRequest.ts";
-import handleSubmit from "../../utils/handleSubmit.ts";
+import setValue from "../../utils/form-input/setValue.ts";
+import prepareForRequest from "../../utils/api/prepareForRequest.ts";
+import handleSubmit from "../../utils/api/handleSubmit.ts";
 import type BlogRequestType from "../../types/BlogRequestType.ts";
 import { emptyBlogRequest } from "../../types/BlogRequestType.ts";
-import type {BaseFormProps} from "../../types/BaseFormProps.ts";
-import resetBlogResponseObject from "../../utils/resetBlogResponseObject.ts";
+import type {BaseFormProps} from "../../types/props/BaseFormProps.ts";
+import resetBlogResponseObject from "../../utils/form-input/resetBlogResponseObject.ts";
 import {useEffect} from "react";
 
 interface BlogFormProps extends BaseFormProps{

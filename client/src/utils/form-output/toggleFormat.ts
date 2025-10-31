@@ -1,7 +1,5 @@
 import * as React from "react";
-import type {FormatOptions, FormatType} from "../types/FormatType.ts";
-
-
+import type {FormatOptions, FormatType} from "../../types/form-output/FormatType.ts";
 
 export default function toggleFormat(key: FormatType, currentFormat: FormatOptions, setCurrentFormat: React.Dispatch<FormatOptions>) {
     const activeCount = Object.values(currentFormat).filter(Boolean).length;

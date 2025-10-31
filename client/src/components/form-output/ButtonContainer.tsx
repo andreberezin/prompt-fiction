@@ -1,7 +1,7 @@
 import {TbReload, TbSeo} from "react-icons/tb";
 import {RiFullscreenExitFill, RiFullscreenFill} from "react-icons/ri";
 import * as React from "react";
-import type {HasMetaData} from "../../types/HasMetadata.ts";
+import type {HasMetaData} from "../../types/props/HasMetadata.ts";
 
 interface ButtonContainerProps<T extends HasMetaData>{
     isTextEdited: boolean;

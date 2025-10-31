@@ -1,5 +1,5 @@
 import {MdKeyboardDoubleArrowRight} from "react-icons/md";
-import '../../styles/clearAndSubmitButtons.scss'
+import '../../styles/buttons/clearAndSubmitButtons.scss'
 
 interface SubmitButtonProps {
     loadingState: boolean;

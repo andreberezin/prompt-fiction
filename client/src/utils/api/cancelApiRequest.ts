@@ -1,6 +1,7 @@
 import * as React from "react";
 import cleanupAfterApiRequest from "./cleanupAfterApiRequest.ts";
 
+// todo for later use - add ability to cancel the request
 export default function cancelApiRequest (
     abortControllerRef: React.RefObject<AbortController | null>,
     setShowSEO: React.Dispatch<React.SetStateAction<boolean>>,
@@ -11,7 +12,6 @@ export default function cancelApiRequest (
 ): void{
     if (abortControllerRef.current) {
         abortControllerRef.current?.abort("manual");
-        // abortControllerRef.current.abort();
     }
     setShowSEO(false);
     if (errorTimeoutId.current) clearTimeout(errorTimeoutId.current);

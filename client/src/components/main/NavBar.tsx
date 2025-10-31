@@ -1,7 +1,7 @@
 import * as React from "react";
 import type {ContentType} from "../../types/ContentType.ts";
 import {CONTENTTYPES} from "../../types/ContentType.ts";
-import '../../styles/navbar.scss'
+import '../../styles/main/navbar.scss'
 
 interface NavBarProps {
     contentType: ContentType;

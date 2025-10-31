@@ -5,7 +5,7 @@ import newAbortSignal from "./newAbortSignal.ts";
 import axios from "axios";
 import type {PrepareForRequestProps} from "./prepareForRequest.ts";
 import * as React from "react";
-import type {ContentType} from "../types/ContentType.ts";
+import type {ContentType} from "../../types/ContentType.ts";
 
 interface updateResponseObjectProps<T> extends PrepareForRequestProps {
     responseRef:  React.RefObject<T>;

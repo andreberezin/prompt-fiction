@@ -1,4 +1,4 @@
-import './styles/App.scss'
+import './styles/main/App.scss'
 import NavBar from "./components/main/NavBar.tsx";
 import {useState} from "react";
 import type {ContentType} from "./types/ContentType.ts";

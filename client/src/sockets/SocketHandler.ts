@@ -26,9 +26,6 @@ export default class SocketHandler {
         const socket = new SockJS('ws');
         const stompClient = new Client({
             webSocketFactory: () => socket,
-            // connectHeaders: {
-            //
-            // },
             reconnectDelay: 5000,
             onConnect: () => {
                 console.log("Socket Connected");
@@ -54,11 +51,6 @@ export default class SocketHandler {
             this.client.deactivate();
             this.client = null;
         }
-    }
-
-
-    getClient() {
-        return this.client;
     }
 
     subscribeToStatusUpdates(

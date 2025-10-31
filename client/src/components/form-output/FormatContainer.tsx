@@ -1,9 +1,9 @@
-import toggleFormat from "../../utils/toggleFormat.ts";
+import toggleFormat from "../../utils/form-output/toggleFormat.ts";
 import {AiOutlineFile, AiOutlineFileMarkdown, AiOutlineFilePdf} from "react-icons/ai";
-import downloadPdf from "../../utils/downloadPdf.ts";
+import downloadPdf from "../../utils/api/downloadPdf.ts";
 import * as React from "react";
-import type {FormatOptions} from "../../types/FormatType.ts";
-import type {HasExportFormats} from "../../types/HasExportFormats.ts";
+import type {FormatOptions} from "../../types/form-output/FormatType.ts";
+import type {HasExportFormats} from "../../types/props/HasExportFormats.ts";
 import type {ContentType} from "../../types/ContentType.ts";
 
 interface FormatContainerProps<T extends HasExportFormats> {

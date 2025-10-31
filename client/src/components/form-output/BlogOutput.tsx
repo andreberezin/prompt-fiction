@@ -1,12 +1,12 @@
-import '../../styles/output.scss'
-import '../../styles/outputLowerContainer.scss'
-import '../../styles/outputUpperContainer.scss'
-import '../../styles/HoverIconButtons.scss'
+import '../../styles/form-output/output.scss'
+import '../../styles/form-output/outputLowerContainer.scss'
+import '../../styles/form-output/outputUpperContainer.scss'
+import '../../styles/buttons/HoverIconButtons.scss'
 import * as React from "react";
 import {useState} from "react";
-import type BlogResponseType from "../../types/BlogResponseType.ts";
+import type BlogResponseType from "../../types/form-output/BlogResponseType.ts";
 import {TextArea} from "./TextArea.tsx";
-import type {FormatOptions} from "../../types/FormatType.ts";
+import type {FormatOptions} from "../../types/form-output/FormatType.ts";
 import {FormatContainer} from "./FormatContainer.tsx";
 import {MetadataContainer} from "./MetadataContainer.tsx";
 import {ButtonContainer} from "./ButtonContainer.tsx";
