@@ -12,13 +12,13 @@ export default ({ mode }: ConfigEnv) => {
         '/api': {
           target: env.VITE_BACKEND_URL || 'http://localhost:8080',
           changeOrigin: true,
-          secure: false,
+          secure: true,
         },
         '/ws': {
           target: env.VITE_WS_URL || 'ws://localhost:8080',
           ws: true,
           changeOrigin: true,
-          secure: false,
+          secure: true,
         }
       }
     }
