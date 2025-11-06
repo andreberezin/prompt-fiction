@@ -39,7 +39,7 @@ export default function handleError(
         setError(String(err));
     }
 
-    errorTimeoutId.current = setTimeout(() => {
+    errorTimeoutId.current = window.setTimeout(() => {
         setError("")
     }, 30000)
 }

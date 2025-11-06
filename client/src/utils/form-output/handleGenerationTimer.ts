@@ -5,5 +5,5 @@ export default function handleGenerationTimer(
     generationTimeInterval: React.RefObject<number | null>, interval: number ): void
 {
     setGenerationTime(0);
-    generationTimeInterval.current = setInterval(() => setGenerationTime(current => current + interval), interval);
+    generationTimeInterval.current = window.setInterval(() => setGenerationTime(current => current + interval), interval);
 }
