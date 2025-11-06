@@ -1,6 +1,12 @@
 # ---------- Stage 1: Build Frontend ----------
 FROM node:18-alpine AS frontend-build
 
+# Set build-time environment variables for frontend
+ARG VITE_BACKEND_URL
+ARG VITE_WS_URL
+ENV VITE_BACKEND_URL=${VITE_BACKEND_URL}
+ENV VITE_WS_URL=${VITE_WS_URL}
+
 WORKDIR /app/client
 COPY client/package*.json ./
 RUN npm ci
@@ -10,6 +16,7 @@ RUN npm run build
 # ---------- Stage 2: Build Backend ----------
 FROM maven:3.9-eclipse-temurin-21-alpine AS backend-build
 
+ARG BACKEND_ENV_FILE=.env
 WORKDIR /app/server
 COPY server/pom.xml .
 RUN mvn dependency:go-offline

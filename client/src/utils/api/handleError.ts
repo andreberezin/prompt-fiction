@@ -25,7 +25,7 @@ export default function handleError(
             if (typeof message[0] === "number") {
                 setError(`${message}`);
             } else {
-                setError(`${status} . ${message}`);
+                setError(`${message}`);
             }
 
         } else {

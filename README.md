@@ -23,11 +23,9 @@ It connects a **React + TypeScript** frontend with a **Spring Boot + Java** back
 If you want to skip all this then just go to the live Render website: https://prompt-fiction.onrender.com/
 - NB! Might take some time for the servers to wake up and the API requests and WS connections might be a bit slower to react.
 
-Follow these steps to run both the backend (Spring Boot) and frontend (React + Vite) locally:
-
-### 1. Backend (Spring Boot)
-
 **Requirements:** Java 21, Maven, Node.js (v16+), npm
+
+## Run both the backend (Spring Boot) and frontend (React + Vite) locally:
 
 **Setup:**
 1. Clone the repository and navigate to the directory.
@@ -38,22 +36,43 @@ Follow these steps to run both the backend (Spring Boot) and frontend (React + V
    cd prompt-fiction
    ```
 
-2. Install dependencies:
-   ```sh
-   npm install
-   ```
-
-3. Get yourself a Gemini API Key from https://ai.google.dev/gemini-api/docs/quickstart
+2. Get yourself a Gemini API Key from https://ai.google.dev/gemini-api/docs/quickstart
    1. Export the API key:
    ```sh
     export GEMINI_API_KEY="<YOUR_KEY_HERE>"
     ```
+   
+### Run without Docker:
+
+3. Install dependencies:
+   ```sh
+   npm install
+   ```
+
 4. Start the backend and frontend servers with one command:
    ```sh
    npm run dev
    ```
 - The backend will run on [http://localhost:8080](http://localhost:8080). 
 - The frontend will run on [http://localhost:5173](http://localhost:5173).
+
+
+### Run with Docker:
+
+**Requirements:** Docker
+
+3. Create the .env files in /client and /server according to the .env.example files. Add the necessary values.
+   ```sh
+   cp client/.env.example client/.env
+   cp server/.env.example server/.env
+   ```
+
+4. Build and run the Docker container:
+   ```sh
+   chmod +x start.sh
+   ./start.sh
+   ```
+- The application will run on [http://localhost:8080](http://localhost:8080).
 
 ---
 
